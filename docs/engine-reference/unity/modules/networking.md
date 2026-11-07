@@ -457,6 +457,25 @@ above disagree, this block wins. Gaps are marked `NOT SOURCEABLE`.
 - NGO created `Assets/DefaultNetworkPrefabs.asset` itself and added the Player prefab to it. The
   NetworkManager in `Prototype.unity` references that list.
 
+## NetworkTransform in NGO 2.13.3 (read from the installed source, 2026-11-08)
+
+Source: `Library/PackageCache/com.unity.netcode.gameobjects@*/Runtime/Components/NetworkTransform.cs`,
+namespace `Unity.Netcode.Components`.
+- `public AuthorityModes AuthorityMode;` with `enum AuthorityModes { Server, Owner }`. Server is
+  the default ("If server (the default), then only server-side adjustments to the transform will
+  be synchronized"). Owner: "only the owner-side adjustments to the transform will be synchronized
+  with both the server and other clients." In NGO 2.x there is no `ClientNetworkTransform` subclass
+  to write; set the field instead.
+- Public bool fields: `SyncPositionX/Y/Z`, `SyncRotAngleX/Y/Z`, `SyncScaleX/Y/Z` (all default
+  `true`), `Interpolate` (default `true`), `InLocalSpace`, `UseQuaternionSynchronization`,
+  `UseHalfFloatPrecision`, `SlerpPosition`. `Teleport(Vector3, Quaternion, Vector3)` exists.
+- **Project decision (2026-11-08): the player's own body is owner-authoritative** (AuthorityMode
+  Owner, position plus Y rotation only). Everything that is game state (items, oven, guests,
+  weather) stays server-authoritative per CLAUDE.md rule 2. Reason: with server authority and no
+  prediction, the client's own movement would lag by the round trip.
+- Tested in the Editor with MPPM (2026-11-08): both players walk and turn, each sees the other.
+  Not yet tested with simulated latency.
+
 ## Multiplayer Play Mode 2.0.2 (docs read for 2.0; the project resolves 3.0.0, see above)
 
 - `com.unity.multiplayer.playmode` 2.0.2 (2026-03-12). Minimum editor 6000.3.0b10 (changelog 2.0.1);

@@ -1,5 +1,7 @@
 using Schutzhuette.Net;
+using Schutzhuette.Player;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using Unity.Netcode.Transports.UTP;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -61,6 +63,99 @@ namespace Schutzhuette.EditorTools
             }
 
             Debug.Log(LogPrefix + $"Fertig. Szene: {ScenePath}, Prefab: {PlayerPrefabPath}");
+        }
+
+        /// <summary>
+        /// Menüeintrag: erweitert das Player-Prefab um Laufen, Umschauen und
+        /// Netzwerk-Synchronisierung der Position.
+        /// </summary>
+        [MenuItem("Schutzhütte/Player-Prefab: Bewegung einrichten")]
+        public static void SetupPlayerMovementFromMenu()
+        {
+            string error = AddMovementToPlayerPrefab();
+            uint hash = error == null ? EnsureNetworkPrefabHash(PlayerPrefabPath) : 0;
+            EditorUtility.DisplayDialog(
+                "Player-Prefab",
+                error ?? (hash != 0 ? "Fertig." : "Fertig, aber die Netzwerk-ID ist 0. Bitte melden."),
+                "OK");
+        }
+
+        /// <summary>
+        /// Batchmode-Einstieg für <see cref="SetupPlayerMovementFromMenu"/>. Exit-Code 1 bei Fehler.
+        /// </summary>
+        public static void SetupPlayerMovementFromCommandLine()
+        {
+            string error = AddMovementToPlayerPrefab();
+            if (error != null)
+            {
+                Debug.LogError(LogPrefix + error);
+                EditorApplication.Exit(1);
+                return;
+            }
+
+            uint hash = EnsureNetworkPrefabHash(PlayerPrefabPath);
+            if (hash == 0)
+            {
+                Debug.LogError(LogPrefix + $"GlobalObjectIdHash von {PlayerPrefabPath} ist nach dem Speichern 0.");
+                EditorApplication.Exit(1);
+                return;
+            }
+
+            Debug.Log(LogPrefix + $"Bewegung im Player-Prefab eingerichtet. GlobalObjectIdHash: {hash}");
+        }
+
+        // Gibt null zurück, wenn alles geklappt hat, sonst eine Fehlermeldung.
+        private static string AddMovementToPlayerPrefab()
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefabPath) == null)
+            {
+                return $"{PlayerPrefabPath} fehlt. Erst die Prototyp-Szene einrichten.";
+            }
+
+            // Prefab in einer unsichtbaren Bearbeitungs-Szene öffnen, ändern, speichern.
+            GameObject root = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
+            try
+            {
+                if (root.GetComponent<PlayerMovement>() != null)
+                {
+                    return "Das Player-Prefab hat schon PlayerMovement. Nichts geändert.";
+                }
+
+                // Gleiche Maße wie die Kapsel: 2 m hoch, Radius 0,5 m, Mitte im Ursprung.
+                var controller = root.AddComponent<CharacterController>();
+                controller.height = 2f;
+                controller.radius = 0.5f;
+                controller.center = Vector3.zero;
+
+                // Owner-Autorität: Der Spieler bewegt seine Figur selbst, NGO verteilt die Pose.
+                // Geteilt werden Position und Drehung um die Hochachse, sonst nichts.
+                var networkTransform = root.AddComponent<NetworkTransform>();
+                networkTransform.AuthorityMode = NetworkTransform.AuthorityModes.Owner;
+                networkTransform.SyncRotAngleX = false;
+                networkTransform.SyncRotAngleZ = false;
+                networkTransform.SyncScaleX = false;
+                networkTransform.SyncScaleY = false;
+                networkTransform.SyncScaleZ = false;
+                networkTransform.Interpolate = true;
+
+                // Kopf-Punkt auf Augenhöhe (Kapselmitte + 0,7 m = 1,7 m über dem Boden).
+                var cameraMount = new GameObject("CameraMount").transform;
+                cameraMount.SetParent(root.transform, false);
+                cameraMount.localPosition = new Vector3(0f, 0.7f, 0f);
+
+                root.AddComponent<PlayerMovement>();
+                var look = root.AddComponent<PlayerLook>();
+                var serializedLook = new SerializedObject(look);
+                serializedLook.FindProperty("_cameraMount").objectReferenceValue = cameraMount;
+                serializedLook.ApplyModifiedPropertiesWithoutUndo();
+
+                PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
+                return null;
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
         }
 
         /// <summary>
