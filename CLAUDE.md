@@ -83,7 +83,7 @@ Ziel: Eine Frage beantworten – **macht es Spaß, zu zweit eine schwere Kiste d
 - [x] Projektgrundlage: Ordnerstruktur, `.gitignore` und `.gitattributes` (LFS) für Unity
 - [x] NGO einrichten: Host starten / beitreten (einfache Buttons reichen), Spieler-Prefab spawnt
 - [x] Spielerbewegung (First Person), synchronisiert
-- [ ] Graubox-Hütte (baue ich mit ProBuilder; du gibst mir Maße und Raumaufteilung)
+- [x] Graubox-Hütte (Rohbau per Editor-Skript nach `docs/GRAUBOX.md`; Nachformen mit ProBuilder bei Bedarf)
 - [ ] Aufheben, Tragen, Ablegen und Werfen von Kisten, synchron für alle
 - [ ] Schwerer Gegenstand, der sich nur bewegt, wenn zwei Spieler ihn halten
 - [ ] Ofen, der Holz verbraucht und ausgeht (Wärme als einfacher Wert)
