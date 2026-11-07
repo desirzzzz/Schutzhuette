@@ -1,4 +1,4 @@
-# Unity 6.3 LTS — Current Best Practices
+# Unity 6.3 LTS → 6.6 — Current Best Practices (the 6.4 to 6.6 block is appended at the end)
 
 **Last verified:** 2026-02-13
 
@@ -373,3 +373,93 @@ Debug.Log($"Player {playerName} scored {score} points");
 - https://docs.unity3d.com/6000.0/Documentation/Manual/BestPracticeGuides.html
 - https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/index.html
 - https://docs.unity3d.com/Packages/com.unity.inputsystem@1.11/manual/index.html
+
+---
+
+# Appended: 6.3 LTS → 6.6
+
+**Last verified:** 2026-11-07 (added by `/setup-engine`). The sections above are the 6.3 LTS
+recommendations and were **not** re-verified on this date. Where they conflict with this block,
+this block wins for this project. Gaps are listed as `NOT SOURCEABLE`; do not fill them from memory.
+
+## Project setup (this project)
+
+- **This project deliberately runs Unity 6.6 (6000.6.6f1), not the 6.3 LTS recommended above.** 6.6 is a Supported Update release, supported until 6.7 ships. The plan in CLAUDE.md is to move to the 6.7 LTS when it is released. The 6.6 upgrade guide says `UNITY_64` and `DEVELOPMENT_BUILD` are removed in 6.8, so new code should not use them.
+- Packages resolved in `Packages/manifest.json` on 2026-11-07: `com.unity.render-pipelines.universal` 17.6.0, `com.unity.inputsystem` 1.20.0, `com.unity.ugui` 2.6.0. No Netcode or Multiplayer packages yet.
+
+## Scripting
+
+### Domain reload is off in new 6.6 projects [SUMMARY]
+- The "What's new in 6.6" summary says new projects default to **Reload Scene only** in Enter Play Mode Settings. The verbatim part confirms the consequence: Project Auditor ships an "auto-statics cleanup" analyzer (`UAL` prefix) with attributes spelled `AutoStaticsCleanup` / `NoAutoStaticsCleanup` there (the 6.5 summary spells the second `NoAutostaticsCleanup`; use the 6.6 spelling and check it in the compiler).
+- `NOT SOURCEABLE` — what those attributes do exactly. Read the Project Auditor documentation before using them.
+- **Project rule (CLAUDE.md):** reset every static field in a method marked `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`.
+
+### Diagnostics follow the Managed Code Variant (6.6)
+```csharp
+// ❌ Deprecated in 6.6, removed in 6.8
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    ValidateState();
+#endif
+
+// ✅
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
+    ValidateState();
+#endif
+
+// ✅ A log that must not ship in non-development builds
+if (Debug.isDebugBuild) Debug.Log("...");
+```
+Set **Managed Code Variant = Checked** (Project Settings → Player → Other Settings) for builds that should keep the checks; the default **Release** variant strips them.
+
+### `Dictionary` fields serialize (6.6)
+`[SerializeField] private Dictionary<string, int> _counts;` is now serialized by Unity in MonoBehaviours, ScriptableObjects and `[Serializable]` types [SUMMARY for the exact places; the upgrade guide confirms the field case]. Wrappers and subclasses of `Dictionary` still work as ordinary serialized classes.
+
+### Object identity is `EntityId` (6.5)
+Use `EntityId` (8 bytes), never `int`, for object identity. Never put it in an `int` field, never use its hash code as a key, never round-trip it through `int.Parse`. (Advice, not from the guides: for identity that travels between machines, use the netcode layer's own ids rather than `EntityId` values.)
+
+### Destroying objects (6.4)
+`Object.Destroy` now calls `OnDisable` on components of all descendants. Do not write helper code that calls `OnDisable` manually on children.
+
+## Rendering (URP)
+
+- Custom render passes use the **Render Graph** API; URP Compatibility Mode is gone (6.4).
+- Dynamic batching is obsolete (6.6). The 6.4 Rendering Statistics window shows draw calls saved by the SRP Batcher, GPU Resident Drawer, `BatchRendererGroup` and GPU instancing; use it to check batching. (Advice, not from the guides: rely on the SRP Batcher and GPU Resident Drawer instead of dynamic batching.)
+- URP: `additionalLightsShadowResolutionTier` on `UniversalAdditionalLightData` changes point/spot shadow resolution at run time (6.5, verbatim).
+- Reading depth from GPU memory through an input attachment is available in URP on DirectX 12 and Vulkan only (6.6, verbatim).
+- Lightmapping: prefer Unity Compute Light Baker or Progressive GPU Lightmapper; the Progressive CPU Lightmapper is deprecated.
+
+## Physics
+
+- **Mesh Collider needs Mesh Read/Write enabled in the Editor** (6.6, verbatim). A build fails if it is off.
+- `NOT SOURCEABLE` — built-in PhysX changes in 6.4–6.6 (none listed in the guides; that is not proof of none). Rigidbody tuning for heavy, wobbly objects must be checked in the Editor, not taken from this file.
+- Not for this project unless DOTS is adopted: the Unity Physics package is a core package since 6.5 with a Direct Solver option [SUMMARY].
+
+## Input
+
+- New Input System only (`com.unity.inputsystem` 1.20.0). 6.4 adds `OnMouseDown`, `OnMouseDrag`, `OnMouseUp` for MonoBehaviours when the Input System is active (verbatim).
+- `NOT SOURCEABLE` — other Input System changes in 6.4–6.6.
+
+## Multiplayer
+
+- `NOT SOURCEABLE` — Netcode for GameObjects and Multiplayer Play Mode in 6.4–6.6. Neither is installed yet. Read the package documentation for the exact installed version when the NGO step starts, and add its version to this file then.
+- Unity's own Base Class Library targeting packs (`System.Text.Json`, `System.Collections.Immutable`, `System.Reflection.Metadata`, `System.Runtime.CompilerServices.Unsafe`) override same-named assemblies that a plug-in ships (6.5). Keep this in mind when adding third-party networking or Steam libraries.
+
+## Editor, workflow and version control
+
+- **YAML format change in 6.6:** word wrapping is off and "Reduce Version Control Noise" is removed. Assets created by older versions show unrelated YAML diffs; reserialize once (`AssetDatabase.ForceReserializeAssets`) in a separate commit.
+- The new Hierarchy window is the default (6.6).
+- Editor.log is `ProjectName/Logs/Editor.log` by default (6.5). Tools that read the old global log must be changed, or use `-useGlobalLog`.
+- Cinemachine is a core package at version 3 (6.6). Do not add Cinemachine 2 examples.
+- Project Auditor is built into the Editor (6.4).
+
+## Command line (verified against the 6.6 Editor command-line reference)
+
+- Batchmode cannot open a project that is already open in an Editor: "only a single instance of Unity can run at a time". Close the Editor before `commands.test`, `commands.smoke` or `commands.build`.
+- `-buildTarget` selects the active build target the Editor launches in; valid values include `win64`, `win`, `linux64`, `osxuniversal`, `android`, `ios`, `webgl`. `-buildWindows64Player <path.exe>` builds a 64-bit Windows player. The page does not say whether these flags switch the active platform.
+- `-runTests` with `-testPlatform EditMode|PlayMode` and `-testResults <path>`. **Do not combine `-runTests` with `-quit`:** the Editor then quits before the tests complete.
+- `-logFile -` writes the log to the console. `-version` prints the Editor version without launching it.
+
+**Sources (all fetched 2026-11-07):**
+- the six pages listed at the end of the "Appended spans" block in `breaking-changes.md`
+- https://docs.unity.com/en-us/engine/6000.6/manual/unity-editor/command-line-arguments/editor
+- https://docs.unity.com/en-us/engine/6000.6/manual/programming-environment/test-framework-introduction/reference-command-line

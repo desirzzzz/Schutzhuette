@@ -2,13 +2,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Engine Version** | Unity 6.3 LTS |
-| **Installed at pin time** | NOT DETERMINED — `/setup-engine` §3 probes the installed editor and records the result here. |
-| **Release Date** | December 2025 |
-| **Latest editor on the pinned line** | 6000.3.26f1 (Oct 8, 2026) |
-| **Project Pinned** | 2026-02-13 |
-| **Last Docs Verified** | 2026-10-17 (release timeline, newer releases, latest 6.3 LTS editor); 2026-02-13 (rest of directory) |
+| **Engine Version** | Unity 6.6 (6000.6.6f1) |
+| **Installed at pin time** | 6000.6.6f1 — matches the pin. Checked 2026-11-07: Hub directory `C:/Program Files/Unity/Hub/Editor/6000.6.6f1/` exists, `Unity.exe -version` printed `6000.6.6f1`, `ProjectSettings/ProjectVersion.txt` says `6000.6.6f1`. |
+| **Release Date** | September 2026 (6000.6.0f1 on Aug 31, announced Sep 1, 2026) |
+| **Latest editor on the pinned line** | 6000.6.6f1 (Oct 15, 2026), as recorded on 2026-10-17; not re-checked on 2026-11-07 |
+| **Project Pinned** | 2026-11-07 (re-pinned from Unity 6.3 LTS, which this directory pinned on 2026-02-13) |
+| **Last Docs Verified** | 2026-11-07 (appended 6.3 → 6.4 → 6.5 → 6.6 spans in `breaking-changes.md`, `deprecated-apis.md`, `current-best-practices.md`; Editor command-line reference); 2026-10-17 (release timeline, newer releases); 2026-02-13 (`modules/`, `plugins/`, `PLUGINS.md` and the 2022 → 6.3 sections, **not re-verified for 6.6**) |
 | **LLM Knowledge Cutoff** | May 2025 |
+| **Risk Level** | HIGH — 6.6 (Aug 2026) is beyond the LLM's training data, and Unity coverage in training data ends around 2022 LTS |
 
 ## Knowledge Gap Warning
 
@@ -33,12 +34,15 @@ version-qualified claim** — `NOT DETERMINED` means the gap is unknown, not abs
 | 6.2 | Aug 2025 | MEDIUM | Supported Update release: Unity AI (beta) in the Editor, Mesh LOD, World Space UI for UI Toolkit, Graph Toolkit, Android XR hand mesh |
 | 6.3 LTS | Dec 2025 | HIGH | First LTS since 6.0 (two years of support): Platform Toolkit, Nintendo Switch 2 support, Android XR, desktop screen reader support, Shader Build Settings |
 
-## Newer Releases After the Pin (6.4 to 6.7)
+## Releases 6.4 to 6.7 (6.4 to 6.6 are inside the pin span)
 
-**The pin does not change: it stays Unity 6.3 LTS, the newest LTS.** These are
-Supported Update releases that shipped after it. Nothing else in this directory
-covers their APIs, so treat any 6.4+ API as unconfirmed until checked against
-Unity's docs for that release. 6.0 LTS support ends in October 2026.
+**The pin is Unity 6.6 (6000.6.6f1). That is a deliberate choice for this project
+(see CLAUDE.md), not the newest LTS, which is still 6.3 LTS.** 6.4, 6.5 and 6.6 are
+Supported Update releases. Their breaking changes and removed APIs are appended to
+`breaking-changes.md`, `deprecated-apis.md` and `current-best-practices.md`
+(verified 2026-11-07). `modules/` and `plugins/` still describe 6.3. Treat any 6.7
+API as unconfirmed; nothing in this directory covers it. 6.0 LTS support ends in
+October 2026.
 
 | Version | Release | Status (2026-10-17) | Key Theme |
 |---------|---------|---------------------|-----------|
@@ -60,9 +64,9 @@ supported "until the next release - in this case 6.7 - arrives" and that it
 "brings you one step closer to the 6.7 LTS". Editor versions and release dates
 come from Unity's release API
 https://services.api.unity.com/unity/editor/release/v1/releases (6.3 LTS first
-editor 6000.3.0f1 on Dec 3, 2025; latest 6000.3.26f1 on Oct 8, 2026). Upgrading
-the pin is a decision for when 6.7 LTS ships and `/setup-engine` re-pins; until
-then new projects stay on 6.3 LTS.
+editor 6000.3.0f1 on Dec 3, 2025; latest 6000.3.26f1 on Oct 8, 2026). This
+project's plan (CLAUDE.md) is to move to the 6.7 LTS once it ships;
+`/setup-engine upgrade` re-pins then.
 
 ## Unity 6 Releases Before the Cutoff
 
@@ -119,5 +123,11 @@ October 2026, 6.3 LTS until December 2027).
 - Unity 6.4 announcement: https://discussions.unity.com/t/unity-6-4-is-now-available/1713245
 - Unity 6.5 announcement: https://discussions.unity.com/t/unity-6-5-is-now-available/1723176
 - Unity 6.6 announcement: https://discussions.unity.com/t/unity-6-6-is-now-available/1735357
+- Upgrade to Unity 6.4 (fetched 2026-11-07): https://docs.unity.com/en-us/engine/6000.6/manual/upgrade-guides/upgrade-guide-unity64.md
+- Upgrade to Unity 6.5 (fetched 2026-11-07): https://docs.unity.com/en-us/engine/6000.6/manual/upgrade-guides/upgrade-guide-unity65.md
+- Upgrade to Unity 6.6 (fetched 2026-11-07): https://docs.unity.com/en-us/engine/6000.6/manual/upgrade-guides/upgrade-guide-unity66.md
+- What's new in 6.4 / 6.5 / 6.6 (fetched 2026-11-07; the 6.5 and 6.6 pages only partly verbatim): https://docs.unity.com/en-us/engine/6000.6/manual/whats-new/unity64, https://docs.unity.com/en-us/engine/6000.5/manual/whats-new/unity65, https://docs.unity.com/en-us/engine/6000.6/manual/whats-new/unity66.md
+- Editor command line arguments, 6000.6 (fetched 2026-11-07): https://docs.unity.com/en-us/engine/6000.6/manual/unity-editor/command-line-arguments/editor
+- Test Framework command line, 6000.6 (fetched 2026-11-07): https://docs.unity.com/en-us/engine/6000.6/manual/programming-environment/test-framework-introduction/reference-command-line
 - Editor release API: https://services.api.unity.com/unity/editor/release/v1/releases
 - C# API reference: https://docs.unity3d.com/6000.0/Documentation/ScriptReference/index.html

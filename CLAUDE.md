@@ -113,7 +113,7 @@ Unten folgt das Framework „Claude Code Game Studios“ (Version 1.2.0). Es ist
 
 - **Stufe `minimal`** (Voreinstellung, deshalb steht in `project.yaml` kein `modes:`-Block). Statt Design-Dokumenten pro System gilt `design/game-brief.md`. Ab dem Vertical Slice auf `standard` hochstellen (`/settings`).
 - **Hooks sind aus:** Es gibt absichtlich keine `.claude/settings.json`. `.claude/hooks/yaml-helper.sh` wird trotzdem von den Skills benutzt, nicht löschen.
-- **`/setup-engine` ist noch nicht gelaufen.** Als ersten Schritt ausführen: Unity, Version 6000.6.6f1, C#.
+- **`/setup-engine` ist gelaufen** (2026-11-07): Unity 6000.6.6f1, C#. Das Ergebnis steht in `project.yaml`, `.claude/docs/technical-preferences.md` und `docs/engine-reference/unity/`.
 - Skills nutze ich, wenn sie passen, zum Beispiel `/playtest-report` nach Tests mit Freunden, `/scope-check`, wenn Ideen dazukommen, und `/gate-check` am Prüfpunkt.
 
 **Bei Widersprüchen gelten die Regeln oben, nicht die des Frameworks.** Konkret:
@@ -134,11 +134,11 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]
-- **Language**: [CHOOSE: GDScript / C# / C++ / Blueprint]
+- **Engine**: Unity 6.6 (6000.6.6f1)
+- **Language**: C#
 - **Version Control**: Git with trunk-based development
-- **Build System**: [SPECIFY after choosing engine]
-- **Asset Pipeline**: [SPECIFY after choosing engine]
+- **Build System**: Unity Build Pipeline
+- **Asset Pipeline**: Unity Asset Import Pipeline
 
 > **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
 > dedicated sub-specialists. Use the set matching your engine.
