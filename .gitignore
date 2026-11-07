@@ -1,0 +1,78 @@
+# ─── Unity: generierte Ordner (werden bei jedem Öffnen neu erzeugt) ───
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# .meta-Dateien NIE ignorieren (außer das zugehörige Asset ist ignoriert)
+!/[Aa]ssets/**/*.meta
+
+# Automatisch generiertes Rider-Plugin
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# ─── IDEs ───
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+ExportedObj/
+.consulo/
+
+# ─── Unity: Crash-Reports, Pakete, Builds ───
+sysinfo.txt
+crashlytics-build.properties
+*.unitypackage
+*.unitypackage.meta
+*.apk
+*.aab
+*.app
+
+# ─── Blender: automatische Sicherungskopien ───
+*.blend1
+*.blend2
+*.blend3
+
+# ─── Python: Bytecode-Cache ───
+__pycache__/
+*.pyc
+
+# ─── Betriebssystem ───
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ─── Claude Code Game Studios: lokale Einstellungen und Laufzeitdateien ───
+.claude/settings.local.json
+.claude/agent-memory/
+.claude/worktrees/
+CLAUDE.local.md
+project.local.yaml
+production/session-logs/
+production/session-state/*
+!production/session-state/.gitkeep
+.scratch/
+/docs/consistency-failures.md
+/reports/
+/test-results/
