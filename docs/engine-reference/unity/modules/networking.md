@@ -1,7 +1,11 @@
-# Unity 6.3 — Networking Module Reference
+# Unity 6.3 → 6.6 — Networking Module Reference
 
-**Last verified:** 2026-02-13
+**Last verified:** 2026-02-13 (sections below); 2026-11-07 (the "NGO 2.13" block at the end)
 **Knowledge Gap:** Unity 6 uses Netcode for GameObjects (UNet deprecated)
+
+> **For this project read the "NGO 2.13 for this project" block at the end first.**
+> The examples below predate it: they use `[ServerRpc]`/`[ClientRpc]` and the old
+> `Input` class. New code uses `[Rpc(SendTo.Server)]` and the Input System.
 
 ---
 
@@ -349,3 +353,142 @@ void OnClientDisconnected(ulong clientId) {
 ## Sources
 - https://docs-multiplayer.unity3d.com/netcode/current/about/
 - https://docs-multiplayer.unity3d.com/netcode/current/learn/bossroom/
+
+---
+
+# NGO 2.13 for this project (verified 2026-11-07)
+
+**Last verified:** 2026-11-07, against the package registry, the NGO 2.13 API reference and
+manual, and the Multiplayer Play Mode 2.0 manual. Where this block and the older sections
+above disagree, this block wins. Gaps are marked `NOT SOURCEABLE`.
+
+## Package choice
+
+- **Use `com.unity.netcode.gameobjects` 2.13.3.** The newest NGO is 3.2.1 (2026-11-05), but its
+  registry entry requires `"unity":"6000.7"`; this project runs 6000.6.6f1. 2.13.3 declares
+  `"unity":"6000.0"` and depends on `com.unity.transport` 2.6.0 and `com.unity.nuget.mono-cecil` 1.11.4.
+- **Do not go below 2.13.0.** Changelog 2.13.0 (2026-06-21): "Added support for Unity's Fast
+  Enter Play Mode with domain reload disabled." This project has domain reload off.
+- 2.13.0 deprecated `NetworkObject.IsSceneObject` in favor of `NetworkObject.InScenePlaced`.
+- 2.7.0 deprecated all `RequireOwnership` RPC fields in favor of `RpcInvokePermission`.
+- Moving to 3.x is a decision for the switch to Unity 6.7 LTS.
+
+## RPCs
+
+- Attribute: `[Rpc(SendTo.Server)]`. Constructor `public RpcAttribute(SendTo target)`. Fields:
+  `InvokePermission` (`RpcInvokePermission`, default `Everyone`), `Delivery` (`RpcDelivery`),
+  `DeferLocal`, `AllowTargetOverride`.
+- `RequireOwnership` is `[Obsolete]`. Use `InvokePermission = RpcInvokePermission.Owner` or
+  `RpcInvokePermission.Everyone`, for example
+  `[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]`.
+- The `ServerRpcAttribute` class itself is not `[Obsolete]` in 2.13, only its `RequireOwnership`
+  field. This project uses `[Rpc(...)]` only (CLAUDE.md).
+- `SendTo` values: `Authority`, `ClientsAndHost`, `Everyone`, `Me`, `NotAuthority`, `NotMe`,
+  `NotOwner`, `NotServer`, `Owner`, `Server`, `SpecifiedInParams`. In client-server,
+  `Authority` behaves like `Server`.
+- `NOT SOURCEABLE`: whether an `[Rpc]` method name must end in `Rpc` in 2.13. Keep the suffix.
+
+## NetworkManager (API, 2.13.3)
+
+- `public static NetworkManager Singleton { get; }`
+- `public bool StartHost()`, `public bool StartClient()`, `public bool StartServer()`
+- `public void Shutdown(bool discardMessageQueue = false)`
+- `public bool IsHost`, `IsServer`, `IsClient`, `IsListening { get; }`; `public ulong LocalClientId { get; }`
+- `public IReadOnlyList<ulong> ConnectedClientsIds { get; }`, `ConnectedClients`, `ConnectedClientsList`
+- `public event Action<ulong> OnClientConnectedCallback` and `OnClientDisconnectCallback`. The API
+  remark: "It is recommended to use OnConnectionEvent instead, as this will eventually be
+  deprecated." (`OnConnectionEvent`'s signature was not read: `NOT SOURCEABLE`.)
+- `public string DisconnectReason { get; }`: read it after `OnClientDisconnectCallback`.
+- `public event Action OnServerStarted`, `OnClientStarted`, `OnPreShutdown`, `OnTransportFailure`;
+  `public event Action<bool> OnServerStopped`, `OnClientStopped` (bool = was host).
+- `public const ulong ServerClientId = 0`; `DisconnectClient(ulong clientId, string reason = null)`.
+- `NetworkConfig`: `ConnectionApproval` (bool), `PlayerPrefab` (GameObject: "When set, NetworkManager
+  will automatically create and spawn the assigned player prefab"), `NetworkTopology`
+  (`NetworkTopologyTypes.ClientServer` or `DistributedAuthority`). Defaults: not stated.
+  This project uses **ClientServer**.
+- Getting-started manual: "Netcode for GameObjects won't spawn a player object if you don't have
+  any prefab set as the PlayerPrefab." Enable Scene Management is on by default.
+
+## Connection approval
+
+- `public Action<NetworkManager.ConnectionApprovalRequest, NetworkManager.ConnectionApprovalResponse> ConnectionApprovalCallback { get; set; }`.
+  Set it before `StartHost()`, and tick **Connection Approval** in the NetworkManager inspector
+  ("enables connection approval when this is checked and the NetworkManager.ConnectionApprovalCallback is assigned").
+- Request (struct): `ulong ClientNetworkId`, `byte[] Payload`.
+- Response: `bool Approved`, `bool CreatePlayerObject`, `bool Pending`, `uint? PlayerPrefabHash`
+  (null = default player prefab), `Vector3? Position`, `Quaternion? Rotation`, `string Reason`
+  (sent to a rejected client; it reads it from `NetworkManager.DisconnectReason`).
+- Null `Position`: the API page says the prefab position is used, a manual sample comment says
+  `Vector3.zero`. They conflict, so always set `Position` and `Rotation` explicitly.
+- Not supported with the distributed authority topology.
+- The docs do not say whether the callback also runs for the host's own client. **Observed in
+  this project (Editor test, 2026-11-08): it does.** `Logs/Editor.log` shows
+  `[Spawn] Client 0 angenommen, Spawnpunkt 1.` for the host and `Client 1 ... Spawnpunkt 2.` for
+  the joining client, and both capsules appeared at the assigned positions in both windows.
+
+## Unity Transport (as shipped with NGO 2.13)
+
+- `SetConnectionData(string ipv4Address, ushort port, string listenAddress = null)`, plus an
+  overload with a leading `bool forceOverrideCommandLineArgs` and one taking `NetworkEndpoint`s.
+  `ipv4Address` "can be an IPv6 address or a domain name". Ignored when using Unity Relay.
+- **`DebugSimulator` and `SetDebugSimulatorParameters` are `[Obsolete]` and have no effect:**
+  "Use Network Simulator from the Multiplayer Tools package." The ~100 ms latency test from
+  CLAUDE.md therefore needs the Multiplayer Tools package.
+- `NOT SOURCEABLE`: Network Simulator setup steps and the Multiplayer Tools version for 6000.6.
+  Check before the carrying step.
+
+## Observed in this project (batchmode runs, 2026-11-08)
+
+- **On Unity 6000.6.6f1, `com.unity.multiplayer.playmode` and `com.unity.transport` are built-in
+  packages.** With `"com.unity.multiplayer.playmode": "2.0.2"` in the manifest the Editor resolved
+  **3.0.0** (`"source": "builtin"` in `Packages/packages-lock.json`); the manifest now says 3.0.0.
+  NGO 2.13.3 declares `com.unity.transport` 2.6.0, but the Editor resolved the built-in **6.6.0**.
+  The project compiles with that combination; runtime behavior is checked by the play test.
+- MPPM 3.0.0's changelog entry (2026-02-11) is empty. Its bundled manual
+  (`Library/PackageCache/com.unity.multiplayer.playmode@*/Documentation~`) uses the same menu
+  paths as 2.0: **Window > Play Mode > Scenarios** and **Window > Play Mode > Active Scenario**.
+- **A network prefab saved with `PrefabUtility.SaveAsPrefabAsset` from a scene object gets
+  `GlobalObjectIdHash: 0`.** NGO computes the hash in `NetworkObject.OnValidate` when the prefab
+  asset is loaded, but the first save does not contain it. At run time NGO logs "Detected
+  NetworkObject GlobalObjectIdHash value of 0!" and does not spawn it. Fix: load the asset,
+  `EditorUtility.SetDirty`, `AssetDatabase.SaveAssets()` (see
+  `PrototypeSceneBuilder.RefreshPrefabHashFromCommandLine`). Source: NGO 2.13.3
+  `Runtime/Core/NetworkObject.cs` in `Library/PackageCache`.
+- NGO created `Assets/DefaultNetworkPrefabs.asset` itself and added the Player prefab to it. The
+  NetworkManager in `Prototype.unity` references that list.
+
+## Multiplayer Play Mode 2.0.2 (docs read for 2.0; the project resolves 3.0.0, see above)
+
+- `com.unity.multiplayer.playmode` 2.0.2 (2026-03-12). Minimum editor 6000.3.0b10 (changelog 2.0.1);
+  2.0.0: "This version only supports Unity 6.3 and beyond."
+- Up to four editor players (the main Editor plus up to three additional Editor instances), plus
+  up to four local builds.
+- 2.0 works with **Play Mode Scenarios**: **Window > Play Mode > Scenarios** (or the Play Mode
+  dropdown > **Configure play mode scenarios**) > **+**. In the scenario keep **Editor** ticked and
+  click **+** under **Additional Editor Instances**. Entering Play mode launches all configured
+  instances; each additional Editor is a separate process with its own window. **Window > Play
+  Mode > Active Scenario** shows them; Ctrl+F9 to Ctrl+F12 focus Player 1 to 4.
+- Roles: the docs recommend Multiplayer Roles from the Dedicated Server package and advise
+  against tags. For the prototype the role is picked with the HUD buttons instead.
+- Limits: in an additional Editor you cannot create or change GameObjects, and the Package
+  Manager does not work. If instances go out of sync, close the Editor and delete `Library/VP`.
+- `NOT SOURCEABLE`: MPPM behavior with domain reload disabled.
+
+**Sources (all fetched 2026-11-07):**
+- https://packages.unity.com/com.unity.netcode.gameobjects
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@3.2/changelog/CHANGELOG.html (contains the 2.x entries)
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.NetworkManager.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.NetworkManager.ConnectionApprovalResponse.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.NetworkManager.ConnectionApprovalRequest.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.NetworkConfig.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.NetworkTopologyTypes.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.Transports.UTP.UnityTransport.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.RpcAttribute.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.SendTo.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/api/Unity.Netcode.ServerRpcAttribute.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/manual/basics/connection-approval.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/manual/components/core/networkmanager.html
+- https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.13/manual/tutorials/get-started-with-ngo.html
+- https://packages.unity.com/com.unity.multiplayer.playmode
+- https://docs.unity3d.com/Packages/com.unity.multiplayer.playmode@2.0/manual/index.html and its pages install.html, play-mode-scenario/play-mode-scenario-create.html, play-mode-scenario/play-mode-scenario-configurations.html, instance-types/main-and-additional-editor-instances.html, faq.html
+- https://docs.unity3d.com/Packages/com.unity.multiplayer.playmode@2.0/changelog/CHANGELOG.html

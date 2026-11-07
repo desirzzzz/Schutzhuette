@@ -81,7 +81,7 @@ production/        Sitzungsstand des Frameworks (session-state/ ist gitignored)
 Ziel: Eine Frage beantworten – **macht es Spaß, zu zweit eine schwere Kiste durch eine Hütte zu tragen?**
 
 - [x] Projektgrundlage: Ordnerstruktur, `.gitignore` und `.gitattributes` (LFS) für Unity
-- [ ] NGO einrichten: Host starten / beitreten (einfache Buttons reichen), Spieler-Prefab spawnt
+- [x] NGO einrichten: Host starten / beitreten (einfache Buttons reichen), Spieler-Prefab spawnt
 - [ ] Spielerbewegung (First Person), synchronisiert
 - [ ] Graubox-Hütte (baue ich mit ProBuilder; du gibst mir Maße und Raumaufteilung)
 - [ ] Aufheben, Tragen, Ablegen und Werfen von Kisten, synchron für alle
