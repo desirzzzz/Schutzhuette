@@ -17,7 +17,10 @@ Laut `docs/KONZEPT.md` gehören dazu: Stube, Küche, Lager, Eingang und ein Hang
   Figur bleibt eine Hand breit Luft: Zu zweit hintereinander tragen geht, nebeneinander nicht.
 - **Wände:** außen 0,3 m dick, innen 0,2 m, 2,8 m hoch. Die Hütte steht auf einem Sockel, der
   Hüttenboden liegt deshalb auf **1,5 m Höhe**.
-- **Kein Dach** in der Graubox. Das kommt später.
+- **Dach:** vorerst eine flache Platte auf den Wänden (Unterkante 4,3 m, 0,4 m Überstand), dazu ein
+  Dielenbelag auf dem Hüttenboden und fünf Lampen. Das setzt `HutLookBuilder` (Menü
+  „Schutzhütte/Farbe und Licht setzen“) zusammen mit den Materialien. Ein richtiges Satteldach
+  kommt später mit dem Low-Poly-Asset-Pack.
 
 ## Grundriss (von oben, vorne = unten)
 
