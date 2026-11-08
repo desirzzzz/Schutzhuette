@@ -572,8 +572,15 @@ authoritative (CLAUDE.md rule 2); prediction is purely visual on the owner's mac
   holder cannot get further than 1.2 m from the held end. The partner's position is the
   interpolated, delayed one.
 - Each owner ignores collisions between its CharacterController and the chest while holding it.
-- Known gaps: the client's end trails behind its hands by roughly the round trip (no prediction yet);
-  the chest passes through walls.
+- Known gap: the client's end trails behind its hands by roughly the round trip (no prediction yet).
+- **Walls (2026-11-08):** carried things are kinematic or have their collider off, so physics cannot
+  stop them. Instead the owner checks before each step whether the carried box would overlap fixed
+  geometry (`CarryCollision.HitsEnvironment`: `Physics.OverlapBox` at 95 % size; "fixed" = no
+  attached Rigidbody, not a CharacterController, not part of a player). Blocked steps are cut back
+  to their x- or z-part so carriers slide along walls (`CarryCollision.Slide`). A single crate also
+  blocks turning (`IMovementModifier.ConstrainYaw`, used by `PlayerLook`). The chest check uses the
+  partner's delayed position. If the box already overlaps, the check lets the player move, so nobody
+  gets stuck. Tested in the Editor (MPPM, 100 ms): crate and chest stop at walls and door frames.
 - Tested in the Editor with MPPM and 100 ms simulated ping (2026-11-08): grab, carry together,
   limits and drop work, no errors in the logs. Alone with two windows the carriers can only move
   alternately; the real feel needs a test with two people.

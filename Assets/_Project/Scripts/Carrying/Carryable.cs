@@ -37,6 +37,11 @@ namespace Schutzhuette.Carrying
         /// <summary>Der Collider der echten Kiste (für Physics.IgnoreCollision der Vorhersage).</summary>
         public Collider Collider => _collider;
 
+        /// <summary>Halbe Kantenlängen der Kiste in Metern (für die Wandprüfung beim Tragen).</summary>
+        public Vector3 HalfExtents => _collider is BoxCollider box
+            ? Vector3.Scale(box.size, transform.lossyScale) * 0.5f
+            : transform.lossyScale * 0.5f;
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();

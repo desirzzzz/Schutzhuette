@@ -112,17 +112,47 @@ namespace Schutzhuette.Carrying
                 return desiredDelta;
             }
 
-            // Zu zweit: Abstand zum Partner zwischen Minimum und Maximum halten.
+            // Zu zweit: Abstand zum Partner zwischen Minimum und Maximum halten,
+            // und nicht so laufen, dass die Truhe dabei in eine Wand ragt.
             if (_current.TryGetPartner(NetworkObject, out NetworkObject partner))
             {
-                return KeepDistance(currentPosition, desiredDelta, partner.transform.position,
+                Vector3 partnerPosition = partner.transform.position;
+                Vector3 delta = KeepDistance(currentPosition, desiredDelta, partnerPosition,
                     _current.MinCarrierDistance, _current.MaxCarrierDistance);
+
+                _current.IsHeldBy(NetworkObject, out int myEnd);
+                Vector3 halfExtents = _current.HalfExtents;
+
+                // Steckt die Truhe schon fest (z. B. gerade so angehoben), nicht festhalten.
+                if (ChestBlockedAt(currentPosition, partnerPosition, myEnd, halfExtents))
+                {
+                    return delta;
+                }
+
+                return CarryCollision.Slide(delta,
+                    step => ChestBlockedAt(currentPosition + step, partnerPosition, myEnd, halfExtents));
             }
 
             // Allein: Der Gegenstand bewegt sich nicht, man kommt nicht von seinem Ende weg.
             _current.IsHeldBy(NetworkObject, out int end);
             return KeepDistance(currentPosition, desiredDelta, _current.GetEndPosition(end),
                 0f, _current.SingleHolderRadius);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>Die Lage der Truhe hängt nur von den Positionen der Träger ab, Drehen ändert nichts.</remarks>
+        public float ConstrainYaw(Vector3 currentPosition, Quaternion currentRotation, float desiredYawDegrees)
+        {
+            return desiredYawDegrees;
+        }
+
+        // Ragt die Truhe in feste Umgebung, wenn ich hier stehe und der Partner dort?
+        private bool ChestBlockedAt(Vector3 myPosition, Vector3 partnerPosition, int myEnd, Vector3 halfExtents)
+        {
+            Vector3 holderOfEnd0 = myEnd == 0 ? myPosition : partnerPosition;
+            Vector3 holderOfEnd1 = myEnd == 0 ? partnerPosition : myPosition;
+            _current.ComputePose(holderOfEnd0, holderOfEnd1, out Vector3 center, out Quaternion rotation);
+            return CarryCollision.HitsEnvironment(center, halfExtents, rotation);
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace Schutzhuette.Player
         [SerializeField, Range(10f, 89f)] private float _maxPitch = 80f;
 
         private InputAction _lookAction;
+        private IMovementModifier[] _modifiers = new IMovementModifier[0];
         private Transform _camera;
         private Vector3 _cameraHomePosition;
         private Quaternion _cameraHomeRotation;
@@ -41,6 +42,8 @@ namespace Schutzhuette.Player
             {
                 return;
             }
+
+            _modifiers = GetComponents<IMovementModifier>();
 
             if (InputSystem.actions != null)
             {
@@ -93,7 +96,14 @@ namespace Schutzhuette.Player
                 ? raw * _mouseSensitivity
                 : raw * (_stickDegreesPerSecond * Time.deltaTime);
 
-            transform.Rotate(0f, degrees.x, 0f);
+            // Drehen kann begrenzt sein, z. B. wenn eine getragene Kiste sonst in die Wand schwenkt.
+            float yaw = degrees.x;
+            foreach (IMovementModifier modifier in _modifiers)
+            {
+                yaw = modifier.ConstrainYaw(transform.position, transform.rotation, yaw);
+            }
+
+            transform.Rotate(0f, yaw, 0f);
 
             _pitch = Mathf.Clamp(_pitch - degrees.y, -_maxPitch, _maxPitch);
             if (_cameraMount != null)

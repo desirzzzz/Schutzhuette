@@ -65,6 +65,22 @@ namespace Schutzhuette.Carrying
         /// <summary>Der Collider des Gegenstands (die Träger ignorieren ihn beim Tragen).</summary>
         public Collider Collider => _collider;
 
+        /// <summary>Halbe Kantenlängen in Metern (für die Wandprüfung beim Tragen).</summary>
+        public Vector3 HalfExtents => _collider is BoxCollider box
+            ? Vector3.Scale(box.size, transform.lossyScale) * 0.5f
+            : transform.lossyScale * 0.5f;
+
+        /// <summary>
+        /// Lage, die der Gegenstand hätte, wenn die Träger der beiden Enden an diesen Stellen
+        /// stünden. Nutzt dieselben Einstellungen wie das Tragen auf dem Host.
+        /// </summary>
+        /// <param name="holderOfEnd0">Position der Figur an Ende 0.</param>
+        /// <param name="holderOfEnd1">Position der Figur an Ende 1.</param>
+        public void ComputePose(Vector3 holderOfEnd0, Vector3 holderOfEnd1, out Vector3 center, out Quaternion rotation)
+        {
+            ComputeCarryPose(holderOfEnd0, holderOfEnd1, _reach, _handHeight, out center, out rotation);
+        }
+
         /// <summary>Wie viele Enden gerade gehalten werden (0 bis 2). Stimmt auf Host und Clients.</summary>
         public int HolderCount => (TryGetHolder(0, out _) ? 1 : 0) + (TryGetHolder(1, out _) ? 1 : 0);
 

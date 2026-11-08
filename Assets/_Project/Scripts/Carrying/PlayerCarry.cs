@@ -1,3 +1,4 @@
+using Schutzhuette.Player;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -24,7 +25,7 @@ namespace Schutzhuette.Carrying
     /// (jemand war schneller), verschwindet die Kopie einfach wieder. Die anderen Spieler
     /// sehen von alledem nichts, nur die echte Kiste.
     /// </remarks>
-    public class PlayerCarry : NetworkBehaviour
+    public class PlayerCarry : NetworkBehaviour, IMovementModifier
     {
         [Tooltip("Kopf-Punkt, von dem aus gezielt wird (derselbe wie bei PlayerLook).")]
         [SerializeField] private Transform _cameraMount;
@@ -234,6 +235,67 @@ namespace Schutzhuette.Carrying
 
             DropRpc(position, rotation, velocity);
             StartReleasePrediction(item, velocity, position, rotation);
+        }
+
+        // ----- Hängenbleiben an Wänden (IMovementModifier) -----
+
+        /// <inheritdoc />
+        public float SpeedMultiplier => 1f;
+
+        /// <inheritdoc />
+        public Vector3 ConstrainMove(Vector3 currentPosition, Vector3 desiredDelta)
+        {
+            Carryable item = ItemInHands();
+            if (item == null)
+            {
+                return desiredDelta;
+            }
+
+            Quaternion rotation = transform.rotation;
+            Vector3 halfExtents = item.HalfExtents;
+
+            // Steckt die Kiste schon in einer Wand (z. B. direkt nach dem Aufheben),
+            // nicht festhalten, sonst käme man nie wieder heraus.
+            if (CrateBlockedAt(currentPosition, rotation, halfExtents))
+            {
+                return desiredDelta;
+            }
+
+            return CarryCollision.Slide(desiredDelta,
+                delta => CrateBlockedAt(currentPosition + delta, rotation, halfExtents));
+        }
+
+        /// <inheritdoc />
+        public float ConstrainYaw(Vector3 currentPosition, Quaternion currentRotation, float desiredYawDegrees)
+        {
+            Carryable item = ItemInHands();
+            if (item == null || Mathf.Approximately(desiredYawDegrees, 0f))
+            {
+                return desiredYawDegrees;
+            }
+
+            Vector3 halfExtents = item.HalfExtents;
+            if (CrateBlockedAt(currentPosition, currentRotation, halfExtents))
+            {
+                return desiredYawDegrees;
+            }
+
+            Quaternion next = Quaternion.Euler(0f, desiredYawDegrees, 0f) * currentRotation;
+            return CrateBlockedAt(currentPosition, next, halfExtents) ? 0f : desiredYawDegrees;
+        }
+
+        // Die Kiste in den Händen aus eigener Sicht: die echte oder die Aufheb-Kopie.
+        private Carryable ItemInHands()
+        {
+            Carryable held = CurrentlyHeld();
+            return held != null ? held : _pendingGrab;
+        }
+
+        // Steckt die Kiste am Haltepunkt einer Figur mit dieser Lage in fester Umgebung?
+        private bool CrateBlockedAt(Vector3 playerPosition, Quaternion playerRotation, Vector3 halfExtents)
+        {
+            Vector3 center = playerPosition + playerRotation * _holdLocalPosition;
+            return CarryCollision.HitsEnvironment(center, halfExtents, playerRotation);
         }
 
         // Was der Spieler aus seiner Sicht gerade trägt. Eine schon losgelassene Kiste hängt
