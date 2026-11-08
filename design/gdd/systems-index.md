@@ -2,7 +2,7 @@
 
 > **Status**: Approved (vom Entwickler am 2026-11-08 freigegeben)
 > **Created**: 2026-11-08
-> **Last Updated**: 2026-11-08 (Gegenstandsarten designt)
+> **Last Updated**: 2026-11-08 (Gegenstandsarten: erneutes Design-Review, Approved)
 > **Source Concept**: docs/KONZEPT.md (Vollfassung) und design/game-brief.md (Kurzfassung)
 > **Grundlage für den Umfang**: production/milestones/vertical-slice.md
 
@@ -102,20 +102,20 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 4 | Tragen zu zweit | Gameplay | MVP | Implemented | — | Tragen und Werfen, Gegenstandsarten |
 | 5 | Holzofen und Wärme | Gameplay | MVP | Implemented | — | Tragen und Werfen, Interaktion, Gegenstandsarten |
 | 6 | Geräusche | Audio | MVP | Implemented | — | Netzwerk-Sitzung, Tragen und Werfen, Gegenstandsarten |
-| 7 | Gegenstandsarten (inferred) | Core | Vertical Slice | Designed | design/gdd/gegenstandsarten.md | — |
+| 7 | Gegenstandsarten (inferred) | Core | Vertical Slice | Approved | design/gdd/gegenstandsarten.md | — |
 | 8 | Interaktion (inferred) | Core | Vertical Slice | Not Started | — | Bewegung und Kamera, Tragen und Werfen, Gegenstandsarten |
-| 9 | Saison-Ablauf und Spielphasen | Core | Vertical Slice | Not Started | — | Netzwerk-Sitzung |
+| 9 | Saison-Ablauf und Spielphasen | Core | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Gegenstandsarten |
 | 10 | Steam-Lobby und Einladen | Core | Vertical Slice | Not Started | — | Netzwerk-Sitzung |
 | 11 | Gäste und Bedürfnisse | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Holzofen und Wärme, Gegenstandsarten, Interaktion |
 | 12 | Kochen und Gerichte | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Lager und Vorräte |
 | 13 | Lager und Vorräte | Economy | Vertical Slice | Not Started | — | Gegenstandsarten, Tragen und Werfen |
 | 14 | Holz hacken | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Holzofen und Wärme |
-| 15 | Versorgung: Betten und Erste Hilfe (inferred) | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Interaktion |
-| 16 | Materialseilbahn | Gameplay | Vertical Slice | Not Started | — | Interaktion, Tragen und Werfen, Lager und Vorräte, Wetter und Eskalation |
+| 15 | Versorgung: Betten und Erste Hilfe (inferred) | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Interaktion, Gegenstandsarten |
+| 16 | Materialseilbahn | Gameplay | Vertical Slice | Not Started | — | Interaktion, Tragen und Werfen, Lager und Vorräte, Wetter und Eskalation, Gegenstandsarten |
 | 17 | Wetter und Eskalation | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen |
 | 18 | Ereignisse (mit Strom und Licht) | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Wetter und Eskalation, Interaktion, Holzofen und Wärme, Lager und Vorräte, Materialseilbahn |
 | 19 | Nachteinsatz | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Wetter und Eskalation, Gäste und Bedürfnisse, Tragen zu zweit, Ereignisse (mit Strom und Licht), Sprachchat und Funkgerät |
-| 20 | Solo-Hüttenhund | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Tragen und Werfen, Nachteinsatz |
+| 20 | Solo-Hüttenhund | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Tragen und Werfen, Nachteinsatz, Gegenstandsarten |
 | 21 | Figuren-Animation und Ragdoll | Gameplay | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen |
 | 22 | Bewertung | Progression | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Saison-Ablauf und Spielphasen, Nachteinsatz |
 | 23 | Hüttenkasse und Upgrades | Progression | Vertical Slice | Not Started | — | Bewertung, Gäste und Bedürfnisse |
@@ -284,10 +284,10 @@ der frühe Freundestest möglich ist.
 |--------|-------|
 | Total systems identified | 34 |
 | Design docs started | 1 (Gegenstandsarten, 2026-11-08) |
-| Design docs reviewed | 0 |
-| Design docs approved | 0 |
+| Design docs reviewed | 1 (Gegenstandsarten, 2026-11-08: erst Needs Revision, nach Überarbeitung Approved) |
+| Design docs approved | 1 (Gegenstandsarten, 2026-11-08) |
 | MVP systems designed | 0/6 (alle 6 gebaut, ohne GDD auf Stufe `minimal`) |
-| Vertical Slice systems designed | 1/20 (Gegenstandsarten, Review ausstehend) |
+| Vertical Slice systems designed | 1/20 (Gegenstandsarten, Approved) |
 
 ---
 

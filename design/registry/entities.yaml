@@ -389,11 +389,11 @@ formulas:
       - gravity
       - hold_height
       - surface_height
-    output_range: [0, 6.11]
+    output_range: [0, 5.01]
     expression: "sqrt(2 * gravity * max(0, hold_height - surface_height))"
-    notes: "Haltehöhe hängt am Haltepunkt im Tragen (0,2 m über der Kamera)."
+    notes: "Haltehöhe 1,28 m: Haltepunkt im Tragen 0,2 m über der Mitte der Spielfigur (1,08 m über dem Boden, Kapsel 2 m plus 0,08 m Hautdicke). Vorher [0, 6.11] mit 1,9 m, korrigiert nach Design-Review."
     added: 2026-11-08
-    revised: ""
+    revised: 2026-11-08
   - name: is_warm
     status: active
     source: design/gdd/gegenstandsarten.md

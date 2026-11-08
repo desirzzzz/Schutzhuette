@@ -1,6 +1,6 @@
 # Gegenstandsarten
 
-> **Status**: In Design
+> **Status**: Approved (erneutes Design-Review 2026-11-08; siehe `design/gdd/reviews/gegenstandsarten-review-log.md`)
 > **Author**: Entwickler + Claude
 > **Last Updated**: 2026-11-08
 > **Last Verified**: 2026-11-08
@@ -28,8 +28,8 @@ Andere Systeme lesen den Katalog, statt eigene Werte zu führen:
 
 - Das Tragen nimmt das Gewicht.
 - Der Ofen nimmt die Brenndauer.
-- Das Lager nimmt den Platzbedarf.
-- Das Kochen nimmt die Zutaten.
+- Das Lager nimmt Ware und Portionen der Pakete.
+- Das Kochen nimmt die Waren.
 - Die Gäste nehmen die Gerichte.
 
 Ohne den Katalog stünde jeder Wert mehrfach im Code. Eine Gewichtsänderung müsste dann an mehreren
@@ -53,7 +53,9 @@ angelegt).
    - **Trageart:** `allein` oder `zu zweit`. Eine Art mit `zu zweit` bewegt sich nur, wenn zwei
      Spieler sie halten, so wie heute die Truhe.
    - **Kategorie**, genau eine: Brennstoff, Rohstoff, Vorratspaket, Gericht, Werkzeug oder Sperrgut.
-   - **Aufprallklang:** Holz oder Weich, das sind die Geräuschgruppen von heute.
+   - **Aufprallklang:** Holz oder Weich. Heute gibt es nur eine Aufprallgruppe (Holz) plus eine dumpfe
+     Schicht nach Gewicht, die die `impactSoft`-Clips nutzt. Die Klanggruppe je Art ist neue Arbeit in
+     den Geräuschen.
    - **Prefab:** das Netzobjekt, das in der Welt erscheint.
 2. **Dazu kommen optionale Eigenschaften**, jede mit eigenen Werten:
    - **Brennbar:** Brenndauer in Sekunden. Der Ofen liest sie.
@@ -160,8 +162,8 @@ Die Formel `solo_mass_valid` ist definiert als:
 einen Hinweis (keinen Fehler), wenn eine Art `two_person` hat, höchstens 25 kg wiegt und nicht in der
 Kategorie Sperrgut ist. Die Trage (15 kg, Sperrgut) ist die gewollte Ausnahme.
 
-**Example:** Kanister 20 kg ≤ 25, also gültig. Das Tempo sinkt auf 80 %, für 12,5 m braucht man
-3,5 s statt 2,8 s. Eine 30-kg-Art mit `alone` ist ungültig. Herleitung des Werts:
+**Example:** Kanister 20 kg ≤ 25, also gültig. Das Tempo sinkt auf 80 % (3,2 statt 4 m/s), für 12,5 m
+braucht man 3,9 s statt 3,1 s. Eine 30-kg-Art mit `alone` ist ungültig. Herleitung des Werts:
 (1 − 0,75) / 0,01 = 25. Der Faktor 0,01 ist der Tempoverlust pro kg aus dem Tragen, 0,75 das
 Mindesttempo, das einem Träger bleibt. Ab 40 kg klemmt das Tempo im Tragen bei 0,6, darüber wäre
 nichts mehr spürbar schwerer.
@@ -181,7 +183,7 @@ Die Formel `breaks_on_impact` ist definiert als:
 | v_relative | Vector3 | beliebig | calculated | Relative Geschwindigkeit der Kontaktpartner |
 | contact_normal | Vector3 | Länge 1 | calculated | Kontaktnormale |
 | impact_speed | float | 0–ca. 16 m/s | calculated | Senkrechter Anteil der Aufprallgeschwindigkeit, derselbe Wert wie bei den Geräuschen |
-| break_speed | float | 6,72–7,2 (Start 7,0) | data file | Bruchgeschwindigkeit der Art |
+| break_speed | float | 5,51–7,2 (Start 7,0) | data file | Bruchgeschwindigkeit der Art |
 | breaks_on_impact | bool | true/false | calculated | true = Host entfernt den Gegenstand, Scherben-Geräusch |
 
 **Was ein Kontakt ist:** ein Kollisionsereignis der Physik. `impact_speed` ist der größte senkrechte
@@ -189,20 +191,24 @@ Anteil über alle Kontaktpunkte dieses Ereignisses. Die Geräusche rechnen künf
 sie nur den ersten Kontaktpunkt aus).
 
 **Output Range:** Jeder Kontakt wird einzeln geprüft, es gibt kein Schadenskonto. Die Gesamt-
-geschwindigkeit wäre der falsche Messwert: Wer im Gehen ablegt, käme auf
-√(5,94² + 4,5²) = 7,45 m/s, und die Tasse würde zerbrechen.
+geschwindigkeit wäre der falsche Messwert: Ein Wurf, der die Wand nur streift, hätte die vollen 8 m/s
+und würde zerbrechen, obwohl er kaum aufprallt. Beim Ablegen setzt das Tragen die Geschwindigkeit auf 0,
+dort zählt nur der Fall.
 
 **Example (break_speed 7,0):**
 
 | Fall | impact_speed | Ergebnis |
 |---|---|---|
-| Ablegen auf den Boden | 5,9–6,1 | heil |
-| Ablegen auf den Tisch | 4,2 | heil |
+| Ablegen auf den Boden | 5,01 | heil |
+| Ablegen auf den Tisch | 2,73 | heil |
 | Wurf (8 m/s) gerade gegen die Wand | 8,0 | zerbricht |
-| Wurf aus dem Laufen gegen die Wand | 12,5 | zerbricht |
+| Wurf aus dem Laufen gegen die Wand (8 + 4 m/s) | 12,0 | zerbricht |
 | Wurf 40° schräg zur Wand | 6,1 | heil |
 
-Der Wert 7,0 entspricht einer Fallhöhe von 2,5 m.
+Der Wert 7,0 entspricht einer Fallhöhe von 2,5 m, also gut 1,2 m mehr als die Haltehöhe. Schräg gegen
+eine Wand zerbricht ein Wurf bis etwa 29° Abweichung (8 × cos 29° = 7,0). Auf den Boden zerbricht ein
+Wurf ab etwa 38° Neigung nach oben oder unten: `sqrt((8 × sin p)² + 2 × 9,81 × 1,28) > 7` gilt ab
+`sin p > 0,61`.
 
 **Fallgeschwindigkeit beim Loslassen:** Die Formel `release_fall_speed` ist definiert als:
 
@@ -212,21 +218,22 @@ Der Wert 7,0 entspricht einer Fallhöhe von 2,5 m.
 | Variable | Type | Range | Source | Description |
 |----------|------|-------|--------|-------------|
 | gravity | float | 9,81 | constant | Physik-Schwerkraft des Projekts |
-| hold_height | float | 1,8–1,9 m | calculated | Kamerahöhe (1,6–1,7 m, Annahme) plus 0,2 m Haltepunkt |
+| hold_height | float | 1,28 m | constant | Haltepunkt aus dem Tragen: 0,2 m über der Mitte der Spielfigur. Die Mitte liegt 1,08 m über dem Boden (Kapsel 2 m hoch, dazu 0,08 m Hautdicke des Character Controllers); 0,9 m vor der Figur |
 | surface_height | float | 0–ca. 1,0 m | calculated | Boden 0, Tisch etwa 0,9 |
-| release_fall_speed | float | 0–6,11 m/s | calculated | Aufprall nach dem Loslassen |
+| release_fall_speed | float | 0–5,01 m/s | calculated | Aufprall nach dem Loslassen |
 
-**Output Range:** 0 bis 6,11 m/s (Boden, Kamera 1,7 m).
+**Output Range:** 0 bis 5,01 m/s (Boden). Beim Ablegen setzt das Tragen die Geschwindigkeit auf 0, es
+zählt also nur der Fall.
 
-**Example:** Boden, Kamera 1,6 m: sqrt(2 × 9,81 × 1,8) = 5,94 m/s. Tisch: sqrt(2 × 9,81 × 0,9) = 4,20 m/s.
+**Example:** Boden: sqrt(2 × 9,81 × 1,28) = 5,01 m/s. Tisch: sqrt(2 × 9,81 × 0,38) = 2,73 m/s.
 
 **Prüffenster im Editor (Hinweis, kein Fehler):**
-`1,1 × release_fall_speed_max ≤ break_speed ≤ 0,9 × throw_speed`, also 6,72 bis 7,2 m/s. Die
-Prüfung liest dafür zwei Prüfwerte aus den Katalog-Einstellungen: Haltehöhe 1,9 m (ergibt
-`release_fall_speed_max` = 6,11 m/s) und Wurftempo 8,0 m/s. Beide müssen zu den Werten im Tragen
-passen; ändert sich dort etwas, werden die Prüfwerte nachgezogen. Ein Wert darunter heißt, Ablegen zerbricht das Geschirr. Ein Wert
-darüber heißt, schräge Würfe zerbrechen nichts mehr. Wird das Fenster zu eng, ist die
-Wurfgeschwindigkeit im Tragen der Hebel, nicht die Bruchgeschwindigkeit.
+`1,1 × release_fall_speed_max ≤ break_speed ≤ 0,9 × throw_speed`, also 5,51 bis 7,2 m/s. Die
+Prüfung liest dafür zwei Prüfwerte aus den Katalog-Einstellungen: Haltehöhe 1,28 m (ergibt
+`release_fall_speed_max` = 5,01 m/s) und Wurftempo 8,0 m/s. Beide müssen zu den Werten im Tragen
+passen; ändert sich dort etwas, werden die Prüfwerte nachgezogen. Ein Wert darunter heißt, Ablegen
+zerbricht das Geschirr. Ein Wert darüber heißt, gerade Würfe gegen die Wand zerbrechen nichts mehr. Wird
+das Fenster zu eng, ist die Wurfgeschwindigkeit im Tragen der Hebel, nicht die Bruchgeschwindigkeit.
 
 ### 3. Abkühlen
 
@@ -292,6 +299,8 @@ genau wie beim einzelnen Scheit.
   nennt. Build und Host-Start werden verweigert, bis es behoben ist.
 - **Wenn die Masse ≤ 0 ist oder ein Vorratspaket 0 Portionen hat:** Fehler im Editor. Die Art gilt als
   ungültig und erscheint nicht in der Welt.
+- **Wenn die Kennung oder der Anzeigename leer ist** (bei Arten und Waren): Fehler im Editor. Der
+  Eintrag gilt als ungültig.
 - **Wenn eine Art kein Prefab hat:** Fehler im Editor. Waren haben als eigener Datentyp gar kein
   Prefab-Feld.
 - **Wenn ein Vorratspaket auf eine unbekannte Ware verweist** (fest im Katalog oder beim Erscheinen
@@ -317,7 +326,7 @@ genau wie beim einzelnen Scheit.
 
 - **Wenn ein liegendes zerbrechliches Gericht getroffen wird:** Der Stoß versetzt es in den Zustand
   „Fällt“ und zählt selbst als Aufprall. Eine geworfene Kiste (8 m/s) zerbricht die Tasse. Eine Kiste,
-  die aus Haltehöhe darauf fällt (6 m/s), lässt sie heil.
+  die aus Haltehöhe darauf fällt (5,01 m/s), lässt sie heil.
 - **Wenn mehrere Kontakte im selben Physikschritt kommen:** Jeder wird geprüft, der erste über der
   Grenze zerbricht das Gericht. Der Host entfernt es einmal, und es gibt genau ein Scherben-Geräusch.
 - **Wenn der Träger hinfällt (Ragdoll):** Der Gegenstand wechselt von „Getragen“ zu „Fällt“, danach
@@ -364,12 +373,36 @@ nur als Weg für die Kennung genutzt, sie ist keine Abhängigkeit.
 | Ereignisse (mit Strom und Licht) | weich | Stirnlampe (Werkzeug) | kein Dokument |
 | Sprachchat und Funkgerät | weich | Funkgerät (Werkzeug) | kein Dokument |
 | Kraxe (Alpha) | weich | Masse | kein Dokument |
+| Materialseilbahn | hart | Vorratspaket; erzeugt Pakete und setzt dabei die Ware | kein Dokument |
+| Versorgung: Betten und Erste Hilfe | weich | Erste-Hilfe-Kasten (Werkzeug, über die Interaktion) | kein Dokument |
+| Solo-Hüttenhund | weich | Masse (trägt nur kleine Dinge) | kein Dokument |
+| Saison-Ablauf und Spielphasen | weich | Startaufstellung: legt beim Saisonstart fest, welche Gegenstände wo liegen und welche Ware in den Paketen steckt (vorläufig; heute macht das `CrateSpawner`) | kein Dokument |
 
 „Hart“ heißt: Das System funktioniert ohne den Katalog nicht. „Weich“ heißt: Es nutzt nur einzelne
 Einträge daraus.
 
 **Beidseitig:** Noch hat keins dieser Systeme ein Design-Dokument. Jedes muss beim Schreiben
 „Gegenstandsarten“ unter seinen Abhängigkeiten nennen.
+
+## Tuning Knobs
+
+Bei Stufe `standard` nur empfohlen, auf Hinweis des Design-Reviews ergänzt. Alle Werte liegen in
+Datenobjekten, nie im Code.
+
+| Stellschraube | Start | Sicherer Bereich | Ablage | Wirkung |
+| --- | --- | --- | --- | --- |
+| `max_solo_mass` | 25 kg | 20–40 kg | Katalog-Einstellungen | Ab wann eine Art nur zu zweit tragbar sein muss. Höher = schwere Dinge allein tragbar, Teamwork schwächer. |
+| `break_speed` | 7,0 m/s | 5,51–7,2 m/s | je Art | Ab wann Geschirr zerbricht. Niedriger = zerbricht beim Ablegen; höher = gerade Würfe zerbrechen nicht mehr. |
+| `cool_time` | Tee 90 s, Schmarrn 150 s | 25–300 s | je Art | Zeit bis kalt. Kürzer = mehr Zeitdruck, mehr Frust. |
+| `floor_factor` | 6 | 4–10 | Katalog-Einstellungen | Puffer der Untergrenze für `cool_time` (nur Editor-Hinweis). |
+| Prüfwert Haltehöhe | 1,28 m | muss dem Tragen entsprechen | Katalog-Einstellungen | Grundlage des Prüffensters für `break_speed`. |
+| Prüfwert Wurftempo | 8,0 m/s | muss dem Tragen entsprechen | Katalog-Einstellungen | Obere Grenze des Prüffensters. |
+| `max_path` | 15 m | 10–15 m | Katalog-Einstellungen | Längster Weg Herd → Stube für die Untergrenze. |
+| `walk_speed_min` | 4 m/s | muss der Bewegung entsprechen | Katalog-Einstellungen | Lauftempo für die Untergrenze. |
+| Toleranz beim Hacken | 10 % | 5–20 % | Katalog-Einstellungen | Ab welcher Abweichung der Massenbilanz der Editor warnt. |
+
+Wechselwirkungen: Ändert das Tragen Haltepunkt oder Wurftempo, müssen die beiden Prüfwerte mit; sonst
+prüft der Editor gegen alte Zahlen. Das Wurftempo verschiebt die obere Grenze für `break_speed`.
 
 ## Visual/Audio Requirements
 
@@ -380,8 +413,9 @@ Einträge daraus.
   Speckbrot dampfen nicht.
 - **Zerbrechen:** ein kurzer Scherben-Effekt aus Partikeln, ohne dass etwas liegen bleibt, dazu ein
   Scherben-Geräusch. Das ist ein neuer Klang, er gilt nur für den Bruch.
-- **Aufprall:** Die Klanggruppen Holz und Weich bleiben wie heute, Lautstärke und Tonhöhe richten sich
-  nach der Masse.
+- **Aufprall:** Neu ist eine Klanggruppe je Art (Holz oder Weich). Heute gibt es nur die Holzgruppe plus
+  eine dumpfe Schicht nach Gewicht (`impactSoft`-Clips). Lautstärke und Tonhöhe richten sich weiter nach
+  der Masse.
 - **Inhalt der Pakete:** Eine Ware bekommt optional eine Farbe oder ein Symbol für den Aufkleber auf
   Kiste und Truhe, damit man den Inhalt von außen erkennt.
 
@@ -391,8 +425,8 @@ Einträge daraus.
 
 - Das Gewicht spürt man über das Tragen: Tempo und Kamera-Wippen. Die Massen sind in drei Stufen
   gewählt: unter 3 kg leicht, 10–20 kg merklich, 80 kg nur zu zweit.
-- Zerbrechen muss fair wirken. Ablegen zerbricht nie etwas, ein Wurf gegen die Wand immer. Ob das enge
-  Fenster dafür reicht, zeigt der Playtest.
+- Zerbrechen muss fair wirken. Ablegen zerbricht nie etwas, ein Wurf gegen die Wand immer. Das Fenster
+  (5,51 bis 7,2 m/s) lässt dafür Spielraum; der Playtest bestätigt es.
 - Der Dampf kündigt an, dass ein Gericht kalt wird, es soll nie plötzlich passieren.
 - Beim Client erscheint der Bruch mit der Verzögerung seines Pings (etwa 100 ms), seine Kopie prallt
   kurz ab. Das nehmen wir hin.
@@ -413,7 +447,9 @@ Einträge daraus.
 | Verweis | Quelle | Genutzt in |
 | --- | --- | --- |
 | 1 % Tempoverlust pro kg, Mindesttempo 0,6 | Tragen und Werfen (`PlayerCarry`, gebaut, kein Dokument) | Formel 1 |
-| Wurftempo 8 m/s (höchstens 15), Haltepunkt 0,2 m über der Kamera | Tragen und Werfen (`PlayerCarry`) | Formel 2, Prüfwerte |
+| Wurftempo 8 m/s (höchstens 15); Haltepunkt 0,2 m über der Mitte der Spielfigur (1,28 m über dem Boden, mit 0,08 m Hautdicke), 0,9 m davor; Ablegen ohne Geschwindigkeit | Tragen und Werfen (`PlayerCarry`) | Formel 2, Prüfwerte |
+| Lauftempo 4 m/s | Bewegung und Kamera (`PlayerMovement`) | Formel 1, Untergrenze Abkühlzeit |
+| Ofen nimmt höchstens 240 s Brennzeit auf | Holzofen (`StoveSettings`) | Abnahmekriterium 25 |
 | Aufprall-Messwert, Klanggruppen, 3 kg leicht / 80 kg schwer | Geräusche (`ImpactAudio`, `SoundSettings`) | Bruchregel, Aufprallklang |
 | Truhe bewegt sich nur zu zweit | Tragen zu zweit (`HeavyCarryable`) | Trageart |
 | Brenndauer 45 s | Holzofen (`FuelItem`) | Holzscheit |
@@ -452,8 +488,8 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
    Rohstoff / 15 kg Sperrgut / 26 kg Vorratspaket **THEN** Hinweis / Hinweis / nichts / nichts; nie ein
    Fehler.
 5. **[EditMode]** **GIVEN** zwei Einträge (Arten oder Waren) mit derselben Kennung **WHEN** die Prüfung
-   läuft **THEN** gibt es genau 1 Fehler, der beide Assets nennt, **AND** der Start des Hosts wird
-   verweigert.
+   läuft **THEN** gibt es genau 1 Fehler, der beide Assets nennt, **AND** das Prüfergebnis meldet
+   „Start gesperrt“ (das Ergebnis, das der Host-Start liest, ist eine prüfbare Funktion).
 6. **[EditMode]** **GIVEN** hackbar A → A oder A → B → A **WHEN** geprüft **THEN** gibt es mindestens
    1 Fehler, der den Kreis nennt; holzklotz → holzscheit ergibt keinen.
 7. **[EditMode + PlayMode]** **GIVEN** das holzscheit-Prefab hat Rigidbody-Masse 1 **WHEN** die Prüfung
@@ -466,25 +502,25 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 
 ### B. Zerbrechen
 
-10. **[EditMode]** **GIVEN** v_relative (4,5; −5,94; 0), Normale (0; 1; 0), break_speed 7,0, Tasse
-    „fällt“ **WHEN** berechnet **THEN** ist `impact_speed` = 5,94 und die Tasse bleibt heil (der
-    Gesamtbetrag 7,45 zählt nicht).
+10. **[EditMode]** **GIVEN** ein flacher Wurf auf den Boden mit v_relative (6,0; −5,01; 0), Normale
+    (0; 1; 0), break_speed 7,0, Tasse „fällt“ **WHEN** berechnet **THEN** ist `impact_speed` = 5,01 und
+    die Tasse bleibt heil (der Gesamtbetrag 7,82 zählt nicht).
 11. **[EditMode]** **GIVEN** zerbrechlich, break_speed 7,0, „fällt“ **WHEN** impact_speed 4,2 / 6,1 /
     7,0 / 7,01 / 8,0 / 12,5 **THEN** heil / heil / heil / bricht / bricht / bricht. Der schräge Wurf
     (5,14; 0; 6,13) gegen die Normale (0; 0; 1) ergibt 6,13 und bleibt heil. Speckbrot und eine Tasse
     im Zustand „getragen“ bleiben auch bei 12,5 heil.
-12. **[EditMode]** **GIVEN** (Haltehöhe; Fläche) = (1,8; 0) / (1,8; 0,9) / (1,9; 0) / (1,8; 2,0)
-    **WHEN** `release_fall_speed` berechnet wird **THEN** 5,94 / 4,20 / 6,11 / 0, ohne NaN.
-13. **[EditMode]** **GIVEN** Prüfwerte Haltehöhe 1,9 m und Wurftempo 8,0 m/s (Fenster 6,72 bis 7,20)
-    **WHEN** break_speed 7,0 / 6,72 / 7,20 / 6,70 / 7,25 geprüft wird **THEN** nichts / nichts /
-    nichts / Hinweis „Ablegen zerbricht“ / Hinweis „schräge Würfe zerbrechen nicht“; nie ein Fehler.
+12. **[EditMode]** **GIVEN** (Haltehöhe; Fläche) = (1,28; 0) / (1,28; 0,9) / (1,8; 0) / (1,28; 2,0)
+    **WHEN** `release_fall_speed` berechnet wird **THEN** 5,01 / 2,73 / 5,94 / 0, ohne NaN.
+13. **[EditMode]** **GIVEN** Prüfwerte Haltehöhe 1,28 m und Wurftempo 8,0 m/s (Fenster 5,51 bis 7,20)
+    **WHEN** break_speed 7,0 / 5,52 / 7,20 / 5,45 / 7,25 geprüft wird **THEN** nichts / nichts /
+    nichts / Hinweis „Ablegen zerbricht“ / Hinweis „gerade Würfe zerbrechen nicht“; nie ein Fehler.
 14. **[EditMode]** **GIVEN** eine fallende Tasse **WHEN** im selben Physikschritt zwei Kontakte mit 8
     und 9 m/s kommen **THEN** wird Entfernen genau 1-mal ausgelöst und genau 1 Scherben-Geräusch
     angefordert, ohne Exception.
 15. **[PlayMode]** Nur Host: **GIVEN** eine Tasse Tee liegt eingefroren auf dem Boden **WHEN** eine
     Vorratskiste mit 8 m/s waagrecht dagegenprallt **THEN** ist die Tasse nach höchstens 10
-    Physikschritten entfernt; **WHEN** die Kiste stattdessen mit 6 m/s senkrecht darauf fällt **THEN**
-    existiert die Tasse nach 50 Schritten noch.
+    Physikschritten entfernt; **WHEN** die Kiste stattdessen aus Haltehöhe (5,01 m/s) senkrecht darauf
+    fällt **THEN** existiert die Tasse nach 50 Schritten noch.
 16. **[Manuell]** Solo, je 10 Versuche mit Tee und Kaiserschmarrn: **WHEN** auf Boden oder Tisch
     abgelegt, auch im Gehen **THEN** 10/10 heil; **WHEN** aus dem Laufen gerade gegen die Wand geworfen
     **THEN** 10/10 verschwinden mit genau einem Scherben-Geräusch, ohne Reste. Speckbrot, genauso
@@ -523,8 +559,9 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 24. **[PlayMode]** **GIVEN** ein Test-Katalog, in dem die Vorratskiste 20 kg wiegt **WHEN** der Host
     sie erscheinen lässt und ein Spieler sie trägt **THEN** ist `Rigidbody.mass` = 20 und der
     Tempofaktor derselbe wie beim Wasserkanister (0,8 statt 0,9).
-25. **[PlayMode]** **GIVEN** ein brennender Ofen mit Restzeit R **WHEN** ein Holzscheit hineinfällt
-    **THEN** ist es entfernt und die Restzeit R + 45 s (steht im Katalog 60 s, dann R + 60 s); **WHEN**
+25. **[PlayMode]** **GIVEN** ein brennender Ofen mit Restzeit 60 s (unter der Obergrenze von 240 s des
+    Ofens) **WHEN** ein Holzscheit hineinfällt **THEN** ist es entfernt und die Restzeit 105 s (steht im
+    Katalog 60 s Brenndauer, dann 120 s); **WHEN**
     eine Axt hineinfällt **THEN** bleibt sie bestehen und R ändert sich nicht.
 26. **[Manuell]** Solo: **GIVEN** je eine Art der Klanggruppen Holz und Weich **WHEN** sie aus
     Haltehöhe fallen **THEN** spielt jede den Klang ihrer Gruppe; eine zerbrechende Tasse spielt genau
@@ -540,19 +577,24 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
     sie sich weniger als 0,1 m; halten beide sie, bewegt sie sich. Dasselbe gilt für die Trage, sobald
     sie gebaut ist.
 30. **[Freundestest]** **GIVEN** der Host erzeugt zur Zeit T einen Tee **WHEN** beide ihn beobachten
-    **THEN** wird er bei Host und Client höchstens 0,5 s auseinander kalt, etwa bei T + 90 s.
+    **THEN** wird er bei Host und Client höchstens 0,5 s auseinander kalt, etwa bei T + 90 s. Gemessen
+    wird über je eine Log-Zeile mit der Serverzeit des Wechsels bei Host und Client (oder die
+    Debug-Anzeige), nicht mit bloßem Auge.
 31. **[EditMode]** *(sobald Gäste gebaut sind)* **GIVEN** beim Host kommen die Ereignisse [Tasse
     zerbricht, Tasse an Gast G servieren] **WHEN** er sie abarbeitet **THEN** schlägt das Servieren
     fehl, G wartet weiter, keine Exception.
 32. **[PlayMode]** **GIVEN** der Host lässt eine Vorratskiste mit `ware_speck` erscheinen **WHEN** ein
     Client sie sieht **THEN** lesen Host und Client am Gegenstand dieselbe Ware `ware_speck`.
+33. **[Manuell]** **GIVEN** zwei Einträge mit derselben Kennung im Projekt **WHEN** der Build gestartet
+    wird (Batchmode wie beim Freundestest-Build) **THEN** bricht er mit einem Fehler ab, der beide
+    Assets nennt, und es entsteht keine Exe.
 
 ## Open Questions
 
 | # | Frage | Wer klärt | Bis wann |
 | --- | --- | --- | --- |
-| 1 | Reicht das enge Bruchfenster (6,72–7,2 m/s)? Hebel wäre das Wurftempo. | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
-| 2 | Sollen steile Würfe nach unten (ab etwa 28°) zerbrechen? | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
+| 1 | Passt das Bruchfenster (5,51–7,2 m/s) im Spiel? Hebel wäre das Wurftempo. | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
+| 2 | Sollen steile Würfe auf den Boden (ab etwa 38° Neigung) zerbrechen? | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
 | 3 | Bei 15 m/s können Gegenstände dünne Wände durchfliegen. Braucht es für Würfe eine durchgehende Kollisionsprüfung? | Programmierung (ADR) | vor dem Bau |
 | 4 | Lässt man ein Gericht in einer Wand los, drückt die Physik es mit bis zu 10 m/s heraus. Zerbricht es dabei? | Test, notfalls kurze Schonzeit nach dem Loslassen | beim Bau |
 | 5 | Trägt man Stirnlampe und Funkgerät in der Hand oder am Körper? | Dokumente zu Interaktion und zu Strom und Licht | bei deren Design |
