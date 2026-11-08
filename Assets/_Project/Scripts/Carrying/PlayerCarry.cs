@@ -76,6 +76,14 @@ namespace Schutzhuette.Carrying
         /// <summary>Der Gegenstand, den diese Figur gerade trägt, sonst null. Stimmt auf Host und Clients.</summary>
         public Carryable HeldItem => GetComponentInChildren<Carryable>();
 
+        /// <summary>
+        /// Trägt der Spieler aus eigener Sicht gerade eine Kiste oder hebt eine auf?
+        /// Nur auf dem eigenen Rechner aussagekräftig.
+        /// </summary>
+        public bool IsBusy => CurrentlyHeld() != null || _pendingGrab != null;
+
+        private PlayerHeavyCarry _heavyCarry;
+
         /// <inheritdoc />
         public override void OnNetworkSpawn()
         {
@@ -85,6 +93,7 @@ namespace Schutzhuette.Carrying
             }
 
             _controller = GetComponent<CharacterController>();
+            _heavyCarry = GetComponent<PlayerHeavyCarry>();
 
             if (InputSystem.actions != null)
             {
@@ -128,6 +137,14 @@ namespace Schutzhuette.Carrying
 
             Carryable held = CurrentlyHeld();
             bool grabPending = _pendingGrab != null;
+
+            // Wer gerade einen schweren Gegenstand hält, kann nicht zusätzlich eine Kiste nehmen.
+            if (_heavyCarry != null && _heavyCarry.IsHolding)
+            {
+                _lookTarget = null;
+                return;
+            }
+
             _lookTarget = held == null && !grabPending ? FindLookTarget() : null;
 
             if (!inputAllowed)
@@ -406,7 +423,8 @@ namespace Schutzhuette.Carrying
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
         private void PickUpRpc(NetworkObjectReference itemReference)
         {
-            if (HeldItem != null)
+            var heavyCarry = GetComponent<PlayerHeavyCarry>();
+            if (HeldItem != null || (heavyCarry != null && heavyCarry.IsHolding))
             {
                 return;
             }

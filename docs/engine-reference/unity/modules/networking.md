@@ -554,6 +554,30 @@ authoritative (CLAUDE.md rule 2); prediction is purely visual on the owner's mac
   client as "much better", and fast pick-up/throw sequences as clean after the fixes. No errors in
   either Editor log.
 
+## Two-person carrying (`HeavyCarryable`, `PlayerHeavyCarry`, 2026-11-08)
+
+- **Holders** are two `NetworkVariable<NetworkObjectReference>` (one per end), written only by the
+  host. A reference, not a client ID: NGO's `SpawnManager.GetPlayerNetworkObject(clientId)` refuses on
+  clients in client-server mode ("Only the server can find player objects from other clients"),
+  while `NetworkObjectReference.TryGet` resolves through `SpawnManager.SpawnedObjects`, which clients
+  have. The default reference (id 0) resolves to null; NGO's id counter starts at 1.
+- **Pose:** with both ends held, the host makes the chest kinematic and sets it every `LateUpdate`
+  from both carriers' positions (`HeavyCarryable.ComputeCarryPose`, a pure static function): each
+  hand sits `reach` in front of its carrier towards the other one, the chest lies centred between
+  the hands. Its server-authoritative NetworkTransform distributes the result. With fewer than two
+  holders it is a normal host-simulated rigid body and falls.
+- **Limits:** movement stays owner-authoritative, so each owner limits its own move through
+  `IMovementModifier` (`PlayerMovement` asks every modifier for a speed factor and a constrained
+  delta): carriers keep their horizontal distance between 2.6 m and 3.6 m and walk at 60 %; a single
+  holder cannot get further than 1.2 m from the held end. The partner's position is the
+  interpolated, delayed one.
+- Each owner ignores collisions between its CharacterController and the chest while holding it.
+- Known gaps: the client's end trails behind its hands by roughly the round trip (no prediction yet);
+  the chest passes through walls.
+- Tested in the Editor with MPPM and 100 ms simulated ping (2026-11-08): grab, carry together,
+  limits and drop work, no errors in the logs. Alone with two windows the carriers can only move
+  alternately; the real feel needs a test with two people.
+
 ## Multiplayer Play Mode 2.0.2 (docs read for 2.0; the project resolves 3.0.0, see above)
 
 - `com.unity.multiplayer.playmode` 2.0.2 (2026-03-12). Minimum editor 6000.3.0b10 (changelog 2.0.1);

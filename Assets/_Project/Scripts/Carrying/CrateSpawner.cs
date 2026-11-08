@@ -72,7 +72,7 @@ namespace Schutzhuette.Carrying
                 _spawnedCrates.Add(crate);
             }
 
-            Debug.Log($"[Crates] {_spawnedCrates.Count} Kisten ausgelegt.");
+            Debug.Log($"[Crates] {_spawnedCrates.Count} x {_cratePrefab.name} ausgelegt.");
         }
 
         // Host beendet: übrig gebliebene Kisten wegräumen, damit der nächste Start sauber beginnt.

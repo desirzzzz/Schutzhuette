@@ -30,6 +30,9 @@ namespace Schutzhuette.Player
         private InputAction _moveAction;
         private float _verticalVelocity;
 
+        // Komponenten, die das Laufen bremsen oder begrenzen (z. B. schweres Tragen).
+        private IMovementModifier[] _modifiers = new IMovementModifier[0];
+
         /// <inheritdoc />
         public override void OnNetworkSpawn()
         {
@@ -46,6 +49,8 @@ namespace Schutzhuette.Player
             {
                 return;
             }
+
+            _modifiers = GetComponents<IMovementModifier>();
 
             // Projektweite Input Actions (InputSystem_Actions, Map "Player").
             if (InputSystem.actions != null)
@@ -72,7 +77,18 @@ namespace Schutzhuette.Player
             // Eingabe relativ zur Blickrichtung des Körpers.
             Vector2 input = _moveAction.ReadValue<Vector2>();
             Vector3 move = transform.right * input.x + transform.forward * input.y;
-            move = Vector3.ClampMagnitude(move, 1f) * _walkSpeed;
+
+            float speed = _walkSpeed;
+            foreach (IMovementModifier modifier in _modifiers)
+            {
+                speed *= modifier.SpeedMultiplier;
+            }
+
+            Vector3 horizontalDelta = Vector3.ClampMagnitude(move, 1f) * (speed * Time.deltaTime);
+            foreach (IMovementModifier modifier in _modifiers)
+            {
+                horizontalDelta = modifier.ConstrainMove(transform.position, horizontalDelta);
+            }
 
             // Am Boden leicht andrücken, damit isGrounded stabil bleibt.
             if (_controller.isGrounded && _verticalVelocity < 0f)
@@ -81,9 +97,8 @@ namespace Schutzhuette.Player
             }
 
             _verticalVelocity += _gravity * Time.deltaTime;
-            move.y = _verticalVelocity;
 
-            _controller.Move(move * Time.deltaTime);
+            _controller.Move(horizontalDelta + Vector3.up * (_verticalVelocity * Time.deltaTime));
         }
     }
 }
