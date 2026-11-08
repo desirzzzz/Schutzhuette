@@ -2,7 +2,7 @@
 
 **Die eine Frage:** Macht es Spaß, zu zweit eine schwere Kiste durch eine Hütte zu tragen?
 
-Build: `Builds/Schutzhuette-Prototyp-0.1.3.zip` (Windows, 64 Bit). Version 0.1.3.
+Build: `Builds/Schutzhuette-Prototyp-0.1.4.zip` (Windows, 64 Bit). Version 0.1.4.
 
 **Updates:** Ab 0.1.3 aktualisiert sich das Spiel selbst. Gibt es eine neue Version, steht im
 Menü „Neue Version … verfügbar!“ mit dem Knopf **Jetzt aktualisieren**. Ein Klick lädt sie,
