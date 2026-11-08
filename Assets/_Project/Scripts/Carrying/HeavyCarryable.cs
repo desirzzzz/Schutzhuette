@@ -48,6 +48,7 @@ namespace Schutzhuette.Carrying
         private Rigidbody _rigidbody;
         private NetworkRigidbody _networkRigidbody;
         private Collider _collider;
+        private Renderer[] _renderers;
         private bool _carriedOnServer;
 
         /// <summary>Waagrechter Mindestabstand der zwei Träger.</summary>
@@ -89,6 +90,22 @@ namespace Schutzhuette.Carrying
             _rigidbody = GetComponent<Rigidbody>();
             _networkRigidbody = GetComponent<NetworkRigidbody>();
             _collider = GetComponent<Collider>();
+            _renderers = GetComponentsInChildren<Renderer>();
+        }
+
+        /// <summary>
+        /// Blendet den echten Gegenstand nur auf diesem Rechner aus oder ein, solange eine
+        /// Vorhersage-Kopie an seiner Stelle steht. Ändert nichts am Netzwerkzustand.
+        /// </summary>
+        public void SetLocallyHidden(bool hidden)
+        {
+            LocalGhost.SetVisible(_renderers, !hidden);
+        }
+
+        /// <summary>Nicht vernetzte Darstellungs-Kopie für die Vorhersage (ohne Collider).</summary>
+        public GameObject CreateLocalGhost()
+        {
+            return LocalGhost.CreateFrom(transform);
         }
 
         /// <summary>Weltposition eines Endes (0 = hinten, 1 = vorne).</summary>

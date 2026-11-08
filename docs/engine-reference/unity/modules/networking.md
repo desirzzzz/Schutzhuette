@@ -572,7 +572,12 @@ authoritative (CLAUDE.md rule 2); prediction is purely visual on the owner's mac
   holder cannot get further than 1.2 m from the held end. The partner's position is the
   interpolated, delayed one.
 - Each owner ignores collisions between its CharacterController and the chest while holding it.
-- Known gap: the client's end trails behind its hands by roughly the round trip (no prediction yet).
+- **Prediction for the chest (clients only, 2026-11-08):** while both ends are held, a client
+  carrier hides the real chest locally and shows a copy (`LocalGhost`) posed every `LateUpdate`
+  with the same `ComputePose` the host uses, but from its own current position and the partner as
+  it currently sees them. The copy goes away as soon as the client no longer sees two holders. Tested
+  in the Editor (MPPM, 100 ms): the client's end stays in its hands. On release the whole chest falls
+  flat; keeping the remaining carrier's end in hand is noted in `docs/IDEEN.md`.
 - **Walls (2026-11-08):** carried things are kinematic or have their collider off, so physics cannot
   stop them. Instead the owner checks before each step whether the carried box would overlap fixed
   geometry (`CarryCollision.HitsEnvironment`: `Physics.OverlapBox` at 95 % size; "fixed" = no

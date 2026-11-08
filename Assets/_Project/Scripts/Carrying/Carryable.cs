@@ -57,10 +57,7 @@ namespace Schutzhuette.Carrying
         public void SetLocallyHidden(bool hidden)
         {
             IsLocallyHidden = hidden;
-            foreach (Renderer itemRenderer in _renderers)
-            {
-                itemRenderer.enabled = !hidden;
-            }
+            LocalGhost.SetVisible(_renderers, !hidden);
         }
 
         /// <summary>
@@ -70,19 +67,7 @@ namespace Schutzhuette.Carrying
         /// <param name="withPhysics">true: mit Collider und Rigidbody (zum Fallen und Fliegen).</param>
         public GameObject CreateLocalGhost(bool withPhysics)
         {
-            var ghost = new GameObject($"{name} (Vorhersage)");
-            ghost.transform.SetPositionAndRotation(transform.position, transform.rotation);
-            ghost.transform.localScale = transform.lossyScale;
-
-            if (TryGetComponent(out MeshFilter sourceFilter))
-            {
-                ghost.AddComponent<MeshFilter>().sharedMesh = sourceFilter.sharedMesh;
-            }
-
-            if (TryGetComponent(out MeshRenderer sourceRenderer))
-            {
-                ghost.AddComponent<MeshRenderer>().sharedMaterials = sourceRenderer.sharedMaterials;
-            }
+            GameObject ghost = LocalGhost.CreateFrom(transform);
 
             if (withPhysics)
             {

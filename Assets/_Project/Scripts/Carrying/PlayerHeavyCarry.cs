@@ -36,6 +36,10 @@ namespace Schutzhuette.Carrying
         private bool _cursorWasLocked;
         private GUIStyle _hintStyle;
 
+        // Vorhersage beim Tragen zu zweit (nur Clients): Kopie der Truhe aus eigener Sicht.
+        private GameObject _chestGhost;
+        private HeavyCarryable _hiddenChest;
+
         /// <summary>
         /// Hält diese Figur gerade ein Ende eines schweren Gegenstands?
         /// Aussagekräftig auf dem eigenen Rechner und auf dem Host.
@@ -67,6 +71,61 @@ namespace Schutzhuette.Carrying
         public override void OnNetworkDespawn()
         {
             SetIgnoreCollision(null);
+            EndChestPrediction();
+        }
+
+        // Nach dem Laufen (Update) die Vorhersage-Kopie an die neue eigene Position setzen.
+        // Der Host braucht das nicht: Er rechnet die echte Truhe schon aus seiner Sicht aus.
+        private void LateUpdate()
+        {
+            if (!IsSpawned || !IsOwner || IsServer)
+            {
+                return;
+            }
+
+            if (!IsHolding || !_current.TryGetPartner(NetworkObject, out NetworkObject partner))
+            {
+                EndChestPrediction();
+                return;
+            }
+
+            // Inzwischen eine andere Truhe angepackt: alte Vorhersage sauber beenden.
+            if (_hiddenChest != null && _hiddenChest != _current)
+            {
+                EndChestPrediction();
+            }
+
+            if (_chestGhost == null)
+            {
+                _chestGhost = _current.CreateLocalGhost();
+                _hiddenChest = _current;
+                _hiddenChest.SetLocallyHidden(true);
+            }
+
+            // Dieselbe Rechnung wie beim Host, aber mit der eigenen, aktuellen Position
+            // statt der verzögerten. Den Partner nehmen wir so, wie wir ihn gerade sehen.
+            _current.IsHeldBy(NetworkObject, out int myEnd);
+            Vector3 me = transform.position;
+            Vector3 other = partner.transform.position;
+            _current.ComputePose(myEnd == 0 ? me : other, myEnd == 0 ? other : me,
+                out Vector3 center, out Quaternion rotation);
+            _chestGhost.transform.SetPositionAndRotation(center, rotation);
+        }
+
+        private void EndChestPrediction()
+        {
+            if (_chestGhost != null)
+            {
+                Destroy(_chestGhost);
+            }
+
+            if (_hiddenChest != null)
+            {
+                _hiddenChest.SetLocallyHidden(false);
+            }
+
+            _chestGhost = null;
+            _hiddenChest = null;
         }
 
         private void Update()
