@@ -65,7 +65,7 @@ namespace Schutzhuette.Net
         {
             GUI.matrix = Matrix4x4.Scale(new Vector3(_uiScale, _uiScale, 1f));
             GUILayout.BeginArea(new Rect(10f, 10f, 260f, 400f));
-            GUILayout.Label($"FPS: {_smoothedFps:0}");
+            GUILayout.Label($"Version {GameVersion.Current} · FPS: {_smoothedFps:0}");
 
             // IsListening: Läuft gerade eine Sitzung (als Host oder Client)?
             if (_networkManager.IsListening)
@@ -163,6 +163,9 @@ namespace Schutzhuette.Net
         private void StartClient()
         {
             _transport.SetConnectionData(_joinAddress, _port);
+
+            // Die eigene Version geht mit der Beitrittsanfrage an den Host, der prüft sie.
+            _networkManager.NetworkConfig.ConnectionData = GameVersion.ToConnectionData(GameVersion.Current);
             _statusMessage = _networkManager.StartClient()
                 ? "Verbinde ..."
                 : "Beitreten konnte nicht starten.";

@@ -7,7 +7,7 @@ namespace Schutzhuette.Net
     /// <summary>
     /// Prüft auf dem Host jede neue Verbindung (Connection Approval), bevor ein
     /// Spieler-Objekt entsteht. Vergibt einen freien Spawnpunkt und lehnt ab,
-    /// wenn die Hütte voll ist.
+    /// wenn die Hütte voll ist oder der Spieler eine andere Version hat (<see cref="GameVersion"/>).
     /// </summary>
     /// <remarks>
     /// Warum Connection Approval: Die Antwort enthält Position und Rotation des
@@ -75,6 +75,20 @@ namespace Schutzhuette.Net
             NetworkManager.ConnectionApprovalRequest request,
             NetworkManager.ConnectionApprovalResponse response)
         {
+            // Andere Version als der Host: ablehnen, mit Grund. Der eigene Client des Hosts
+            // ist dasselbe Programm und wird nicht geprüft.
+            string clientVersion = GameVersion.FromConnectionData(request.Payload);
+            if (request.ClientNetworkId != NetworkManager.ServerClientId
+                && !GameVersion.Matches(GameVersion.Current, clientVersion))
+            {
+                response.Approved = false;
+                response.Reason = GameVersion.MismatchReason(GameVersion.Current, clientVersion);
+                response.Pending = false;
+                string shown = string.IsNullOrEmpty(clientVersion) ? "alt/unbekannt" : clientVersion;
+                Debug.Log($"[Spawn] Client {request.ClientNetworkId} abgelehnt: Version {shown}, Host {GameVersion.Current}.");
+                return;
+            }
+
             int slot = FindFreeSlot();
             if (slot < 0)
             {

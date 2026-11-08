@@ -2,7 +2,12 @@
 
 **Die eine Frage:** Macht es Spaß, zu zweit eine schwere Kiste durch eine Hütte zu tragen?
 
-Build: `Builds/Schutzhuette-Prototyp-0.1.1.zip` (Windows, 64 Bit). Version 0.1.1.
+Build: `Builds/Schutzhuette-Prototyp-0.1.2.zip` (Windows, 64 Bit). Version 0.1.2.
+
+**Alle brauchen dieselbe Version.** Sie steht oben links im Menü. Mit einer anderen Version
+lehnt der Host den Beitritt ab und sagt, welche Version fehlt. Neue Versionen gibt es unter
+https://github.com/desirzzzz/Schutzhuette/releases. Ein automatisches Update gibt es noch nicht:
+neue Zip laden, entpacken, die neue `Schutzhuette.exe` starten.
 
 **Neu seit 0.1.0:** Spielfiguren statt Kapseln, Hütte mit Farben, Dach und warmem Licht.
 Gewicht ist spürbar (die Kamera wippt mit Last, schwere Kisten bremsen, die Truhe schaukelt).
@@ -54,7 +59,7 @@ im anderen mit `127.0.0.1` „Beitreten“.
 | Linksklick ins Bild | Maus wieder einfangen |
 | M | Ton aus / wieder an |
 
-Oben links: Ping und FPS. Oben rechts: Ofen (Brenndauer, Wärme).
+Oben links: Version, FPS und Ping. Oben rechts: Ofen (Brenndauer, Wärme).
 
 ## Aufgaben für eine Runde (15 bis 20 Minuten)
 
