@@ -1,6 +1,6 @@
 # Gäste und Bedürfnisse
 
-> **Status**: Approved (Design-Review 2026-11-09, siehe `design/gdd/reviews/gaeste-review-log.md`)
+> **Status**: Approved (erneutes Design-Review 2026-11-09 nach Einarbeitung aller Empfehlungen, siehe `design/gdd/reviews/gaeste-review-log.md`)
 > **Author**: Entwickler + Claude
 > **Last Updated**: 2026-11-09
 > **Last Verified**: 2026-11-08
@@ -47,7 +47,9 @@ aus dem Holz eine warme Stube.
 1. **Gästetypen** sind Datenobjekte. Jeder Typ hat:
    - Kennung und Anzeigename (`wanderer`, `familie`, `bergsteiger`)
    - **Figurenzahl** 1 oder 2. Die Familie besteht aus zwei Figuren (Elternteil und Kind), die zusammen
-     **ein** Gast sind: eine Zufriedenheit, ein Symbol, gemeinsame Bedürfnisse.
+     **ein** Gast sind: eine Zufriedenheit, ein Symbol, gemeinsame Bedürfnisse. Beide Figuren sind dieselbe
+     Station: Servieren und Erste Hilfe gehen an jeder der beiden. Für den Lärmabstand zählt die nähere
+     Figur.
    - eine **Bedürfniskette** mit 1–2 Bedürfnissen, die nacheinander kommen
    - Zahlenwerte wie Geduld und Trinkgeld (stehen unter „Formulas“)
 2. **Bedürfnisse** sind ebenfalls Datenobjekte. Jedes hat eine Kennung (immer mit `beduerfnis_` davor), ein
@@ -142,8 +144,9 @@ aus dem Holz eine warme Stube.
     - **Wer:**
       - Der Host wählt einen anwesenden, wachen Gast: zuerst einen Wanderer, sonst einen anderen Gast, der
         keine Familie ist. Kinder gehen nicht verloren.
-      - „Anwesend und wach“ heißt: in der Hütte und nicht im Zustand Vermisst, Weg oder Schläft. Passen
-        mehrere Gäste, nimmt der Host den, der am längsten da ist.
+      - „Anwesend und wach“ heißt: am eigenen Platz, im Zustand Wartet, Mault, Genießt oder Bleibt. Wer
+        unterwegs ist, schläft, vermisst oder weg ist, kommt nicht in Frage. Passen mehrere Gäste, nimmt der
+        Host den, der am längsten da ist.
       - Ist keiner da, entsteht ein eigener vermisster Wanderer, der nie in der Hütte war.
     - **Was passiert:**
       - Der gewählte Gast verschwindet aus der Hütte, und sein Platz bleibt reserviert.
@@ -163,6 +166,12 @@ aus dem Holz eine warme Stube.
       - Ab da kommen keine Gäste mehr.
       - Die Zufriedenheit aller Gäste wird eingefroren und an die Bewertung übergeben. Wer vorher gegangen
         ist, zählt mit dem Wert, den er beim Gehen hatte.
+    - **Eingefroren außerhalb der Spielphasen:** Die Gäste-Logik läuft nur am Nachmittag, am Abend und in
+      der Nacht. In jeder anderen Phase (Bewertung, Upgrades, Vorbereitung, also auch nach einem Abbruch)
+      ist sie eingefroren:
+      - Gäste sind keine Stationen.
+      - Uhren, Zufriedenheit und Figuren stehen.
+      - Es gibt keine Ankünfte und kein Trinkgeld.
 14. **Was Spieler nicht können:**
     - Gäste tragen (Ausnahme: der Vermisste auf der Trage, das regelt der Nachteinsatz)
     - Gäste wegschicken oder Plätze zuweisen
@@ -171,6 +180,7 @@ aus dem Holz eine warme Stube.
     - Alles entscheidet der Host (Architektur-Regel 2), die Wegfindung läuft nur bei ihm.
     - Die Clients erhalten für jede Figur Position und Blickrichtung, außerdem Zustand, aktuelles Bedürfnis,
       Geduldsstand und eine grobe Stimmung (zufrieden, neutral, mault) für Gesicht und Geräusche.
+    - Einmalige Ereignisse schickt der Host an alle: „Aua“, Murren und Trinkgeld (Münzen, Klimpern, „+6“).
     - Wie das technisch läuft, klärt eine spätere Architektur-Entscheidung (ADR: Wegfindung im Netz).
 
 > `game-designer` und `ai-programmer` für diesen Abschnitt nicht befragt (Lean-Modus). Beim Review genau
@@ -184,7 +194,7 @@ aus dem Holz eine warme Stube.
 | Blockiert | kein Weg zum Ziel, mault | nein | zurück in den Gehzustand, sobald der Weg frei ist |
 | Wartet | Bedürfnis offen, Geduld läuft | ja | Genießt, Mault, Geht zum Bett (Betten komplett), Vermisst |
 | Mault | Bedürfnis offen, Geduld abgelaufen | ja | Genießt, Geht zum Bett, Vermisst |
-| Genießt | kurz nach der Erfüllung | nein | Wartet (nächstes Bedürfnis), Geht (Nachmittag), Bleibt (ab Abend) |
+| Genießt | kurz nach der Erfüllung | nein | Wartet (nächstes Bedürfnis), Geht (Nachmittag), Bleibt (ab Abend), Vermisst |
 | Bleibt | alles erfüllt, plaudert bis zum Saisonende | nein | Vermisst |
 | Geht zum Bett | unterwegs zum reservierten Bett | nein | Schläft, Blockiert |
 | Schläft | im Bett bis zum Saisonende | nein | – |
@@ -192,7 +202,8 @@ aus dem Holz eine warme Stube.
 | Weg | verschwunden, Platz frei, Zufriedenheit festgehalten | – | – |
 | Vermisst | draußen, der Nachteinsatz führt ihn | nein | Wartet (zurück, mit neuem Bedürfnis); sonst bleibt er vermisst bis zum Saisonende |
 
-Bei „Saison beginnt“ verschwinden alle Gäste, egal in welchem Zustand.
+Bei „Saison beginnt“ verschwinden alle Gäste, egal in welchem Zustand. Außerhalb von Nachmittag, Abend und
+Nacht wechselt kein Gast den Zustand (Regel 13).
 
 ### Interactions with Other Systems
 
@@ -202,7 +213,7 @@ Bei „Saison beginnt“ verschwinden alle Gäste, egal in welchem Zustand.
 | Holzofen und Wärme (gebaut, kein GDD) | Wärme 0–100 % | – |
 | Gegenstandsarten (Approved) | Eigenschaft „Gericht“ (Bedürfnis-Kennung, `is_warm`), Zustand „Fällt“ (geworfen oder fallen gelassen) und Aufprall-Ereignisse beim Host (Lärm, Chaos) | Legt die Bedürfnis-Kennungen und den Wert kalter Gerichte fest |
 | Interaktion (Approved) | Handlung „Servieren“ (Kategorie Gericht, sofort); der Gast ist Bezugsobjekt der Ersten Hilfe | Der Gast ist eine Station mit der Bedingung „Möchte gerade X“ |
-| Kochen und Gerichte *(kein GDD)* | Gerichte, deren Eigenschaft eine Bedürfnis-Kennung nennt | – |
+| Kochen und Gerichte *(kein GDD)* | Gerichte, deren Eigenschaft eine Bedürfnis-Kennung nennt (indirekt über die Gegenstandsarten) | – |
 | Versorgung *(kein GDD)* | ruft „Bedürfnis erfüllt“ auf (Bett, Erste Hilfe) | Welche Betten für welchen Gast reserviert sind |
 | Geräusche (gebaut) | – | Murren, „Aua“, Klimpern beim Trinkgeld, Schritte |
 | Nachteinsatz *(kein GDD)* | Zeitpunkt, „Gast ist zurück“ samt neuen Bedürfnissen | der vermisste Gast |
@@ -221,7 +232,8 @@ sie freigegeben.
 
 - Alle Zeiten laufen in `game_time`.
 - Alle Werte liegen in Datenobjekten (Gästetyp, Bedürfnis, Gäste-Einstellungen).
-- Die Bereiche sind Empfehlungen für das Spielprofil. Harte Grenzen setzt nur der Editor (`[Min]`).
+- Die Bereiche sind Empfehlungen für das Spielprofil. Harte Grenzen setzen `[Min]` im Inspector und
+  Formel 9.
 
 ### 1. Ankunft
 
@@ -366,7 +378,7 @@ Die Formel `satisfaction_rate` ist definiert als:
 **Example:** Der Ofen geht bei Wärme 100 aus.
 
 - Die ersten 40 s kosten nichts.
-- Bis Wärme 0 vergehen weitere 27 s, die zusammen etwa 5,4 Punkte kosten.
+- Bis Wärme 0 vergehen weitere 26,7 s, die zusammen 5,33 Punkte kosten.
 - Nach 2 min ohne Feuer hat der Gast etwa 27 Punkte verloren.
 
 ### 5. Lärm und Chaos
@@ -397,7 +409,7 @@ Ergänzende Regeln:
 | chaos_base | float | 5–40 | data file | 15: groß, etwa ein Erfolg |
 | chaos_speed_min | float | 1–5 m/s | data file | 3: Was rollt oder rutscht, tut nicht weh. |
 | chaos_lockout | float | 1–10 s | data file | 3: Eine Kiste trifft nicht in jedem Physikschritt neu. |
-| distance, hit_speed, mass_kg | float | – | calculated | Abstand zum Aufprall, Geschwindigkeit beim Treffer, Masse der Art |
+| distance, hit_speed, mass_kg | float | – | calculated | Abstand zum Aufprall (bei der Familie zur näheren Figur), Geschwindigkeit beim Treffer, Masse der Art |
 
 **Output Range:** Lärm 0–3 je Ereignis, Chaos 0 oder 15.
 
@@ -489,6 +501,28 @@ danach.
 
 **Example:** Wanderer nach dem Tee: 4 + 4 = 8 s, dann erscheinen das Speckbrot-Symbol und ein neuer Ring.
 
+### 9. Prüfung der Gäste-Daten (Editor, Fehler)
+
+Die Formel `guest_data_valid` ist definiert als:
+
+`guest_data_valid = 0 <= arrival_jitter < 1 AND 0 <= patience_pressure_cut < 1 AND min(patience_base) > 0 AND tip_full > 0 AND noise_radius > 0 AND cold_threshold > 0 AND comfort_warmth >= cold_threshold AND mault_in <= mault_out < happy_out <= happy_in AND weight_sum[Nachmittag] > 0 AND weight_sum[Abend] > 0 AND weight_sum[Nacht] > 0`
+
+Dazu kommen die Prüfungen aus den Grenzfällen (Kette 1–2, Figuren 1–2, Vorsilbe `beduerfnis_`, bekannte
+Kennung im Gericht). `[Min]` im Inspector reicht dafür nicht, weil es „< 1“ nicht ausdrücken kann.
+
+**Variables:**
+
+| Variable | Type | Range | Source | Description |
+|---|---|---|---|---|
+| arrival_jitter, patience_pressure_cut | float | 0 bis unter 1 | data file | Bei 1 würde `next_cost` 0 (in jedem Schritt ein Gast) bzw. `patience_total` 0 (der Ring teilt durch null). |
+| patience_base, tip_full, noise_radius, cold_threshold | float | > 0 | data file | Teiler in den Formeln 2, 4, 5 und 7 |
+| comfort_warmth | float | ≥ `cold_threshold` | data file | Sonst gäbe es Wärmebonus und Kälteabzug zugleich. |
+| mault_in, mault_out, happy_out, happy_in | float | aufsteigend | data file | Sonst überlappen die Stimmungen, und die Hysterese kippt. |
+| weight_sum[phase] | float | > 0 | calculated | Summe der Gewichte aller Typen in der Phase; bei 0 gibt es nichts zu ziehen. |
+| guest_data_valid | bool | true/false | calculated | false = Fehler im Editor mit dem Namen des verletzten Werts |
+
+**Output Range:** bool. Mit den Startwerten ist sie wahr.
+
 ### Erwartete Werte (Prüfung, keine Regel)
 
 **Gäste pro Saison** (Nacht 720 s, ohne Platzgrenze):
@@ -541,6 +575,10 @@ Hinweis für die Hüttenkasse:
   gibt es nicht.
 - **Wenn auf einem reservierten Platz ein Gegenstand liegt:** Der Platz ist ein Ziel, das man nicht
   erreicht. Der Gast ist blockiert (siehe unten), bis jemand den Platz frei räumt.
+  - Nach `blocked_max` setzt bzw. legt er sich trotzdem: Der Gegenstand ist für ihn durchlässig, solange er
+    den Platz belegt, und bewegt sich nicht.
+  - Danach gilt alles wie gewohnt, er ist am Platz eine Station.
+  - So hängt solo nichts fest, auch wenn die Truhe (nur zu zweit tragbar) auf dem Sitz steht.
 - **Wenn die Szene keine Sitzplätze oder keinen Ankunftspunkt hat:** Das ist ein Fehler im Editor. Im Spiel
   kommen keine Gäste, und der Host schreibt eine Fehlermeldung ins Log.
 - **Wenn ein Gästetyp oder ein Bedürfnis falsch angelegt ist:** Das ist ein Fehler im Editor. Die Prüfung
@@ -614,8 +652,9 @@ Hinweis für die Hüttenkasse:
   - Uhren und Zufriedenheit stehen, es gibt kein Trinkgeld mehr.
   - Die Gäste bleiben sichtbar in der Hütte bis „Saison beginnt“.
 - **Wenn der Host die Saison abbricht:** Die Kasse setzt der Saison-Ablauf zurück. Die Gäste verschwinden
-  bei der nächsten „Saison beginnt“. Bis dahin sind sie eingefroren wie nach „Nacht vorbei“: keine
-  Stationen, Uhren und Zufriedenheit stehen.
+  bei der nächsten „Saison beginnt“. Bis dahin sind sie eingefroren (Regel 13), weil die Saison in der
+  Vorbereitung steht: keine Stationen, Uhren und Zufriedenheit stehen. Das gilt auch beim Abbruch am
+  Nachmittag oder Abend, wenn der Saison-Ablauf kein „Nacht vorbei“ schickt.
 
 **Vermisster Gast**
 
@@ -650,7 +689,7 @@ Hinweis für die Hüttenkasse:
 
 | System | Art | Schnittstelle | Stand |
 |---|---|---|---|
-| Kochen und Gerichte | hart | Gerichte nennen eine Bedürfnis-Kennung; die Geduld rechnet mit 45–60 s Kochen inklusive Weg | kein Dokument |
+| Kochen und Gerichte | hart, indirekt | Gerichte nennen eine Bedürfnis-Kennung (die Eigenschaft steht in den Gegenstandsarten, das Kochen setzt sie); die Geduld rechnet mit 45–60 s Kochen inklusive Weg | kein Dokument |
 | Versorgung: Betten und Erste Hilfe | hart | ruft „Bedürfnis erfüllt“ auf (Bett je Bett, Erste Hilfe), liest die Bett-Reservierungen | kein Dokument |
 | Nachteinsatz | hart | bekommt den vermissten Gast, gibt „Gast ist zurück“ samt neuen Bedürfnissen | kein Dokument |
 | Bewertung | hart | eingefrorene Zufriedenheit aller Gäste und den Zustand des Vermissten bei „Nacht vorbei“ | kein Dokument |
@@ -784,6 +823,8 @@ gefunden hat, sind eingearbeitet (Formeln 1, 5, 7, Regeln 9, 10, Grenzfälle).
   Streuung `r` ∈ [−1; 1]) oder `System.Random` mit festem Seed.
 - Saison-Ablauf, Ofen, Versorgung, Nachteinsatz, Bewertung und Hüttenkasse sind Stubs.
 - **Test-Hütte** für EditMode: Tisch A mit 2 Sitzen, Tisch B mit 3 Sitzen, 2 Betten, 1 Ofenplatz.
+- Der Wärme-Stub steht auf 50 (neutral: kein Kälteabzug, kein Wärmebonus), wenn ein Kriterium nichts anderes
+  sagt.
 - PlayMode läuft wie in `interaktion.md` (`SimulationMode.Script`, `Physics.Simulate(0.02f)`, austauschbare
   Uhr). Die Wegfindung wird in kleinen Testszenen geprüft.
 - Zeiten sind `double`. Schrittfolgen laufen in 0,37 s und landen nie genau auf einer Grenze.
@@ -793,7 +834,7 @@ gefunden hat, sind eingearbeitet (Formeln 1, 5, 7, Regeln 9, 10, Grenzfälle).
 **Messweg (gehört in den Bau):**
 
 - Log-Zeilen:
-  `[Guest] t=<ServerTime> <arrive|seat|need|need-received|serve|reject|mault|leave|gone|blocked|free|squeeze|noise|chaos|tip|missing|returned|freeze|clear> id= type= state= need= S= left= mood= n= coins= client= reason=`
+  `[Guest] t=<ServerTime> <arrive|seat|need|need-received|serve|reject|mault|leave|gone|blocked|free|squeeze|noise|chaos|tip|missing|returned|freeze|clear> gt=<game_time> id= type= state= need= S= left= mood= n= coins= client= reason=`
 - Eine Debug-Anzeige je Gast (Typ, Zustand, Bedürfnis, `patience_left`, S, Stimmung), dazu `arrival_budget`,
   `next_cost`, `n` und die freien Sitze und Betten.
 - Debug-Befehl „Gast <typ>“ (nur Editor und Development Build): Er macht sofort eine Ankunft dieses Typs
@@ -826,6 +867,12 @@ gefunden hat, sind eingearbeitet (Formeln 1, 5, 7, Regeln 9, 10, Grenzfälle).
 2. **[EditMode]** **GIVEN** je ein Test-Objekt mit genau einem Fehler (Kette mit 0 oder 3 Bedürfnissen,
    Figurenzahl 0 oder 3, Kennung `tee` ohne Vorsilbe, Gericht mit unbekannter Bedürfnis-Kennung) **WHEN** die
    Prüfung läuft **THEN** gibt es genau 1 Fehler je Objekt, der seine Kennung oder seinen Asset-Namen nennt.
+   **GIVEN** die Gäste-Einstellungen mit je genau einem dieser Werte: `arrival_jitter` 1,0;
+   `patience_pressure_cut` 1,0; `tip_full` 0; `noise_radius` 0; `cold_threshold` 0; ein `patience_base` 0;
+   `comfort_warmth` 30 (unter `cold_threshold` 40); `mault_out` 15 (unter `mault_in` 20); `mault_out` 60 (gleich
+   `happy_out` 60, nicht kleiner); `happy_out` 70 (über `happy_in` 65); alle Abend-Gewichte 0 **WHEN**
+   `guest_data_valid` geprüft wird **THEN** ist sie false, mit genau 1 Fehler, der den verletzten Wert nennt.
+   Damit ist jede Bedingung von Formel 9 einmal verletzt. Mit den Startwerten ist sie true.
 3. **[EditMode]** **GIVEN** die Test-Hütte, alles frei **WHEN** nacheinander Familie, Wanderer und
    Bergsteiger ankommen **THEN** belegt die Familie 2 Sitze an einem Tisch und 2 Betten, die beiden anderen
    je 1 Sitz. Frei bleiben 1 Sitz und 0 Betten. **WHEN** der Wanderer am Nachmittag fertig ist **THEN** hält
@@ -932,7 +979,7 @@ gefunden hat, sind eingearbeitet (Formeln 1, 5, 7, Regeln 9, 10, Grenzfälle).
     - (kalt; Mault) → 12,5
     - (Erste Hilfe, kein Gericht; 0,5) → 15
     - S 95 + 20 wird auf 100 begrenzt.
-19. **[EditMode]** **GIVEN** eine Familie, Bett-Bedürfnis ab 500,0 (120 s), S 80, n = 2 **WHEN** die
+19. **[EditMode]** **GIVEN** eine Familie, Bett-Bedürfnis ab 500,0 (120 s), S 80, n = 2, Wärme 50 **WHEN** die
     Versorgung bei 530,0 Bett 1 meldet **THEN** gibt es noch keinen Gewinn, die Familie wartet. **WHEN** bei
     560,0 Bett 2 kommt **THEN** gibt es einmal Gewinn 15 (Rest 0,5) und 8 Münzen (3 × 2 × 1,25 = 7,5),
     0 s Genießen, dann Geht zum Bett und Schläft.
@@ -976,8 +1023,12 @@ gefunden hat, sind eingearbeitet (Formeln 1, 5, 7, Regeln 9, 10, Grenzfälle).
     und 0 Ankünfte, und alle Figuren sind noch da.
 25. **[EditMode]** **GIVEN** 6 Gäste in verschiedenen Zuständen, 7 belegte Plätze, Budget 0,95 **WHEN**
     „Saison beginnt“ kommt (auch nach einem Abbruch) **THEN** gibt es 0 Gäste und 0 Reservierungen, Budget
-    0,6, `next_cost` 1, und `n` ist neu gesetzt. **GIVEN** der Host bricht ab **THEN** entfernt der Abbruch
-    allein keine Gäste, und bis „Saison beginnt“ sind sie eingefroren wie in Kriterium 24.
+    0,6, `next_cost` 1, und `n` ist neu gesetzt.
+    - *(Grenzfall Abbruch vor der Nacht)* **GIVEN** Abend, Wärme 0, drei Gäste (Wartet mit 40 s Geduld, Mault,
+      Genießt) **WHEN** die Phase durch einen Abbruch zur Vorbereitung wechselt, ohne „Nacht vorbei“, und
+      600 s vergehen **THEN** bleiben S, Geduld und Zustände unverändert, Servieren wird abgelehnt, es gibt
+      0 Münzen, 0 Ankünfte und 0 Aufrufe an den Bewertungs-Stub, und alle Figuren sind noch da.
+    - Dasselbe gilt in Bewertung und Upgrades nach einer normalen Nacht.
 26. **[Manuell]** *(Grenzfall Pause solo)* **GIVEN** solo, Spielprofil, per Debug-Befehl ein wartender
     Wanderer (Ring etwa halb leer) und ein zweiter auf dem Weg, Wärme unter 40 **WHEN** das Esc-Menü 20 s
     offen ist **THEN** zeigt die Debug-Anzeige danach dieselben Werte für `patience_left` und S wie davor
@@ -1036,10 +1087,13 @@ gefunden hat, sind eingearbeitet (Formeln 1, 5, 7, Regeln 9, 10, Grenzfälle).
     - Eine Kiste (10 kg, 8 m/s) trifft Gast A, Gast B steht 3 m daneben: A −15 und kein Lärm, B −1,875.
     - Eine Kiste (10 kg) trifft Gast A mit 2,9 m/s oder in seiner Sperrzeit: A bekommt weder Chaos noch Lärm.
     - S 10 fällt auf 0, nicht darunter. Ein Tee danach bringt 0 Münzen (S_before 0), der Gewinn kommt normal.
-33. **[EditMode]** *(Grenzfall Familie)* **GIVEN** eine Familie mit S 80 **WHEN** das Elternteil bei 10,0 und
-    das Kind bei 11,0 getroffen wird **THEN** ist S 65 (einmal −15). **WHEN** das Kind bei 13,5 erneut
-    getroffen wird **THEN** ist S 50. **GIVEN** ein Wurf trifft bei 20,0 die Familie und einen Wanderer
-    **THEN** zahlen beide je −15.
+33. **[EditMode]** *(Grenzfall Familie)* **GIVEN** eine Familie mit S 80, Wärme 50 **WHEN** das Elternteil
+    bei 10,0 und das Kind bei 11,0 getroffen wird **THEN** ist S 65 (einmal −15). **WHEN** das Kind bei 13,5
+    erneut getroffen wird **THEN** ist S 50. **GIVEN** ein Wurf trifft bei 20,0 die Familie und einen
+    Wanderer **THEN** zahlen beide je −15.
+    - Ein lauter Aufprall (10 kg, 8 m/s) liegt 3 m vom Kind und 6 m vom Elternteil entfernt: einmal −1,875
+      (nähere Figur).
+    - Servieren am Kind erfüllt das Bedürfnis genauso wie am Elternteil.
 34. **[EditMode]** **GIVEN** ein wartender Gast mit S in dieser Folge **WHEN** die Stimmung berechnet wird
     **THEN** ergibt sich: 60 → neutral; 75,5 → zufrieden; 61 → zufrieden; 60 → zufrieden; 59,9 → neutral;
     65 → zufrieden; 19,9 → mault; 24,9 → mault; 25 → neutral; 20 → neutral. Im Zustand Mault (S 0) ist die
@@ -1071,6 +1125,9 @@ Netz“ steht noch aus.
     ist versperrt **WHEN** 3 s vergangen sind **THEN** geht der Gast durch die Truhe hindurch zum Sitz. Die
     Truhe bewegt sich weniger als 0,01 m und dreht sich weniger als 0,1°, und ein zweiter Gast wird an ihr
     wieder blockiert.
+    - *(Grenzfall Gegenstand auf dem Platz)* **GIVEN** eine Kiste steht auf seinem reservierten Sitz,
+      `blocked_max` 3 s **WHEN** 3 s vergangen sind **THEN** sitzt er am Sitz (±0,3 m), die Kiste bewegt sich
+      weniger als 0,01 m, und er zeigt sein Bedürfnis als Station. Dasselbe gilt für ein reserviertes Bett.
 39. **[PlayMode]** **GIVEN** eine Spielerfigur steht 10 s in der einzigen Tür **WHEN** ein Gast hindurch will
     **THEN** ist er nie im Zustand Blockiert, sein S bleibt gleich (Wärme 50), und danach geht er durch.
     **GIVEN** ein Gast sitzt **WHEN** eine Spielerfigur 2 s gegen ihn läuft **THEN** sitzt er weiter an
@@ -1082,7 +1139,8 @@ Netz“ steht noch aus.
     Wanderer (Bleibt) **WHEN** der Einsatz-Stub „Gast vermisst“ meldet **THEN** wird der Wanderer gewählt.
     Ohne Wanderer wird der Bergsteiger gewählt, nie die Familie oder ihr Kind.
     - Bei zwei Wanderern wird der zuerst angekommene gewählt.
-    - Ein Wanderer in Schläft oder in Kommt an (noch draußen am Hang) wird nie gewählt.
+    - Ein Wanderer in Kommt an, Blockiert, Geht zum Bett, Geht oder Schläft wird nie gewählt, einer in
+      Genießt schon.
 41. **[EditMode]** **GIVEN** der gewählte Wanderer wartet auf sein Speckbrot, S 70, Sitz an Tisch B **WHEN**
     er vermisst wird **THEN**:
     - Er ist im Zustand Vermisst, die Figur ist aus der Hütte verschwunden, er hat kein Bedürfnis mehr, sein
@@ -1161,3 +1219,4 @@ Netz“ steht noch aus.
 | 7 | Die Interaktion schätzt im Beispiel 8 Betten pro Saison, hier sind es höchstens 4 (zwei Familien). | Versorgung-GDD | bei dessen Design |
 | 8 | Ist der Andrang zu viert zu entspannt? Spürt man die Nacht mit `phase_rate_scale` 0,2? | Playtest | Freundestest mit Gästen |
 | 9 | Genaue Zahl der Sitzplätze und Betten (angenommen: 10 und 4) | Dokument „Hütten-Layout“ | vor Schritt 6 im Plan |
+| 10 | Fühlt sich Maulen fair an? Es setzt S auf 0, egal wie gut es vorher lief (danach höchstens 25 plus Wärmebonus). Reicht dem Bergsteiger nachts der Tee mit 84 s (nur das 1,4- bis 1,9-Fache von Kochen und Weg)? | Playtest, danach Bewertung-GDD | Freundestest mit Gästen |

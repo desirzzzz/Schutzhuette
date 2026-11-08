@@ -42,3 +42,42 @@ Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/Stove.cs 15eb380be026aaa6bc1d
 Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888
 Reviewed-Content-Hash: Assets/_Project/Data/StoveSettings.asset 1e643672ddeb4bbe260a73bfb6ab528631396eef
 Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/Shelter.cs 9a96657b007cb106379830e28f20ba59d18ccf71
+
+## Review — 2026-11-09 — Verdict: APPROVED
+Review mode: lean · Workflow: standard
+Scope signal: L
+Specialists: keine (Lean-Modus)
+Blocking items: 0 | Recommended: 0 | Nice-to-have: 2
+Summary: Erneutes Review nach Einarbeitung aller 4 Empfehlungen und 7 Kleinigkeiten vom selben Tag. Das ganze Dokument wurde neu gelesen, nicht nur die Änderungen.
+- Gegenstand auf dem reservierten Sitz oder Bett: Nach `blocked_max` setzt bzw. legt sich der Gast; der Gegenstand ist für ihn durchlässig und bewegt sich nicht (Grenzfall und Kriterium 38).
+- Regel 13 friert die Gäste-Logik in jeder Phase außer Nachmittag, Abend und Nacht ein, also auch beim Abbruch vor der Nacht (Kriterium 25).
+- Der Wärme-Stub steht standardmäßig auf 50; die Kriterien 19 und 33 nennen ihn.
+- Neue Formel 9 `guest_data_valid`: Die Startwerte erfüllen sie (Streuung 0,4 und Druckabzug 0,3 unter 1, Teiler > 0, 60 ≥ 40, 20 ≤ 25 < 60 ≤ 65, Gewichte je Phase 4 / 5 / 1). Die sechs Fehlerfälle in Kriterium 2 verletzen je genau eine Bedingung.
+- Die Kleinigkeiten (5,33; nähere Figur der Familie; Vermisster nur am Platz, auch aus Genießt; einmalige Ereignisse ans Netz; `gt=` im Log; Kochen indirekt; Offene Frage 10) sind stimmig umgesetzt.
+Zahlen, Registry und Nachbardokumente sind unverändert stimmig. Es gibt keinen neuen Widerspruch.
+Prior verdict resolved: Yes (alle 4 Empfehlungen und 7 Kleinigkeiten des ersten Reviews umgesetzt)
+Findings:
+- [NICE-TO-HAVE] Formulas (Einleitung): „Harte Grenzen setzt nur der Editor (`[Min]`)“ passt nicht mehr ganz zu Formel 9, die sagt, dass `[Min]` nicht reicht. Besser: „Harte Grenzen setzen `[Min]` und Formel 9.“
+- [NICE-TO-HAVE] Acceptance Criteria 2: Die Fehlerfälle prüfen 6 der Bedingungen von Formel 9. Ungeprüft bleiben `patience_base`, `noise_radius` und `cold_threshold` gleich 0 sowie `happy_out` > `happy_in` und `mault_out` ≥ `happy_out`. Ergänzen oder die Liste als Beispiele kennzeichnen.
+- [ADVISORY] Player Fantasy fehlt weiterhin; bei `standard` nur empfohlen.
+Reviewed-Content-Hash: design/gdd/gaeste.md c21b85902d8e56b80f66134061bb6e04932e1a95
+Reviewed-Content-Hash: design/registry/entities.yaml fb26dc4b0eb65fe96fd333f10ff541699ab78386
+Reviewed-Content-Hash: .claude/skills/design-review/SKILL.md a63d8fba9b7142eeb43791f061e2e1533c429b43
+Reviewed-Content-Hash: design/gdd/saison-ablauf.md 3867aaafba45ca9355efba37f670d0ba9edc123b
+Reviewed-Content-Hash: design/gdd/gegenstandsarten.md 236810092679a234ea857ea7714119299aa9a794
+Reviewed-Content-Hash: design/gdd/interaktion.md 21098903d62d50f383cb62325bf9981a61eee317
+Reviewed-Content-Hash: design/game-brief.md c532ebc1df2645bf9cfaa33cef546086aa209ad3
+Reviewed-Content-Hash: design/levels/huette-skizze.md 6d576a81a483763794a5a6c45c2d2c297a4932e7
+Reviewed-Content-Hash: docs/KONZEPT.md 61b8e6849eea854b6e0f56192ab726ab20048b99
+Reviewed-Content-Hash: docs/GRAUBOX.md cb7f69e759c4331fb5f4e45ab9e2f8160f86635c
+Reviewed-Content-Hash: production/milestones/vertical-slice.md f87133252712d26611b2f4b3eb2dc0acc497ac05
+Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/Stove.cs 15eb380be026aaa6bc1debe15186dad788f69a21
+Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888
+Reviewed-Content-Hash: Assets/_Project/Data/StoveSettings.asset 1e643672ddeb4bbe260a73bfb6ab528631396eef
+Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/Shelter.cs 9a96657b007cb106379830e28f20ba59d18ccf71
+
+> **Nachtrag der Autorensitzung (2026-11-09):** Die beiden Kleinigkeiten des zweiten Reviews sind umgesetzt.
+> Die Formulas-Einleitung nennt jetzt `[Min]` und Formel 9 als harte Grenzen. Kriterium 2 verletzt jede
+> Bedingung von Formel 9 genau einmal: zusätzlich `noise_radius` 0, `cold_threshold` 0, ein `patience_base` 0,
+> `mault_out` 60 (gleich `happy_out`) und `happy_out` 70 (über `happy_in`). Kein neues Review nötig, da nur
+> Text und Testfälle geschärft wurden.
