@@ -405,12 +405,13 @@ formulas:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/saison-ablauf.md
     variables:
-      - server_time
+      - game_time
       - cooked_time
       - cool_time
     output_range: [0, 1]
-    expression: "(server_time - cooked_time) < cool_time"
+    expression: "(game_time - cooked_time) < cool_time"
     notes: "bool; cool_time <= 0 oder fehlend = immer wahr. Die Gäste lesen das Ergebnis."
     added: 2026-11-08
     revised: ""
@@ -419,12 +420,13 @@ formulas:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/saison-ablauf.md
     variables:
-      - server_time
+      - game_time
       - cooked_time
       - cool_time
     output_range: [0, 1]
-    expression: "clamp(1 - (server_time - cooked_time) / cool_time, 0, 1)"
+    expression: "clamp(1 - (game_time - cooked_time) / cool_time, 0, 1)"
     notes: "Nur Anzeige (Dampf); cool_time <= 0 oder fehlend = 0."
     added: 2026-11-08
     revised: ""
@@ -486,6 +488,65 @@ formulas:
     notes: "bool; false = Editor-Fehler. Start: min 0,5 s, max 20 s, penalty 2,0."
     added: 2026-11-08
     revised: ""
+  - name: game_time
+    status: active
+    source: design/gdd/saison-ablauf.md
+    referenced_by:
+      - design/gdd/saison-ablauf.md
+      - design/gdd/gegenstandsarten.md
+      - design/gdd/interaktion.md
+    variables:
+      - server_time
+      - is_paused
+      - pause_time
+      - paused_total
+    output_range: [0, 999999]
+    expression: "(is_paused ? pause_time : server_time) - paused_total"
+    notes: "Spielzeit, steht in der Pause solo. Einzige Zeitbasis für Spielregeln mit Zeit (Abkühlen, dt von Handlungen, Brennzeit, Phasen)."
+    added: 2026-11-08
+    revised: ""
+  - name: season_length
+    status: active
+    source: design/gdd/saison-ablauf.md
+    referenced_by:
+      - design/gdd/saison-ablauf.md
+      - design/gdd/interaktion.md
+    variables:
+      - afternoon_length
+      - evening_length
+      - night_length
+    output_range: [1800, 2400]
+    expression: "afternoon_length + evening_length + night_length"
+    notes: "Nur Spielzeit (ohne Vorbereitung, Bewertung, Upgrades, Pause). Start 600 + 720 + (480..1080) s; night_length = clamp(t_mission_done, night_min, night_max). Interaktion nutzt sie in solo_hold_share."
+    added: 2026-11-08
+    revised: ""
+  - name: phase_progress
+    status: active
+    source: design/gdd/saison-ablauf.md
+    referenced_by:
+      - design/gdd/saison-ablauf.md
+    variables:
+      - phase_elapsed
+      - reference_length
+    output_range: [0, 1]
+    expression: "(reference_length > 0) ? clamp(phase_elapsed / reference_length, 0, 1) : 0"
+    notes: "Bezugslänge: Nachmittag afternoon_length, Abend evening_length, Nacht night_min; Zwischenphasen 0. Jeder Spieler rechnet sie aus Phase und phase_start_time selbst. Gäste, Wetter, Ereignisse, HUD lesen sie."
+    added: 2026-11-08
+    revised: ""
+  - name: season_pressure
+    status: active
+    source: design/gdd/saison-ablauf.md
+    referenced_by:
+      - design/gdd/saison-ablauf.md
+    variables:
+      - phase_index
+      - p
+      - phase_progress
+    output_range: [0, 1]
+    expression: "(phase_index in {0,1,2}) ? p[phase_index] + (p[phase_index+1] - p[phase_index]) * phase_progress : 0"
+    notes: "Gemeinsamer Druck der Saison, Stützwerte p = [0; 0,2; 0,6; 1,0]. Gäste, Wetter, Ereignisse und Musik leiten ihre Eskalation daraus ab, statt eigene Kurven zu bauen."
+    added: 2026-11-08
+    revised: ""
 
 # Example:
 #
@@ -544,6 +605,24 @@ constants:
       - design/gdd/interaktion.md
     value: 4.0
     unit: m
+    added: 2026-11-08
+    revised: ""
+  - name: season_target_min
+    status: active
+    source: design/gdd/saison-ablauf.md
+    referenced_by:
+      - design/gdd/saison-ablauf.md
+    value: 1800
+    unit: s
+    added: 2026-11-08
+    revised: ""
+  - name: season_target_max
+    status: active
+    source: design/gdd/saison-ablauf.md
+    referenced_by:
+      - design/gdd/saison-ablauf.md
+    value: 2400
+    unit: s
     added: 2026-11-08
     revised: ""
 

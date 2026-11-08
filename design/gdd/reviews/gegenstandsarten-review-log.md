@@ -95,3 +95,25 @@ Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerCarry.cs 8d385a458
 Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
 Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/SoundSettings.cs 332cd8ed7783445496dd2d140dda1d783d199ef8
 Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888
+
+## Review — 2026-11-08 — Verdict: APPROVED
+Review mode: lean · Workflow: standard
+Scope signal: L
+Specialists: keine (Lean-Modus)
+Blocking items: 0 | Recommended: 0 | Nice-to-have: 1 (neu)
+Summary: Erneutes Review nach dem Nachtrag aus dem Review von Saison-Ablauf. Geändert seit dem letzten APPROVED-Stand (+419 Byte): `is_warm` und `warm_fraction` rechnen mit `game_time` statt der Serverzeit (Variablentabelle, AC 18 und 19), dazu ein Satz unter „Hängt ab von“ (die Formel bekommt `game_time` als Wert, keine Abhängigkeit). Vollständig neu gelesen wurden Core Rules, Zustände, Formeln, Edge Cases und Dependencies; der Rest wurde per Suche gegen den letzten Stand geprüft. Im Dokument steht keine `server_time` mehr; Registry stimmt.
+Prior verdict resolved: Yes (Querbezug zum Blocker aus dem Review von Saison-Ablauf behoben)
+Findings:
+- [NICE-TO-HAVE] Dependencies: Die Zeile „Saison-Ablauf und Spielphasen“ steht noch auf „kein Dokument“, und „Beidseitig: Noch hat keins dieser Systeme ein Design-Dokument“ stimmt nicht mehr (Interaktion und Saison-Ablauf haben eins).
+- [NICE-TO-HAVE] Weiter offen aus früheren Reviews: Fenstergrenze 5,51 (genau 5,5125), `hold_height` mit Source „constant“, „R“ in AC 25, Übergänge nach „Verbraucht“, „Am Körper → Liegt“ beim Verbindungsabbruch läuft über „Fällt“, keine Prüfung unsinniger Kombinationen (Ausrüstung zu zweit), Registry-Bereich von `chop_mass_balance`.
+- [ADVISORY] Player Fantasy fehlt; bei `standard` nur empfohlen.
+Reviewed-Content-Hash: design/gdd/gegenstandsarten.md b4250424e75f11cba86b5fda76cc1fe3f04e6918
+Reviewed-Content-Hash: design/registry/entities.yaml daa3912f8c99ada490bd01a6e2af9a5482058a34
+Reviewed-Content-Hash: .claude/skills/design-review/SKILL.md a63d8fba9b7142eeb43791f061e2e1533c429b43
+Reviewed-Content-Hash: design/game-brief.md c532ebc1df2645bf9cfaa33cef546086aa209ad3
+Reviewed-Content-Hash: design/gdd/interaktion.md c5cbb5690a63041f3c986600296ffd29693a909a
+Reviewed-Content-Hash: design/gdd/saison-ablauf.md 5fe8fcb37e6904b2eca7cb60b9e09a717ca15643
+Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerCarry.cs 8d385a458c8d53cc376ab954f80bf24d0c70ef70
+Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
+Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/SoundSettings.cs 332cd8ed7783445496dd2d140dda1d783d199ef8
+Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888

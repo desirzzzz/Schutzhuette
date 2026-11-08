@@ -1,6 +1,6 @@
 # Gegenstandsarten
 
-> **Status**: Approved (erneutes Design-Review 2026-11-08 nach dem Nachtrag Ausrüstung; siehe `design/gdd/reviews/gegenstandsarten-review-log.md`)
+> **Status**: Approved (erneutes Design-Review 2026-11-08 nach dem Nachtrag Spielzeit `game_time`; siehe `design/gdd/reviews/gegenstandsarten-review-log.md`)
 > **Author**: Entwickler + Claude
 > **Last Updated**: 2026-11-08
 > **Last Verified**: 2026-11-08
@@ -248,13 +248,13 @@ das Fenster zu eng, ist die Wurfgeschwindigkeit im Tragen der Hebel, nicht die B
 
 Die Formel `is_warm` ist definiert als:
 
-`is_warm = (server_time - cooked_time) < cool_time`
+`is_warm = (game_time - cooked_time) < cool_time`
 
 **Variables:**
 | Variable | Type | Range | Source | Description |
 |----------|------|-------|--------|-------------|
-| server_time | float | ≥ 0 s | calculated | Uhr des Hosts |
-| cooked_time | float | ≥ 0 s | calculated | Zeitpunkt, zu dem das Gericht entstand. Den speichert der Host. |
+| game_time | double | ≥ 0 s | calculated | Spielzeit aus dem Saison-Ablauf (`design/gdd/saison-ablauf.md`, Formel 3a): läuft wie die Serverzeit, steht in der Pause solo. Nachtrag 2026-11-08 (vorher Serverzeit), damit Gerichte in der Pause nicht abkühlen. |
+| cooked_time | double | ≥ 0 s | calculated | Spielzeit (`game_time`), zu der das Gericht entstand. Den speichert der Host. |
 | cool_time | float | 25–300 s (Tee 90, Schmarrn 150) | data file | Abkühlzeit. Fehlt sie oder ist sie ≤ 0, kühlt das Gericht nie ab. |
 | is_warm | bool | true/false | calculated | Warm oder kalt |
 
@@ -265,7 +265,7 @@ Der Host speichert nur den Kochzeitpunkt, Clients berechnen den Zustand daraus s
 **Example:** Tee, gekocht bei t = 100 s: Bei t = 150 s ist er warm, bei t = 190 s kalt.
 
 **Dampf-Anteil (nur für die Anzeige, keine Spielregel):**
-`warm_fraction = clamp(1 - (server_time - cooked_time) / cool_time, 0, 1)`. Er sinkt von 1 auf 0 und
+`warm_fraction = clamp(1 - (game_time - cooked_time) / cool_time, 0, 1)`. Er sinkt von 1 auf 0 und
 kündigt an, dass ein Gericht kalt wird. Beispiel: Kaiserschmarrn nach 100 s ergibt
 1 − 100/150 = 0,33, also nur noch schwacher Dampf. Ist `cool_time` ≤ 0 oder fehlt sie, ist
 `warm_fraction` = 0: Das Gericht dampft nie (es wird nicht durch 0 geteilt).
@@ -363,7 +363,9 @@ genau wie beim einzelnen Scheit.
 ## Dependencies
 
 **Hängt ab von:** keinem anderen System. Gegenstandsarten sind die Grundlage. Die Netzwerk-Sitzung wird
-nur als Weg für die Kennung genutzt, sie ist keine Abhängigkeit.
+nur als Weg für die Kennung genutzt, sie ist keine Abhängigkeit. Die Abkühl-Formeln bekommen die
+Spielzeit `game_time` aus dem Saison-Ablauf (`design/gdd/saison-ablauf.md`) als Wert übergeben; der
+Katalog selbst hängt deshalb nicht am Saison-Ablauf.
 
 **Wird gebraucht von:**
 
@@ -539,11 +541,11 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 
 ### C. Abkühlen
 
-18. **[EditMode]** **GIVEN** cooked_time 100, cool_time 90 **WHEN** server_time 150 / 189,9 / 190 /
+18. **[EditMode]** **GIVEN** cooked_time 100, cool_time 90 **WHEN** game_time 150 / 189,9 / 190 /
     10 000 **THEN** warm / warm / kalt / kalt. **GIVEN** cool_time 0, −5 oder fehlend **WHEN**
-    server_time 0 und 100 000 **THEN** immer warm, `warm_fraction` = 0.
-19. **[EditMode]** **GIVEN** cooked_time 0, cool_time 150 **WHEN** server_time 0 / 100 / 150 / 300
-    **THEN** `warm_fraction` 1,0 / 0,333 / 0 / 0. **GIVEN** cooked_time 100 und server_time 99 (Uhr
+    game_time 0 und 100 000 **THEN** immer warm, `warm_fraction` = 0.
+19. **[EditMode]** **GIVEN** cooked_time 0, cool_time 150 **WHEN** game_time 0 / 100 / 150 / 300
+    **THEN** `warm_fraction` 1,0 / 0,333 / 0 / 0. **GIVEN** cooked_time 100 und game_time 99 (Uhr
     des Clients knapp zurück) **THEN** 1,0.
 20. **[EditMode]** **GIVEN** floor_factor 6, max_path 15 m, walk_speed_min 4 m/s, carry_speed_factor
     0,992 **WHEN** berechnet **THEN** ergibt sich 22,68 s; cool_time 20 gibt einen Hinweis, 90 nichts,

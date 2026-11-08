@@ -53,3 +53,26 @@ Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerHeavyCarry.cs 288d
 Reviewed-Content-Hash: Assets/_Project/Scripts/Player/PlayerLook.cs 886ad62ff8c92503fbf601aff3e82ce088c400de
 Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
 Reviewed-Content-Hash: Assets/InputSystem_Actions.inputactions 1a12cb91b67132fda366ae04ba2662092ed8781d
+
+## Review — 2026-11-08 — Verdict: APPROVED
+Review mode: lean · Workflow: standard
+Scope signal: L
+Specialists: keine (Lean-Modus)
+Blocking items: 0 | Recommended: 0 | Nice-to-have: 1 (neu)
+Summary: Erneutes Review nach dem Nachtrag aus dem Review von Saison-Ablauf. Geändert seit dem letzten APPROVED-Stand (+442 Byte): `dt` ist vergangene Spielzeit `game_time` (in der Pause solo 0), `season_length` hat Source „calculated“ aus dem Saison-Ablauf, Saison-Ablauf steht als weiche Abhängigkeit unter „Hängt ab von“. Geprüft wurden die geänderten Abschnitte (Formeln 1 und 5, Dependencies) und das ganze Dokument per Suche auf Zeitbezüge; passt zu Formel 3a in `saison-ablauf.md`, Registry und Systemverzeichnis (Zeile 8) stimmen.
+Prior verdict resolved: Yes (Querbezug zum Blocker aus dem Review von Saison-Ablauf behoben)
+Findings:
+- [NICE-TO-HAVE] Acceptance Criteria: Kein Kriterium prüft, dass der Fortschritt einer Handlung in der Solo-Pause steht (`dt` = 0); AC 28 in `saison-ablauf.md` deckt nur Uhr, Physik und Ofen ab.
+- [NICE-TO-HAVE] Weiter offen aus dem letzten APPROVED-Review: „Am Körper → Liegt“ über „Fällt“, Grenzen für 3 und 4 Nutzer nur bei max_solo_penalty 2,0, Tabellen nennen Ausrüstung über die Namen statt über die Eigenschaft.
+- [ADVISORY] Player Fantasy fehlt; bei `standard` nur empfohlen.
+Reviewed-Content-Hash: design/gdd/interaktion.md c5cbb5690a63041f3c986600296ffd29693a909a
+Reviewed-Content-Hash: design/registry/entities.yaml daa3912f8c99ada490bd01a6e2af9a5482058a34
+Reviewed-Content-Hash: .claude/skills/design-review/SKILL.md a63d8fba9b7142eeb43791f061e2e1533c429b43
+Reviewed-Content-Hash: design/game-brief.md c532ebc1df2645bf9cfaa33cef546086aa209ad3
+Reviewed-Content-Hash: design/gdd/gegenstandsarten.md b4250424e75f11cba86b5fda76cc1fe3f04e6918
+Reviewed-Content-Hash: design/gdd/saison-ablauf.md 5fe8fcb37e6904b2eca7cb60b9e09a717ca15643
+Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerCarry.cs 8d385a458c8d53cc376ab954f80bf24d0c70ef70
+Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerHeavyCarry.cs 288da7d15378638677c850cde5d59f642e807f6b
+Reviewed-Content-Hash: Assets/_Project/Scripts/Player/PlayerLook.cs 886ad62ff8c92503fbf601aff3e82ce088c400de
+Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
+Reviewed-Content-Hash: Assets/InputSystem_Actions.inputactions 1a12cb91b67132fda366ae04ba2662092ed8781d

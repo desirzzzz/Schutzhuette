@@ -1,6 +1,6 @@
 # Interaktion
 
-> **Status**: Approved (erneutes Design-Review 2026-11-08; siehe `design/gdd/reviews/interaktion-review-log.md`)
+> **Status**: Approved (erneutes Design-Review 2026-11-08 nach dem Nachtrag Spielzeit `game_time`; siehe `design/gdd/reviews/interaktion-review-log.md`)
 > **Author**: Entwickler + Claude
 > **Last Updated**: 2026-11-08
 > **Last Verified**: 2026-11-08
@@ -201,7 +201,7 @@ Der Host rechnet pro Schritt `progress = min(1, progress + progress_rate * dt)`.
 |----------|------|-------|--------|-------------|
 | crew_multiplier | float | 0 bis `max_solo_penalty` | calculated | siehe oben |
 | duration | float | 0 oder 0,5–20 s | data file | Dauer allein. 0 heißt sofort, ohne Fortschritt. |
-| dt | float | > 0 s | calculated | Zeit seit dem letzten Schritt des Hosts |
+| dt | float | ≥ 0 s | calculated | Vergangene Spielzeit (`game_time` aus `design/gdd/saison-ablauf.md`) seit dem letzten Schritt des Hosts; in der Pause solo 0, der Fortschritt steht dann (Nachtrag 2026-11-08) |
 | progress | float | 0–1 | calculated | Fortschritt, gespeichert am Bezugsobjekt |
 | progress_rate | float | 0 bis `max_solo_penalty` / 0,5 pro s (Start: 0–4) | calculated | Anteil des Fortschritts pro Sekunde |
 | time_to_finish | float | 0–20 s | calculated | Restzeit bei gleicher Besetzung |
@@ -311,7 +311,7 @@ Die Formel `solo_hold_share` ist definiert als:
 |----------|------|-------|--------|-------------|
 | count_i | int | 0–50 | calculated | Geschätzte Ausführungen der Handlung i je Saison (aus den Dokumenten von Ofen, Gästen, Ereignissen, Seilbahn) |
 | duration_i | float | 0–20 s | data file | Dauer allein der Handlung i |
-| season_length | float | 1800–2400 s | data file | Länge der Saison |
+| season_length | float | 1800–2400 s | calculated | Spielzeit der Saison, kommt aus `design/gdd/saison-ablauf.md` (Formel 2) |
 | solo_hold_share | float | ≥ 0 | calculated | Anteil der Saison, den ein Einzelspieler an Stationen hält (ohne Wege) |
 
 **Output Range:** Ziel ≤ 0,25. Über 0,35 fühlt sich das Spiel nach Knopfhalten an, dann sinken Dauern
@@ -403,6 +403,7 @@ darunter gibt der Editor einen Hinweis.
 | Bewegung und Kamera | hart | Blickrichtung und Augenposition für den Strahl, waagrechtes Tempo für „Laufen“ |
 | Tragen und Werfen | hart | Liefert, was man gerade in der Hand hat (nur lesen). E und rechte Maustaste gehören dem Tragen. |
 | Gegenstandsarten | hart | Werkzeug-Handlung und Kategorie des Gehaltenen. Stirnlampe und Funkgerät gelten als Ausrüstung. |
+| Saison-Ablauf und Spielphasen | weich | Spielzeit `game_time`: `dt` des Fortschritts ist vergangene Spielzeit, in der Pause solo 0 (`design/gdd/saison-ablauf.md`) |
 
 **Wird gebraucht von:**
 

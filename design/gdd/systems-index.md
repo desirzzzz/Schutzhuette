@@ -2,7 +2,7 @@
 
 > **Status**: Approved (vom Entwickler am 2026-11-08 freigegeben)
 > **Created**: 2026-11-08
-> **Last Updated**: 2026-11-08 (erneutes Design-Review: Gegenstandsarten und Interaktion Approved)
+> **Last Updated**: 2026-11-08 (erneutes Design-Review: Gegenstandsarten, Interaktion und Saison-Ablauf Approved)
 > **Source Concept**: docs/KONZEPT.md (Vollfassung) und design/game-brief.md (Kurzfassung)
 > **Grundlage für den Umfang**: production/milestones/vertical-slice.md
 
@@ -100,15 +100,15 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 2 | Bewegung und Kamera | Core | MVP | Implemented | — | Netzwerk-Sitzung |
 | 3 | Tragen und Werfen | Gameplay | MVP | Implemented | — | Bewegung und Kamera, Gegenstandsarten |
 | 4 | Tragen zu zweit | Gameplay | MVP | Implemented | — | Tragen und Werfen, Gegenstandsarten |
-| 5 | Holzofen und Wärme | Gameplay | MVP | Implemented | — | Tragen und Werfen, Gegenstandsarten |
+| 5 | Holzofen und Wärme | Gameplay | MVP | Implemented | — | Tragen und Werfen, Gegenstandsarten, Saison-Ablauf und Spielphasen |
 | 6 | Geräusche | Audio | MVP | Implemented | — | Netzwerk-Sitzung, Tragen und Werfen, Gegenstandsarten |
 | 7 | Gegenstandsarten (inferred) | Core | Vertical Slice | Approved | design/gdd/gegenstandsarten.md | — |
-| 8 | Interaktion (inferred) | Core | Vertical Slice | Approved | design/gdd/interaktion.md | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen, Gegenstandsarten |
-| 9 | Saison-Ablauf und Spielphasen | Core | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Gegenstandsarten |
+| 8 | Interaktion (inferred) | Core | Vertical Slice | Approved | design/gdd/interaktion.md | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen, Gegenstandsarten, Saison-Ablauf und Spielphasen |
+| 9 | Saison-Ablauf und Spielphasen | Core | Vertical Slice | Approved | design/gdd/saison-ablauf.md | Netzwerk-Sitzung, Gegenstandsarten |
 | 10 | Steam-Lobby und Einladen | Core | Vertical Slice | Not Started | — | Netzwerk-Sitzung |
 | 11 | Gäste und Bedürfnisse | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Holzofen und Wärme, Gegenstandsarten, Interaktion |
 | 12 | Kochen und Gerichte | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Lager und Vorräte |
-| 13 | Lager und Vorräte | Economy | Vertical Slice | Not Started | — | Gegenstandsarten, Tragen und Werfen |
+| 13 | Lager und Vorräte | Economy | Vertical Slice | Not Started | — | Gegenstandsarten, Tragen und Werfen, Saison-Ablauf und Spielphasen |
 | 14 | Holz hacken | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Holzofen und Wärme |
 | 15 | Versorgung: Betten und Erste Hilfe (inferred) | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Interaktion, Gegenstandsarten |
 | 16 | Materialseilbahn | Gameplay | Vertical Slice | Not Started | — | Interaktion, Tragen und Werfen, Lager und Vorräte, Wetter und Eskalation, Gegenstandsarten |
@@ -118,10 +118,10 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 20 | Solo-Hüttenhund | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Tragen und Werfen, Nachteinsatz, Gegenstandsarten |
 | 21 | Figuren-Animation und Ragdoll | Gameplay | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen |
 | 22 | Bewertung | Progression | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Saison-Ablauf und Spielphasen, Nachteinsatz |
-| 23 | Hüttenkasse und Upgrades | Progression | Vertical Slice | Not Started | — | Bewertung, Gäste und Bedürfnisse |
+| 23 | Hüttenkasse und Upgrades | Progression | Vertical Slice | Not Started | — | Bewertung, Gäste und Bedürfnisse, Saison-Ablauf und Spielphasen |
 | 24 | Sprachchat und Funkgerät | Audio | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Interaktion |
 | 25 | HUD (inferred) | UI | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Gäste und Bedürfnisse, Holzofen und Wärme, Hüttenkasse und Upgrades, Interaktion |
-| 26 | Menüs (inferred) | UI | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Steam-Lobby und Einladen, Bewertung, Hüttenkasse und Upgrades |
+| 26 | Menüs (inferred) | UI | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Steam-Lobby und Einladen, Bewertung, Hüttenkasse und Upgrades, Saison-Ablauf und Spielphasen |
 | 27 | Spielstand speichern (inferred) | Persistence | Alpha | Not Started | — | Hüttenkasse und Upgrades |
 | 28 | Kraxe | Gameplay | Alpha | Not Started | — | Tragen und Werfen, Gegenstandsarten |
 | 29 | Ausdauer und Rutschen auf Eis | Gameplay | Alpha | Not Started | — | Bewegung und Kamera, Wetter und Eskalation |
@@ -173,7 +173,8 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
 1. Bewegung und Kamera *(gebaut)*: braucht die Netzwerk-Sitzung.
 2. Tragen und Werfen *(gebaut)*: braucht Bewegung und Kamera und die Gegenstandsarten.
 3. Interaktion: braucht Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen sowie die
-   Gegenstandsarten (Werkzeug, Kategorie, Ausrüstung). **Engpass.**
+   Gegenstandsarten (Werkzeug, Kategorie, Ausrüstung); die Spielzeit `game_time` kommt aus dem
+   Saison-Ablauf. **Engpass.**
 4. Saison-Ablauf und Spielphasen: braucht die Netzwerk-Sitzung. **Engpass.**
 5. Steam-Lobby und Einladen: braucht die Netzwerk-Sitzung.
 
@@ -181,9 +182,11 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
 
 1. Tragen zu zweit *(gebaut)*: braucht Tragen und Werfen.
 2. Holzofen und Wärme *(gebaut, wird erweitert)*: braucht Tragen und Werfen und die Gegenstandsarten
-   (Brenndauer). Holz kommt ohne Taste hinein, deshalb keine Interaktion.
+   (Brenndauer), setzt sich bei „Saison beginnt“ zurück (Saison-Ablauf). Holz kommt ohne Taste hinein,
+   deshalb keine Interaktion.
 3. Holz hacken: braucht Interaktion und Gegenstandsarten, beliefert den Ofen.
-4. Lager und Vorräte: braucht Gegenstandsarten sowie Tragen und Werfen.
+4. Lager und Vorräte: braucht Gegenstandsarten sowie Tragen und Werfen; setzt sich bei „Saison beginnt“
+   zurück (Saison-Ablauf).
 5. Kochen und Gerichte: braucht Interaktion, Gegenstandsarten und das Lager.
 6. Materialseilbahn: braucht Interaktion, Tragen, das Lager und das Wetter (Schaukeln).
 7. Gäste und Bedürfnisse: braucht Saison, Wärme, Gegenstandsarten und Interaktion. **Engpass.**
@@ -197,14 +200,16 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
 13. Figuren-Animation und Ragdoll: braucht Netzwerk, Bewegung und Tragen (beim Hinfallen fällt der
     Gegenstand aus der Hand).
 14. Bewertung: braucht Gäste, Saison und Nachteinsatz.
-15. Hüttenkasse und Upgrades: braucht Bewertung und Gäste (Trinkgeld).
+15. Hüttenkasse und Upgrades: braucht Bewertung, Gäste (Trinkgeld) und den Saison-Ablauf (Phase
+    „Upgrades“, Rückfall der Kasse beim Abbruch).
 16. Sprachchat und Funkgerät: braucht die Netzwerk-Sitzung und die Interaktion (Funkgerät am Gürtel).
 
 ### Presentation Layer (depends on features)
 
 1. HUD: braucht Saison, Gäste, Ofen, Hüttenkasse und Interaktion (Hinweis am Fadenkreuz,
    Fortschrittsbalken, Ausrüstungs-Symbole).
-2. Menüs: braucht Netzwerk, Steam-Lobby, Bewertung und Upgrades.
+2. Menüs: braucht Netzwerk, Steam-Lobby, Bewertung, Upgrades und den Saison-Ablauf (Vorbereitung,
+   Bewertungs- und Upgrade-Bildschirm, Abbrechen, Pause).
 
 ### Polish Layer (depends on everything)
 
@@ -268,6 +273,9 @@ der frühe Freundestest möglich ist.
 - **Tragen und Werfen ↔ Interaktion:** Die Interaktion besitzt den gemeinsamen Strahl und stellt das
   aktuelle Ziel bereit, das Tragen stellt den gehaltenen Gegenstand bereit. Beide lesen nur beim anderen
   (siehe `design/gdd/interaktion.md`). Im Enumeration-Table steht deshalb nur „Interaktion → Tragen“.
+- **Saison-Ablauf ↔ Nachteinsatz:** Der Saison-Ablauf meldet „Nacht beginnt“ und „Nacht vorbei“ (mit
+  Grund) und stellt die Schnittstelle „Einsatz beendet“ bereit; der Nachteinsatz ruft nur diese auf und
+  kennt den Rest der Uhr nicht (siehe `design/gdd/saison-ablauf.md`).
 
 ---
 
@@ -290,11 +298,11 @@ der frühe Freundestest möglich ist.
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 34 |
-| Design docs started | 2 (Gegenstandsarten, Interaktion; 2026-11-08) |
-| Design docs reviewed | 2 (Gegenstandsarten und Interaktion, je nach Überarbeitung Approved; 2026-11-08) |
-| Design docs approved | 2 (Gegenstandsarten, Interaktion; 2026-11-08) |
+| Design docs started | 3 (Gegenstandsarten, Interaktion, Saison-Ablauf; 2026-11-08) |
+| Design docs reviewed | 3 (Gegenstandsarten, Interaktion, Saison-Ablauf; alle nach Überarbeitung Approved; 2026-11-08) |
+| Design docs approved | 3 (Gegenstandsarten, Interaktion, Saison-Ablauf; 2026-11-08) |
 | MVP systems designed | 0/6 (alle 6 gebaut, ohne GDD auf Stufe `minimal`) |
-| Vertical Slice systems designed | 2/20 (Gegenstandsarten und Interaktion, beide Approved) |
+| Vertical Slice systems designed | 3/20 (Gegenstandsarten, Interaktion und Saison-Ablauf, alle Approved) |
 
 ---
 
