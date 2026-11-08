@@ -2,7 +2,11 @@
 
 **Die eine Frage:** Macht es Spaß, zu zweit eine schwere Kiste durch eine Hütte zu tragen?
 
-Build: `Builds/Schutzhuette-Prototyp-0.1.0.zip` (Windows, 64 Bit). Version 0.1.0.
+Build: `Builds/Schutzhuette-Prototyp-0.1.1.zip` (Windows, 64 Bit). Version 0.1.1.
+
+**Neu seit 0.1.0:** Spielfiguren statt Kapseln, Hütte mit Farben, Dach und warmem Licht.
+Gewicht ist spürbar (die Kamera wippt mit Last, schwere Kisten bremsen, die Truhe schaukelt).
+Geräusche: Aufprall, Schritte auf Holz und im Schnee, knisternder Ofen, Wind.
 
 ## Vorbereitung (jeder Spieler)
 
@@ -48,6 +52,7 @@ im anderen mit `127.0.0.1` „Beitreten“.
 | Linksklick | Getragene Kiste oder Holz werfen |
 | Esc | Maus freigeben (für die Knöpfe) |
 | Linksklick ins Bild | Maus wieder einfangen |
+| M | Ton aus / wieder an |
 
 Oben links: Ping und FPS. Oben rechts: Ofen (Brenndauer, Wärme).
 
@@ -67,6 +72,9 @@ Danach Host wechseln und noch eine Runde, damit beide Seiten (Host und Client) g
 - **Lustige Momente:** Was ist passiert, wer hat gelacht, gute Zitate.
 - **Genervt:** Wo seid ihr hängen geblieben, was fühlte sich träge oder unfair an?
 - **Truhe:** Klappt die Abstimmung zu zweit? Ist die Ecke im Vorraum zu leicht, genau richtig oder zu schwer?
+  Fühlt sie sich schwer an (Schaukeln, langsames Drehen, Ruck, wenn der andere zieht)?
+- **Geräusche:** Hört jeder die Schritte des anderen und das Rumpeln, wenn der andere etwas abstellt
+  oder wirft? Kommt der Ton beim eigenen Wurf ohne Verzögerung? Ist etwas zu laut oder zu leise?
 - **Netz:** Wer war Host, welcher Ping stand oben links, wie hat sich das Tragen als Client angefühlt?
 - **Fehler:** Was ist passiert, was habt ihr kurz davor gemacht? Die Logdatei liegt unter
   `%USERPROFILE%\AppData\LocalLow\DefaultCompany\Schutzhütte\Player.log`, bitte mitschicken.
@@ -80,5 +88,5 @@ zum Vertical Slice weitergeht.
 - Keine künstliche Verzögerung: Der Network Simulator wirkt nur im Unity-Editor. Übers Internet gibt
   es echte Verzögerung.
 - Lässt einer die Truhe los, fällt die ganze Truhe flach herunter (Idee in `docs/IDEEN.md`).
-- Graubox-Grafik, keine Animationen.
+- Einfache Grafik aus farbigen Klötzen, Figuren ohne echte Animationen.
 - Holz als Client in den Ofen werfen wurde im Editor noch nicht getestet.

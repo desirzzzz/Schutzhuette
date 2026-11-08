@@ -18,7 +18,7 @@ namespace Schutzhuette.EditorTools
     {
         private const string ScenePath = "Assets/_Project/Scenes/Prototype.unity";
         private const string ProductName = "Schutzhütte";
-        private const string Version = "0.1.0";
+        private const string Version = "0.1.1";
 
         /// <summary>Menüeintrag im Editor.</summary>
         [MenuItem("Schutzhütte/Build-Einstellungen für den Prototyp")]
