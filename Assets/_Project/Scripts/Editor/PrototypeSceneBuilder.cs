@@ -181,7 +181,7 @@ namespace Schutzhuette.EditorTools
         // hat noch 0, und mit 0 verweigert NGO zur Laufzeit das Spawnen.
         // Deshalb: laden (dabei rechnet NGO die ID aus), ausdrücklich als geändert
         // markieren, speichern und in der Datei nachsehen, ob sie angekommen ist.
-        private static uint EnsureNetworkPrefabHash(string prefabPath)
+        internal static uint EnsureNetworkPrefabHash(string prefabPath)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             NetworkObject networkObject = prefab != null ? prefab.GetComponent<NetworkObject>() : null;

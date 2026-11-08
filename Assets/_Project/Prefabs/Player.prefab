@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6342561905261817219}
   - component: {fileID: 6930684398455541250}
   - component: {fileID: 489880976828018504}
+  - component: {fileID: 1052065544361577029}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -250,6 +251,25 @@ MonoBehaviour:
   _mouseSensitivity: 0.1
   _stickDegreesPerSecond: 180
   _maxPitch: 80
+--- !u!114 &1052065544361577029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2179597229054303953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5ee9f5bb0d0ba41af81425fc88c24b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Carrying.PlayerCarry
+  ShowTopMostFoldoutHeaderGroup: 1
+  _cameraMount: {fileID: 7219984379283611179}
+  _interactRange: 2.5
+  _holdLocalPosition: {x: 0, y: 0.2, z: 0.9}
+  _throwSpeed: 8
+  _maxThrowSpeed: 15
+  _maxServerDistance: 4
 --- !u!1 &3697653620651214038
 GameObject:
   m_ObjectHideFlags: 0

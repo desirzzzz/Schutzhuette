@@ -476,6 +476,34 @@ namespace `Unity.Netcode.Components`.
 - Tested in the Editor with MPPM (2026-11-08): both players walk and turn, each sees the other.
   Not yet tested with simulated latency.
 
+## Carrying via NetworkObject parenting (NGO 2.13.3, read from source, 2026-11-08)
+
+How `Carryable` / `PlayerCarry` work, and the NGO facts they rely on:
+- `NetworkObject.TrySetParent(NetworkObject parent, bool worldPositionStays = true)` and
+  `TryRemoveParent(bool worldPositionStays = true)`, server-side. `AutoObjectParentSync` defaults
+  to `true`. `NetworkBehaviour.OnNetworkObjectParentChanged(NetworkObject parentNetworkObject)`
+  is the override that reacts to a parent change.
+- `NetworkTransform.SwitchTransformSpaceWhenParented` (default `false`): "When parented:
+  Automatically transitions into local space ... When de-parented: Automatically transitions into
+  world space". Only works when the paired `NetworkRigidbody` does **not** use
+  `UseRigidBodyForMotion`. The crate prefab sets it to `true` and leaves `UseRigidBodyForMotion` off.
+- `NetworkRigidbody.AutoUpdateKinematicState` (default `true`) calls
+  `SetIsKinematic(!m_IsAuthority)` on spawn and ownership changes, so clients' crates are always
+  kinematic. On the host, `Carryable` switches kinematic on while carried and off on drop.
+- `NetworkObject.Spawn(bool destroyWithScene = false)`; `NetworkObjectReference` has implicit
+  conversions from `NetworkObject` and `TryGet(out NetworkObject, NetworkManager = null)`.
+- When a parent NetworkObject is despawned, NGO moves its first-generation children to the root
+  (`TryRemoveParentCachedWorldPositionStays` in `NetworkSpawnManager`). A crate held by a player
+  who disconnects therefore drops; `Carryable` makes it non-kinematic again in the parent callback.
+- Why parenting: the crate becomes a child of the carrier's owner-authoritative body, so on the
+  carrier's own machine it follows with zero latency; everyone else sees it move with the
+  interpolated body. Pick-up and drop go through `[Rpc(SendTo.Server, InvokePermission =
+  RpcInvokePermission.Owner)]`; on drop the client sends its own crate pose and the host accepts it
+  when it is within 4 m of the host's view of the carrier.
+- Known limit: the carried crate's collider is off, so it passes through walls while carried.
+- Tested in the Editor with MPPM (2026-11-08, host in the Player 2 window): crates spawn, pick-up,
+  drop and throw work, no errors in either Editor log. Not yet tested with simulated latency.
+
 ## Multiplayer Play Mode 2.0.2 (docs read for 2.0; the project resolves 3.0.0, see above)
 
 - `com.unity.multiplayer.playmode` 2.0.2 (2026-03-12). Minimum editor 6000.3.0b10 (changelog 2.0.1);
