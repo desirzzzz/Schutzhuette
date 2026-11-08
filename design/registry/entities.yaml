@@ -505,6 +505,35 @@ formulas:
     notes: "Spielzeit, steht in der Pause solo. Einzige Zeitbasis für Spielregeln mit Zeit (Abkühlen, dt von Handlungen, Brennzeit, Phasen)."
     added: 2026-11-08
     revised: ""
+  - name: lobby_slots
+    status: active
+    source: design/gdd/steam-lobby.md
+    referenced_by:
+      - design/gdd/steam-lobby.md
+    variables:
+      - n_spawn
+      - max_players
+      - spawn_i
+    output_range: [0, 4]
+    expression: "count{ i in [0, min(n_spawn, max_players)) : spawn_i gesetzt }"
+    notes: "Plätze einschließlich Host; Steam-Lobby und Freigabe (PlayerSpawnApproval) nutzen dieselbe Funktion, ersetzt SlotCount. 0 = Hosten verweigert (Konfigurationsfehler)."
+    added: 2026-11-08
+    revised: ""
+  - name: display_name
+    status: active
+    source: design/gdd/steam-lobby.md
+    referenced_by:
+      - design/gdd/steam-lobby.md
+    variables:
+      - raw_name
+      - slot
+      - name_max
+      - name_bytes_max
+    output_range: [1, 24]
+    expression: "len(clean(raw_name)) >= 1 ? trunc(clean(raw_name), name_max) : 'Spieler ' + (slot + 1)"
+    notes: "Länge in Textelementen (Start name_max 16), höchstens 61 Byte UTF-8, kein Textelement zerschnitten; der Host rechnet und verteilt. Das HUD zeigt das Ergebnis als Namensschild."
+    added: 2026-11-08
+    revised: ""
   - name: season_length
     status: active
     source: design/gdd/saison-ablauf.md
@@ -605,6 +634,15 @@ constants:
       - design/gdd/interaktion.md
     value: 4.0
     unit: m
+    added: 2026-11-08
+    revised: ""
+  - name: join_timeout_seconds
+    status: active
+    source: design/gdd/steam-lobby.md
+    referenced_by:
+      - design/gdd/steam-lobby.md
+    value: 20
+    unit: s
     added: 2026-11-08
     revised: ""
   - name: season_target_min

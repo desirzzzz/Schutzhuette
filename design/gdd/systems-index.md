@@ -2,7 +2,7 @@
 
 > **Status**: Approved (vom Entwickler am 2026-11-08 freigegeben)
 > **Created**: 2026-11-08
-> **Last Updated**: 2026-11-08 (erneutes Design-Review: Gegenstandsarten, Interaktion und Saison-Ablauf Approved)
+> **Last Updated**: 2026-11-08 (Design-Review Steam-Lobby: Approved)
 > **Source Concept**: docs/KONZEPT.md (Vollfassung) und design/game-brief.md (Kurzfassung)
 > **Grundlage für den Umfang**: production/milestones/vertical-slice.md
 
@@ -105,7 +105,7 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 7 | Gegenstandsarten (inferred) | Core | Vertical Slice | Approved | design/gdd/gegenstandsarten.md | — |
 | 8 | Interaktion (inferred) | Core | Vertical Slice | Approved | design/gdd/interaktion.md | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen, Gegenstandsarten, Saison-Ablauf und Spielphasen |
 | 9 | Saison-Ablauf und Spielphasen | Core | Vertical Slice | Approved | design/gdd/saison-ablauf.md | Netzwerk-Sitzung, Gegenstandsarten |
-| 10 | Steam-Lobby und Einladen | Core | Vertical Slice | Not Started | — | Netzwerk-Sitzung |
+| 10 | Steam-Lobby und Einladen | Core | Vertical Slice | Approved | design/gdd/steam-lobby.md | Netzwerk-Sitzung, Saison-Ablauf und Spielphasen |
 | 11 | Gäste und Bedürfnisse | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Holzofen und Wärme, Gegenstandsarten, Interaktion |
 | 12 | Kochen und Gerichte | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Lager und Vorräte |
 | 13 | Lager und Vorräte | Economy | Vertical Slice | Not Started | — | Gegenstandsarten, Tragen und Werfen, Saison-Ablauf und Spielphasen |
@@ -120,7 +120,7 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 22 | Bewertung | Progression | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Saison-Ablauf und Spielphasen, Nachteinsatz |
 | 23 | Hüttenkasse und Upgrades | Progression | Vertical Slice | Not Started | — | Bewertung, Gäste und Bedürfnisse, Saison-Ablauf und Spielphasen |
 | 24 | Sprachchat und Funkgerät | Audio | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Interaktion |
-| 25 | HUD (inferred) | UI | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Gäste und Bedürfnisse, Holzofen und Wärme, Hüttenkasse und Upgrades, Interaktion |
+| 25 | HUD (inferred) | UI | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Gäste und Bedürfnisse, Holzofen und Wärme, Hüttenkasse und Upgrades, Interaktion, Steam-Lobby und Einladen |
 | 26 | Menüs (inferred) | UI | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Steam-Lobby und Einladen, Bewertung, Hüttenkasse und Upgrades, Saison-Ablauf und Spielphasen |
 | 27 | Spielstand speichern (inferred) | Persistence | Alpha | Not Started | — | Hüttenkasse und Upgrades |
 | 28 | Kraxe | Gameplay | Alpha | Not Started | — | Tragen und Werfen, Gegenstandsarten |
@@ -176,7 +176,8 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
    Gegenstandsarten (Werkzeug, Kategorie, Ausrüstung); die Spielzeit `game_time` kommt aus dem
    Saison-Ablauf. **Engpass.**
 4. Saison-Ablauf und Spielphasen: braucht die Netzwerk-Sitzung. **Engpass.**
-5. Steam-Lobby und Einladen: braucht die Netzwerk-Sitzung.
+5. Steam-Lobby und Einladen: braucht die Netzwerk-Sitzung und (weich) den Saison-Ablauf, dessen
+   Beitrittssperre auch für Steam gilt.
 
 ### Feature Layer (depends on core)
 
@@ -206,8 +207,8 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
 
 ### Presentation Layer (depends on features)
 
-1. HUD: braucht Saison, Gäste, Ofen, Hüttenkasse und Interaktion (Hinweis am Fadenkreuz,
-   Fortschrittsbalken, Ausrüstungs-Symbole).
+1. HUD: braucht Saison, Gäste, Ofen, Hüttenkasse, Interaktion (Hinweis am Fadenkreuz,
+   Fortschrittsbalken, Ausrüstungs-Symbole) und Steam-Lobby (Namensschilder).
 2. Menüs: braucht Netzwerk, Steam-Lobby, Bewertung, Upgrades und den Saison-Ablauf (Vorbereitung,
    Bewertungs- und Upgrade-Bildschirm, Abbrechen, Pause).
 
@@ -298,11 +299,11 @@ der frühe Freundestest möglich ist.
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 34 |
-| Design docs started | 3 (Gegenstandsarten, Interaktion, Saison-Ablauf; 2026-11-08) |
-| Design docs reviewed | 3 (Gegenstandsarten, Interaktion, Saison-Ablauf; alle nach Überarbeitung Approved; 2026-11-08) |
-| Design docs approved | 3 (Gegenstandsarten, Interaktion, Saison-Ablauf; 2026-11-08) |
+| Design docs started | 4 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby; 2026-11-08) |
+| Design docs reviewed | 4 (Gegenstandsarten, Interaktion, Saison-Ablauf nach Überarbeitung Approved; Steam-Lobby im ersten Review Approved; 2026-11-08) |
+| Design docs approved | 4 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby; 2026-11-08) |
 | MVP systems designed | 0/6 (alle 6 gebaut, ohne GDD auf Stufe `minimal`) |
-| Vertical Slice systems designed | 3/20 (Gegenstandsarten, Interaktion und Saison-Ablauf, alle Approved) |
+| Vertical Slice systems designed | 4/20 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby, alle Approved) |
 
 ---
 
