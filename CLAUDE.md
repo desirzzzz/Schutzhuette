@@ -85,7 +85,7 @@ Ziel: Eine Frage beantworten – **macht es Spaß, zu zweit eine schwere Kiste d
 - [x] Spielerbewegung (First Person), synchronisiert
 - [x] Graubox-Hütte (Rohbau per Editor-Skript nach `docs/GRAUBOX.md`; Nachformen mit ProBuilder bei Bedarf)
 - [x] Aufheben, Tragen, Ablegen und Werfen von Kisten, synchron für alle (mit 100 ms Ping getestet; Client-Vorhersage macht es für den Client flüssig)
-- [x] Schwerer Gegenstand, der sich nur bewegt, wenn zwei Spieler ihn halten (Grundversion; Vorhersage für den Client und Hängenbleiben an Türrahmen folgen)
+- [x] Schwerer Gegenstand, der sich nur bewegt, wenn zwei Spieler ihn halten (mit Vorhersage für den Client und Hängenbleiben an Türrahmen)
 - [x] Ofen, der Holz verbraucht und ausgeht (Wärme als einfacher Wert)
 
 Am Prüfpunkt testen wir mit Freunden. Erst wenn das Tragen Spaß macht, geht es zum Vertical Slice.
