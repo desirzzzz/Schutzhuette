@@ -214,6 +214,7 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/interaktion.md
     category: werkzeug
     mass_kg: 2
     carry_mode: alone
@@ -226,6 +227,7 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/interaktion.md
     category: werkzeug
     mass_kg: 3
     carry_mode: alone
@@ -238,12 +240,14 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/interaktion.md
     category: werkzeug
     mass_kg: 0.3
     carry_mode: alone
     impact_sound: weich
     tool_action: licht
-    notes: "vorläufig"
+    equipment_slot: kopf
+    notes: "Ausrüstung am Körper (design/gdd/interaktion.md Regel 8)"
     added: 2026-11-08
     revised: ""
   - name: funkgeraet
@@ -251,12 +255,14 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/interaktion.md
     category: werkzeug
     mass_kg: 0.5
     carry_mode: alone
     impact_sound: weich
     tool_action: funk
-    notes: "vorläufig"
+    equipment_slot: guertel
+    notes: "Ausrüstung am Körper (design/gdd/interaktion.md Regel 8)"
     added: 2026-11-08
     revised: ""
   - name: ware_speck
@@ -436,6 +442,50 @@ formulas:
     notes: "Sollwert 0; Hinweis ab mehr als 10 % der Ausgangsmasse. Holz hacken nutzt sie."
     added: 2026-11-08
     revised: ""
+  - name: crew_multiplier
+    status: active
+    source: design/gdd/interaktion.md
+    referenced_by:
+      - design/gdd/interaktion.md
+    variables:
+      - users
+      - max_users
+      - extra_user_bonus
+    output_range: [0, 2]
+    expression: "(users >= 1) ? 1 + extra_user_bonus * (min(users, max_users) - 1) : 0"
+    notes: "Teamzuschlag; Start 0,5, Kurbel und Generator 0,75; höchstens 2,0 über action_data_valid. Stationen (Seilbahn, Betten, Generator) nutzen sie."
+    added: 2026-11-08
+    revised: ""
+  - name: host_range_ok
+    status: active
+    source: design/gdd/interaktion.md
+    referenced_by:
+      - design/gdd/interaktion.md
+    variables:
+      - target_distance
+      - max_server_distance
+    output_range: [0, 1]
+    expression: "target_distance <= max_server_distance"
+    notes: "bool; Abstand von den Augen der Figur zum nächsten Punkt der Station. Einstellregel max_server_distance >= interact_range + max_player_speed * (rtt_budget + interp_delay), Verstoß = Editor-Fehler."
+    added: 2026-11-08
+    revised: ""
+  - name: action_data_valid
+    status: active
+    source: design/gdd/interaktion.md
+    referenced_by:
+      - design/gdd/interaktion.md
+    variables:
+      - duration
+      - min_duration
+      - max_solo_duration
+      - max_users
+      - extra_user_bonus
+      - max_solo_penalty
+    output_range: [0, 1]
+    expression: "(duration == 0 OR duration >= min_duration) AND duration <= max_solo_duration AND 1 <= max_users <= 4 AND 0 <= extra_user_bonus <= 1 AND (duration == 0 OR crew_multiplier(max_users) <= max_solo_penalty)"
+    notes: "bool; false = Editor-Fehler. Start: min 0,5 s, max 20 s, penalty 2,0."
+    added: 2026-11-08
+    revised: ""
 
 # Example:
 #
@@ -476,6 +526,24 @@ constants:
       - design/gdd/gegenstandsarten.md
     value: 25
     unit: kg
+    added: 2026-11-08
+    revised: ""
+  - name: interact_range
+    status: active
+    source: design/gdd/interaktion.md
+    referenced_by:
+      - design/gdd/interaktion.md
+    value: 2.5
+    unit: m
+    added: 2026-11-08
+    revised: ""
+  - name: max_server_distance
+    status: active
+    source: design/gdd/interaktion.md
+    referenced_by:
+      - design/gdd/interaktion.md
+    value: 4.0
+    unit: m
     added: 2026-11-08
     revised: ""
 

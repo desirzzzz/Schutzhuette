@@ -51,3 +51,47 @@ Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerCarry.cs 8d385a458
 Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
 Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/SoundSettings.cs 332cd8ed7783445496dd2d140dda1d783d199ef8
 Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888
+
+## Review — 2026-11-08 — Verdict: NEEDS REVISION
+Review mode: lean · Workflow: standard
+Scope signal: L
+Specialists: keine (Lean-Modus)
+Blocking items: 1 | Recommended: 2
+Summary: Prüfung des Nachtrags „Ausnahme Ausrüstung“ in Regel 6 (aus dem GDD Interaktion) im Rahmen des Reviews von Interaktion. Laut startender Sitzung und Größenvergleich (+291 Byte gegenüber dem freigegebenen Stand) ist das die einzige Änderung seit dem APPROVED-Review; der Rest wurde nicht erneut vollständig gelesen. Die Ausnahme passt inhaltlich zu Interaktion Regel 8, reißt aber eine Lücke ins Daten- und Zustandsmodell dieses Dokuments.
+Prior verdict resolved: Approved-Stand wurde durch den Nachtrag geändert
+Findings:
+- [BLOCKING] Core Rules / States and Transitions: Für Ausrüstung fehlt ein Feld (Platz Kopf oder Gürtel), sonst erkennt der Code Stirnlampe und Funkgerät nur am Namen. Die Zustandstabelle („jeder Gegenstand hat einen dieser Zustände“) kennt weder „Am Körper“ noch „Am Haken“. Siehe Blocker im Review von Interaktion.
+- [RECOMMENDED] Open Questions: Frage 5 („Hand oder Körper?“) ist durch den Nachtrag beantwortet und steht noch offen.
+- [RECOMMENDED] Interactions with Other Systems / Dependencies: Die Zeile „Interaktion“ nennt nur „Werkzeug (Handlung)“; gelesen werden auch Kategorie und Ausrüstung.
+Reviewed-Content-Hash: design/gdd/gegenstandsarten.md ef9e8ed782c0947e5ea5e476be4248e85548d794
+Reviewed-Content-Hash: design/registry/entities.yaml 6e3850ed26d3a06a4aa2cd31caedc3938eb716d1
+Reviewed-Content-Hash: .claude/skills/design-review/SKILL.md a63d8fba9b7142eeb43791f061e2e1533c429b43
+Reviewed-Content-Hash: design/game-brief.md c532ebc1df2645bf9cfaa33cef546086aa209ad3
+Reviewed-Content-Hash: design/gdd/interaktion.md f312c76e5204a5518f0b4b9eb6598c1420a1eb53
+Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerCarry.cs 8d385a458c8d53cc376ab954f80bf24d0c70ef70
+Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
+Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/SoundSettings.cs 332cd8ed7783445496dd2d140dda1d783d199ef8
+Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888
+
+## Review — 2026-11-08 — Verdict: APPROVED
+Review mode: lean · Workflow: standard
+Scope signal: L
+Specialists: keine (Lean-Modus)
+Blocking items: 0 | Recommended: 0 | Nice-to-have: 3 (neu) + 6 (aus dem APPROVED-Review davor, weiter offen)
+Summary: Erneutes Review nach dem Nachtrag Ausrüstung, Dokument vollständig neu gelesen. Der Blocker ist gelöst: optionale Eigenschaft „Ausrüstung: Kopf oder Gürtel“ (Code erkennt Ausrüstung nur am Feld), Zustand „Am Körper“ (fällt und zerbricht nie), Hakenplatz als „Liegt“, Startkatalog Stirnlampe Kopf / Funkgerät Gürtel, AC 34. Beide Empfehlungen sind eingearbeitet (offene Frage 5 beantwortet; Zeile Interaktion nennt Werkzeug, Kategorie, Ausrüstung). Registry stimmt (equipment_slot kopf/guertel), die übrigen Werte sind unverändert gegenüber dem letzten APPROVED-Stand.
+Prior verdict resolved: Yes (1 von 1 Blocker, 2 von 2 Empfehlungen)
+Findings:
+- [NICE-TO-HAVE] Dependencies: „Beidseitig: Noch hat keins dieser Systeme ein Design-Dokument“ stimmt nicht mehr, Interaktion hat eins.
+- [NICE-TO-HAVE] States and Transitions: „Am Körper → Liegt“ beim Verbindungsabbruch; die Ausrüstung erscheint auf Hüfthöhe und geht damit über „Fällt“.
+- [NICE-TO-HAVE] Edge Cases / Datenprüfung: Keine Editor-Prüfung für unsinnige Kombinationen, etwa Ausrüstung mit Trageart „zu zweit“.
+- [NICE-TO-HAVE] Weiter offen aus dem vorigen APPROVED-Review: Fenstergrenze 5,51 (genau 5,5125), `hold_height` mit Source „constant“, „R“ in AC 25, Übergänge nach „Verbraucht“, Registry-Bereich von `chop_mass_balance`.
+- [ADVISORY] Player Fantasy fehlt; bei `standard` nur empfohlen.
+Reviewed-Content-Hash: design/gdd/gegenstandsarten.md 24df514642e755780a6943bf2ed493879089675f
+Reviewed-Content-Hash: design/registry/entities.yaml b21de501b14fde61b25ff79f0e0114bcad6d6d54
+Reviewed-Content-Hash: .claude/skills/design-review/SKILL.md a63d8fba9b7142eeb43791f061e2e1533c429b43
+Reviewed-Content-Hash: design/game-brief.md c532ebc1df2645bf9cfaa33cef546086aa209ad3
+Reviewed-Content-Hash: design/gdd/interaktion.md 02f5c1cddd97b2425ca4c7f31c252eacd2fc8d70
+Reviewed-Content-Hash: Assets/_Project/Scripts/Carrying/PlayerCarry.cs 8d385a458c8d53cc376ab954f80bf24d0c70ef70
+Reviewed-Content-Hash: Assets/_Project/Prefabs/Player.prefab 38213839be69ccff2746d64fb2e34d19eaabb290
+Reviewed-Content-Hash: Assets/_Project/Scripts/Audio/SoundSettings.cs 332cd8ed7783445496dd2d140dda1d783d199ef8
+Reviewed-Content-Hash: Assets/_Project/Scripts/Hut/StoveSettings.cs c76e57a138295b89180200d94d392b4fefbd7888

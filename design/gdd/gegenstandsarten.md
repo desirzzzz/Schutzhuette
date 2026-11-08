@@ -1,6 +1,6 @@
 # Gegenstandsarten
 
-> **Status**: Approved (erneutes Design-Review 2026-11-08; siehe `design/gdd/reviews/gegenstandsarten-review-log.md`)
+> **Status**: Approved (erneutes Design-Review 2026-11-08 nach dem Nachtrag Ausrüstung; siehe `design/gdd/reviews/gegenstandsarten-review-log.md`)
 > **Author**: Entwickler + Claude
 > **Last Updated**: 2026-11-08
 > **Last Verified**: 2026-11-08
@@ -68,6 +68,10 @@ angelegt).
      eine Abkühlzeit in Sekunden. Ohne Abkühlzeit kühlt es nie ab.
    - **Zerbrechlich:** Bruchgeschwindigkeit in m/s. Prallt die Art schneller auf, zerbricht sie.
    - **Werkzeug:** Welche Handlung es ermöglicht. Das legt das Interaktions-Dokument fest.
+   - **Ausrüstung:** Platz am Körper, `Kopf` oder `Gürtel`. Eine Art mit dieser Eigenschaft wird beim
+     Aufheben angelegt statt in der Hand getragen (Zustand „Am Körper“). Daran und nur daran erkennt der
+     Code Ausrüstung, nie am Namen. Die Regeln zum Anlegen und Aufhängen stehen in
+     `design/gdd/interaktion.md`.
 3. **Waren** wie Speck, Mehl oder Tee sind ein eigener, schlanker Datentyp ohne Körper: nur Kennung
    (immer mit `ware_` davor, zum Beispiel `ware_tee`, damit sie nie mit einer Art wie der Tasse `tee`
    zusammenfällt) und Anzeigename. Es gibt sie nur als Bestand im Lager und als Inhalt eines Pakets.
@@ -78,7 +82,11 @@ angelegt).
    zerbrochenes Gericht ist ganz weg.
 6. **Was Spieler nicht können:** Arten umwandeln, außer über die zuständigen Systeme (Hacken, Kochen,
    Auspacken im Lager). Es gibt keine Taschen und kein Inventar. Jeder Gegenstand wird in der Hand
-   getragen, die Kraxe kommt erst in der Alpha.
+   getragen, die Kraxe kommt erst in der Alpha. **Ausnahme Ausrüstung** (Nachtrag 2026-11-08 aus dem
+   GDD Interaktion): Arten mit der Eigenschaft „Ausrüstung“ (im Vertical Slice Stirnlampe und
+   Funkgerät) werden beim Aufheben am Körper angelegt, je ein Platz pro Spieler für Kopf und Gürtel,
+   damit die Hände für Trage und Kisten frei bleiben. Abnehmen geht nur am Ausrüstungshaken. Die Regeln
+   dazu stehen in `design/gdd/interaktion.md`.
 
 **Startkatalog für den Vertical Slice** (Startwerte; die Dokumente der lesenden Systeme dürfen sie
 ändern, die Änderung wird dann hier nachgetragen):
@@ -96,8 +104,8 @@ angelegt).
 | `kaiserschmarrn` | Kaiserschmarrn (Teller) | Gericht | 0,8 kg | allein | Weich | zerbrechlich 7,0 m/s, kühlt in 150 s ab |
 | `axt` | Axt | Werkzeug | 2 kg | allein | Holz | Hacken |
 | `erste_hilfe` | Erste-Hilfe-Kasten | Werkzeug | 3 kg | allein | Weich | Erste Hilfe |
-| `stirnlampe` | Stirnlampe | Werkzeug | 0,3 kg | allein | Weich | Licht *(vorläufig)* |
-| `funkgeraet` | Funkgerät | Werkzeug | 0,5 kg | allein | Weich | Funk *(vorläufig)* |
+| `stirnlampe` | Stirnlampe | Werkzeug | 0,3 kg | allein | Weich | Werkzeug `licht`, Ausrüstung Kopf |
+| `funkgeraet` | Funkgerät | Werkzeug | 0,5 kg | allein | Weich | Werkzeug `funk`, Ausrüstung Gürtel |
 
 **Waren** (vorläufig, das Kochen-Dokument legt sie fest): `ware_speck`, `ware_brot`, `ware_mehl`,
 `ware_eier`, `ware_milch`, `ware_tee`, `ware_wasser`.
@@ -108,8 +116,9 @@ Jeder Gegenstand in der Welt hat einen dieser Zustände:
 
 | Zustand | Bedeutung | Übergänge |
 | --- | --- | --- |
-| Liegt | Ruht und ist eingefroren (Architektur-Regel 3) | → Getragen (aufheben), → Fällt (angestoßen) |
+| Liegt | Ruht und ist eingefroren (Architektur-Regel 3). Ausrüstung an einem Hakenplatz liegt ebenfalls. | → Getragen (aufheben), → Am Körper (aufheben, nur Ausrüstung, Platz frei), → Fällt (angestoßen) |
 | Getragen | Folgt dem Haltepunkt des Trägers | → Fällt (ablegen, werfen, Träger lässt los) |
+| Am Körper | Nur Ausrüstung: sitzt auf ihrem Platz (Kopf, Gürtel) an der Figur und folgt ihr; fällt und zerbricht nie, auch nicht beim Sturz des Trägers | → Liegt (am Haken aufgehängt, oder beim Verbindungsabbruch des Trägers an seiner letzten Position) |
 | Fällt | Der Host simuliert die Physik | → Liegt (kommt zur Ruhe), → Zerbrochen (nur zerbrechlich, Aufprall schneller als die Bruchgeschwindigkeit) |
 | Zerbrochen | Wird entfernt, mit Scherben-Geräusch | Ende |
 | Verbraucht | Verbrannt, ausgepackt, gehackt oder serviert | Ende |
@@ -129,7 +138,7 @@ entscheidet über alle Übergänge.
 | Lager und Vorräte | Vorratspaket (Ware, Portionen) | Verbraucht das Paket und erhöht den Bestand der Ware. |
 | Kochen und Gerichte | Waren, Gericht | Nimmt Waren aus dem Bestand und erzeugt ein warmes Gericht. |
 | Gäste und Bedürfnisse | Gericht (Bedürfnis, warm oder kalt) | Verbraucht das Gericht. Die Freude daran legt das Gäste-Dokument fest. |
-| Interaktion | Werkzeug (Handlung) | Erlaubt die Handlung nur mit dem passenden Werkzeug in der Hand. |
+| Interaktion | Werkzeug (Handlung), Kategorie, Ausrüstung (Platz) | Erlaubt die Handlung nur mit dem passenden Werkzeug oder der passenden Kategorie in der Hand; legt Ausrüstung am Körper an. |
 | Geräusche | Masse, Aufprallklang | Aufprall nach Gewicht und Klanggruppe, dazu ein Scherben-Geräusch beim Zerbrechen. |
 | Netzwerk-Sitzung | Kennung | Übers Netz geht nur die Kennung, nie das Datenobjekt. |
 
@@ -367,7 +376,7 @@ nur als Weg für die Kennung genutzt, sie ist keine Abhängigkeit.
 | Lager und Vorräte | hart | Vorratspaket (Ware, Portionen), Liste der Waren | kein Dokument |
 | Kochen und Gerichte | hart | Waren, Gericht (Abkühlzeit, Kochzeitpunkt) | kein Dokument |
 | Gäste und Bedürfnisse | hart | Gericht (Bedürfnis, warm/kalt) | kein Dokument |
-| Interaktion | hart | Werkzeug (Handlung) | kein Dokument |
+| Interaktion | hart | Werkzeug (Handlung), Kategorie, Ausrüstung (Platz) | `design/gdd/interaktion.md` |
 | Geräusche | weich | Masse, Aufprallklang, Scherben beim Zerbrechen | gebaut |
 | Nachteinsatz | weich | Trage (Leermasse, zu zweit) | kein Dokument |
 | Ereignisse (mit Strom und Licht) | weich | Stirnlampe (Werkzeug) | kein Dokument |
@@ -588,6 +597,11 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 33. **[Manuell]** **GIVEN** zwei Einträge mit derselben Kennung im Projekt **WHEN** der Build gestartet
     wird (Batchmode wie beim Freundestest-Build) **THEN** bricht er mit einem Fehler ab, der beide
     Assets nennt, und es entsteht keine Exe.
+34. **[EditMode + PlayMode]** **GIVEN** eine Test-Art „Testlampe“ mit der Eigenschaft Ausrüstung `Kopf`
+    und eine gleich schwere Test-Art ohne diese Eigenschaft **WHEN** beide aufgehoben werden **THEN**
+    geht die Testlampe in den Zustand „Am Körper“ (der Code erkennt sie am Feld, nicht am Namen), die
+    andere in „Getragen“. **WHEN** der Träger der Testlampe stürzt (Testaufruf) **THEN** bleibt sie
+    „Am Körper“ und zerbricht nicht, auch wenn sie zusätzlich zerbrechlich ist.
 
 ## Open Questions
 
@@ -597,7 +611,7 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 | 2 | Sollen steile Würfe auf den Boden (ab etwa 38° Neigung) zerbrechen? | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
 | 3 | Bei 15 m/s können Gegenstände dünne Wände durchfliegen. Braucht es für Würfe eine durchgehende Kollisionsprüfung? | Programmierung (ADR) | vor dem Bau |
 | 4 | Lässt man ein Gericht in einer Wand los, drückt die Physik es mit bis zu 10 m/s heraus. Zerbricht es dabei? | Test, notfalls kurze Schonzeit nach dem Loslassen | beim Bau |
-| 5 | Trägt man Stirnlampe und Funkgerät in der Hand oder am Körper? | Dokumente zu Interaktion und zu Strom und Licht | bei deren Design |
+| 5 | ~~Trägt man Stirnlampe und Funkgerät in der Hand oder am Körper?~~ **Beantwortet 2026-11-08:** am Körper (Eigenschaft „Ausrüstung“, Zustand „Am Körper“, Regeln in `design/gdd/interaktion.md` Regel 8) | Dokument Interaktion | erledigt |
 | 6 | Wie schwer ist die Trage mit einer Person darauf? | Dokument zum Nachteinsatz | bei dessen Design |
 | 7 | Welche Waren gibt es endgültig, und welche Rezepte? | Dokument zum Kochen | bei dessen Design |
 | 8 | Was ist ein kaltes Gericht wert? | Dokument zu den Gästen | bei dessen Design |
