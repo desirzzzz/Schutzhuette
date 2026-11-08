@@ -63,6 +63,12 @@ namespace Schutzhuette.Carrying
         /// <summary>Faktor für die Laufgeschwindigkeit beim Tragen zu zweit.</summary>
         public float CarrySpeedMultiplier => _carrySpeedMultiplier;
 
+        /// <summary>Abstand Körpermitte → Hand eines Trägers (für die greifenden Arme der Figur).</summary>
+        public float Reach => _reach;
+
+        /// <summary>Höhe der Hände über der Körpermitte.</summary>
+        public float HandHeight => _handHeight;
+
         /// <summary>Der Collider des Gegenstands (die Träger ignorieren ihn beim Tragen).</summary>
         public Collider Collider => _collider;
 
@@ -106,6 +112,40 @@ namespace Schutzhuette.Carrying
         public GameObject CreateLocalGhost()
         {
             return LocalGhost.CreateFrom(transform);
+        }
+
+        /// <inheritdoc />
+        public override void OnNetworkSpawn()
+        {
+            // Figuren erfahren auf jedem Rechner, ob sie ein Ende halten (für die Arme).
+            _holder0.OnValueChanged += HandleHolderChanged;
+            _holder1.OnValueChanged += HandleHolderChanged;
+            HandleHolderChanged(default, _holder0.Value);
+            HandleHolderChanged(default, _holder1.Value);
+        }
+
+        /// <inheritdoc />
+        public override void OnNetworkDespawn()
+        {
+            _holder0.OnValueChanged -= HandleHolderChanged;
+            _holder1.OnValueChanged -= HandleHolderChanged;
+            HandleHolderChanged(_holder0.Value, default);
+            HandleHolderChanged(_holder1.Value, default);
+        }
+
+        private void HandleHolderChanged(NetworkObjectReference previous, NetworkObjectReference current)
+        {
+            if (previous.TryGet(out NetworkObject oldHolder)
+                && oldHolder.TryGetComponent(out Schutzhuette.Player.PlayerVisuals oldVisuals))
+            {
+                oldVisuals.ClearHeldChest(this);
+            }
+
+            if (current.TryGet(out NetworkObject newHolder)
+                && newHolder.TryGetComponent(out Schutzhuette.Player.PlayerVisuals newVisuals))
+            {
+                newVisuals.SetHeldChest(this);
+            }
         }
 
         /// <summary>Weltposition eines Endes (0 = hinten, 1 = vorne).</summary>

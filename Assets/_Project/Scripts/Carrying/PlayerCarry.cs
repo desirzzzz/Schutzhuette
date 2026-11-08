@@ -85,6 +85,18 @@ namespace Schutzhuette.Carrying
 
         private PlayerHeavyCarry _heavyCarry;
 
+        /// <summary>
+        /// Hält diese Figur gerade eine Kiste (oder auf dem eigenen Rechner die Aufheb-Kopie)?
+        /// Dann liefert es den Haltepunkt in Weltkoordinaten, für die greifenden Arme der Figur.
+        /// </summary>
+        public bool TryGetHoldPoint(out Vector3 holdPoint)
+        {
+            Carryable held = HeldItem;
+            bool holding = (held != null && held != _releasedItem) || _pendingGrab != null;
+            holdPoint = holding ? transform.TransformPoint(_holdLocalPosition) : Vector3.zero;
+            return holding;
+        }
+
         /// <inheritdoc />
         public override void OnNetworkSpawn()
         {
