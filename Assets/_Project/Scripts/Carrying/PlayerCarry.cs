@@ -373,8 +373,15 @@ namespace Schutzhuette.Carrying
 
         private void UpdateGrabPrediction()
         {
+            if (ReferenceEquals(_pendingGrab, null))
+            {
+                return;
+            }
+
+            // Die echte Kiste gibt es nicht mehr (z. B. im Ofen verbrannt): Kopie wegräumen.
             if (_pendingGrab == null)
             {
+                EndGrabPrediction();
                 return;
             }
 
@@ -438,6 +445,14 @@ namespace Schutzhuette.Carrying
         {
             if (_releaseGhost == null)
             {
+                return;
+            }
+
+            // Die echte Kiste gibt es nicht mehr, zum Beispiel weil der Host ein geworfenes
+            // Holzscheit im Ofen verbrannt hat: Flug-Kopie einfach wegräumen.
+            if (_releasedItem == null)
+            {
+                EndReleasePrediction();
                 return;
             }
 

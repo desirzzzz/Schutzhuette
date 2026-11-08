@@ -504,6 +504,21 @@ How `Carryable` / `PlayerCarry` work, and the NGO facts they rely on:
 - Tested in the Editor with MPPM (2026-11-08, host in the Player 2 window): crates spawn, pick-up,
   drop and throw work, no errors in either Editor log.
 
+## Stove and firewood (`Stove`, `FuelItem`, 2026-11-08)
+
+- Fuel seconds and heat are `NetworkVariable<float>`s written only by the host each frame
+  (`Stove.Step`, a pure static function); setting an unchanged value does not mark it dirty, so a
+  cold, empty stove sends nothing. Light, fire visual and the HUD line read them on every machine.
+- Feeding is host-only physics: a trigger `BoxCollider` on the stove root in front of the door; when
+  a non-carried `FuelItem` enters (or rests in) it and there is room, the host adds its burn time and
+  calls `NetworkObject.Despawn(true)`. Carried logs have their collider off and cannot trigger it.
+- The stove and the logs are spawned by the host at runtime (`CrateSpawner`), like crates. The wood
+  pile spawner refills an empty point after `_respawnDelay` (20 s).
+- A client's release prediction must survive the real object being despawned while its copy flies:
+  `PlayerCarry` checks for a destroyed `_releasedItem` / `_pendingGrab` and removes the copy.
+- Tested in the Editor (2026-11-08) as host: stove spawns lit, a log fed into it added 45 s, the
+  stove goes out without wood. A client throwing a log into the stove was not part of that test run.
+
 ## Simulated latency: Multiplayer Tools 2.2.12 Network Simulator (2026-11-08)
 
 Sources: the package's bundled `Documentation~/network-simulator.md` and its runtime source in

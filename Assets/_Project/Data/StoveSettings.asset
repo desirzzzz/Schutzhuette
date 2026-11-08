@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3495a3e6456d684b819ef295d0a6d77, type: 3}
+  m_Name: StoveSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Hut.StoveSettings
+  _startFuelSeconds: 60
+  _maxFuelSeconds: 240
+  _maxHeat: 100
+  _heatRisePerSecond: 4
+  _heatDecayPerSecond: 1.5

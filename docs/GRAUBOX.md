@@ -131,7 +131,7 @@ Die Teile, die unten im Boden oder hinten im Sockel stecken, sieht man nicht.
 
 | Teil | Position (x, y, z) | Scale (x, y, z) |
 | --- | --- | --- |
-| Ofen | 2.2, 2.1, 20.9 | 1.4, 1.2, 1.4 |
+| Ofen (seit 2026-11-08 kein Würfel mehr, sondern das Prefab `Stove`, das der Host beim Start an diese Stelle setzt) | 2.2, 2.1, 20.9 | 1.4, 1.2, 1.4 |
 | Tisch 1 | 4.0, 1.9, 14.5 | 1.0, 0.8, 2.4 |
 | Bank 1 links | 2.9, 1.725, 14.5 | 0.4, 0.45, 2.4 |
 | Bank 1 rechts | 5.1, 1.725, 14.5 | 0.4, 0.45, 2.4 |

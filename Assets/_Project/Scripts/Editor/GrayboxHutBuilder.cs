@@ -149,7 +149,8 @@ namespace Schutzhuette.EditorTools
                 new Part(inner, "Sturz Lager-Küche", new Vector3(-3.5f, 4.05f, 18.5f), new Vector3(1.2f, 0.5f, 0.2f)),
 
                 // Platzhalter-Möbel. Verschieben ist ausdrücklich erlaubt.
-                new Part(furniture, "Ofen", new Vector3(2.2f, 2.1f, 20.9f), new Vector3(1.4f, 1.2f, 1.4f)),
+                // Der Ofen steht nicht mehr hier: Er ist ein vernetztes Prefab (Stove), das der
+                // Host zur Laufzeit an (2.2, 2.1, 20.9) setzt, siehe StoveSetupBuilder.
                 new Part(furniture, "Tisch 1", new Vector3(4f, 1.9f, 14.5f), new Vector3(1f, 0.8f, 2.4f)),
                 new Part(furniture, "Bank 1 links", new Vector3(2.9f, 1.725f, 14.5f), new Vector3(0.4f, 0.45f, 2.4f)),
                 new Part(furniture, "Bank 1 rechts", new Vector3(5.1f, 1.725f, 14.5f), new Vector3(0.4f, 0.45f, 2.4f)),
