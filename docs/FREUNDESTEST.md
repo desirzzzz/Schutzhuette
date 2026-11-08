@@ -13,15 +13,26 @@ Build: `Builds/Schutzhuette-Prototyp-0.1.0.zip` (Windows, 64 Bit). Version 0.1.0
 
 ## Verbinden (1 Host, bis zu 3 weitere Spieler)
 
-- **Host:** **„Host starten“**. Beim ersten Mal fragt die Windows-Firewall: Zugriff erlauben.
+- **Host:** **„Host starten“**.
 - **Alle anderen:** Unter **„Adresse des Hosts“** die Adresse eintragen, dann **„Beitreten“**.
+
+**Windows-Firewall beim Host (einmalig):** Windows fragt bei diesem Spiel meist **nicht** nach, weil es
+UDP nutzt. Der Host legt deshalb die Freigabe selbst an, zum Beispiel in einer PowerShell als
+Administrator:
+
+```powershell
+New-NetFirewallRule -DisplayName "Schutzhuette UDP 7777" -Direction Inbound -Protocol UDP -LocalPort 7777 -Action Allow -Profile Any
+```
+
+Oder per Klick: „Windows Defender Firewall mit erweiterter Sicherheit“ → Eingehende Regeln → Neue
+Regel → Port → UDP, lokaler Port 7777 → Verbindung zulassen → alle Profile → Name vergeben.
 
 Welche Adresse?
 
 | Situation | Adresse | Was der Host vorher tun muss |
 | --- | --- | --- |
 | Alle im selben Netz (zu Hause, LAN) | Die lokale IPv4-Adresse des Host-PCs, zum Beispiel `192.168.1.23`. Zu finden mit `ipconfig` in der Eingabeaufforderung. | Nichts außer der Firewall-Freigabe. |
-| Übers Internet, mit Portfreigabe | Die öffentliche IP des Hosts (zum Beispiel über eine „Wie ist meine IP?“-Webseite). | Im Router **UDP-Port 7777** an den Host-PC weiterleiten. |
+| Übers Internet, mit Portfreigabe | Die öffentliche IP des Hosts (zum Beispiel über eine „Wie ist meine IP?“-Webseite). Sie kann sich ändern, vor jedem Spielabend neu nachsehen. | Im Router **UDP-Port 7777** an den Host-PC weiterleiten. Klappt nur, wenn die Internet-Adresse im Router mit der öffentlichen IP übereinstimmt. Vom eigenen PC aus lässt sich die öffentliche Adresse meist nicht testen, es muss ein Freund von außen sein. |
 | Übers Internet, ohne Router-Zugriff | Die virtuelle IP des Hosts im gemeinsamen virtuellen Netz. | Alle installieren dasselbe virtuelle LAN-Programm (zum Beispiel ZeroTier, Tailscale oder Radmin VPN) und treten demselben Netz bei. |
 
 Der Port ist fest **7777**. Allein testen geht auch: Spiel zweimal starten, im einen „Host starten“,
