@@ -502,7 +502,31 @@ How `Carryable` / `PlayerCarry` work, and the NGO facts they rely on:
   when it is within 4 m of the host's view of the carrier.
 - Known limit: the carried crate's collider is off, so it passes through walls while carried.
 - Tested in the Editor with MPPM (2026-11-08, host in the Player 2 window): crates spawn, pick-up,
-  drop and throw work, no errors in either Editor log. Not yet tested with simulated latency.
+  drop and throw work, no errors in either Editor log.
+
+## Simulated latency: Multiplayer Tools 2.2.12 Network Simulator (2026-11-08)
+
+Sources: the package's bundled `Documentation~/network-simulator.md` and its runtime source in
+`Library/PackageCache/com.unity.multiplayer.tools@*`, plus NGO's `UnityTransport.cs` and Unity
+Transport's `SimulatorUtility.cs`.
+- Add the `NetworkSimulator` component (namespace `Unity.Multiplayer.Tools.NetworkSimulator.Runtime`)
+  to an object that persists across scenes; this project uses the NetworkManager. Custom presets
+  are `NetworkSimulatorPresetAsset` ScriptableObjects (`PacketDelayMs`, `PacketJitterMs`,
+  `PacketLossInterval`, `PacketLossPercent`); the component stores one in its serialized
+  `m_PresetAsset` field (Inspector: Connection Preset = Custom). Requires Unity Transport >= 2.0.0
+  and NGO >= 1.1.0; it works with the built-in Transport 6.6.0 here.
+- NGO only builds the simulator pipeline stage when `UNITY_MP_TOOLS_NETSIM_IMPLEMENTATION_ENABLED`
+  is defined, which `UnityTransport.cs` does in the Editor and in DEBUG builds unless
+  `UNITY_MP_TOOLS_NETSIM_DISABLED_IN_DEVELOP` is set.
+- NGO calls `WithSimulatorStageParameters` without a mode, so `ApplyMode.AllPackets` applies: each
+  instance delays both sent and received packets ("we handle both directions"). With the simulator
+  on host and client (both load the same scene in MPPM), round trip = 4 x PacketDelayMs. The project
+  preset `Assets/_Project/Data/Verzoegerung100ms.asset` uses 25 ms delay and 5 ms jitter.
+- **Measured (Editor test, 2026-11-08):** the client's HUD showed a ping averaging about 100 ms
+  (`UnityTransport.GetCurrentRtt(NetworkManager.ServerClientId)`). Carrying works at that latency;
+  the user described it as slightly sluggish for the client.
+- Pitfall when setting it by editor script: `EditorSceneManager.OpenScene` unloads unused assets,
+  so load the preset asset after opening the scene, or the reference is saved as null.
 
 ## Multiplayer Play Mode 2.0.2 (docs read for 2.0; the project resolves 3.0.0, see above)
 

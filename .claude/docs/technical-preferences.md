@@ -59,6 +59,7 @@
 <!-- Add approved third-party dependencies here -->
 - `com.unity.netcode.gameobjects` 2.13.3 — Netcode for GameObjects, host-client. Approved 2026-11-07. Stay on 2.13.x while on Unity 6.6: 3.x requires Unity 6000.7. 2.13.0 or later is needed for Enter Play Mode with domain reload disabled.
 - `com.unity.multiplayer.playmode` 3.0.0 — Multiplayer Play Mode, editor-only test tool for up to four players. Approved 2026-11-07. On Unity 6.6 it is a built-in package: the Editor resolves 3.0.0 even when the manifest asks for 2.0.2 (`Packages/packages-lock.json`, `"source": "builtin"`).
+- `com.unity.multiplayer.tools` 2.2.12 — Network Simulator for the ~100 ms latency tests (CLAUDE.md). Approved 2026-11-08. Unity 6.6 lists this version in its editor package manifest; it is not built in, it comes from the registry.
 - `com.unity.transport` 6.6.0 — comes with NGO. Built-in on Unity 6.6; it replaces the 2.6.0 that NGO 2.13.3 declares as a dependency. The project compiles with it (batchmode, 2026-11-08).
 
 ## Architecture Decisions Log

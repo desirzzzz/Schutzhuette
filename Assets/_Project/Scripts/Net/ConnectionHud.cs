@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
@@ -103,11 +104,35 @@ namespace Schutzhuette.Net
                 GUILayout.Label($"Spieler verbunden: {_networkManager.ConnectedClientsIds.Count}");
             }
 
+            GUILayout.Label(BuildPingText());
+
             if (GUILayout.Button("Trennen"))
             {
                 _networkManager.Shutdown();
                 _statusMessage = "Getrennt.";
             }
+        }
+
+        // Gemessene Rundlaufzeit (Ping) laut Unity Transport. Zeigt, ob die simulierte
+        // Verzögerung des Network Simulators wirklich ankommt.
+        private string BuildPingText()
+        {
+            if (!_networkManager.IsServer)
+            {
+                return $"Ping zum Host: {_transport.GetCurrentRtt(NetworkManager.ServerClientId)} ms";
+            }
+
+            var pings = new List<string>();
+            foreach (ulong clientId in _networkManager.ConnectedClientsIds)
+            {
+                // Der eigene Client des Hosts läuft ohne Netzwerk, sein Ping ist bedeutungslos.
+                if (clientId != NetworkManager.ServerClientId)
+                {
+                    pings.Add($"{_transport.GetCurrentRtt(clientId)} ms");
+                }
+            }
+
+            return pings.Count == 0 ? "Ping: (noch kein anderer Spieler)" : "Ping: " + string.Join(", ", pings);
         }
 
         private void StartHost()
