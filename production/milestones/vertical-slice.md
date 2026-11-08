@@ -24,6 +24,7 @@ Bewertung? Das klärt ein Freundestest mit einer ganzen Saison.
 | Systeme | Nachteinsatz mit Trage, Holz hacken, Materialseilbahn, Hüttenkasse und Upgrades |
 | Steam und Sprache | Steam-Lobby mit Einladen, Proximity-Sprachchat mit Funkgerät |
 | Steam-Lobby wann? | früh (Schritt 2), mit Valves kostenloser Test-App „Spacewar“ (App-ID 480). Die eigene App-ID (100 USD) kommt erst mit der Steam-Seite (Nachtrag am selben Abend) |
+| Ragdoll und Solo-Hüttenhund | beide im Vertical Slice, Musik erst in der Alpha (Nachtrag bei `/map-systems`, siehe `design/gdd/systems-index.md`) |
 
 ## Inhalt im Einzelnen
 
@@ -50,6 +51,9 @@ Was mit „Vorschlag“ markiert ist, ist noch nicht entschieden.
   (Facepunch.Steamworks).
 - **Sprachchat:** In der Nähe hört man sich, mit der Entfernung wird es leiser. Draußen im
   Nachteinsatz überträgt nur das Funkgerät, und es rauscht.
+- **Solo-Hüttenhund:** Hilft solo beim Suchen und beim Tragen kleiner Dinge (KONZEPT, „Solo“).
+- **Ragdoll:** Figuren wackeln leicht und fallen beim Hinfallen als Ragdoll um. Bringt Momente für
+  Clips und den Trailer.
 - **Erste echte Grafik:** stilisierte Low-Poly-Alpenwelt mit Hütte, Hang, Figuren und Gegenständen,
   warmes Licht drinnen gegen kaltes Blau draußen.
 - **Steam-Seite:** Kapselbilder, Screenshots, Beschreibung und ein Trailer, der in den ersten
@@ -82,12 +86,17 @@ okay“?
    Kaiserschmarrn. Gäste reagieren auf Kälte.
 8. **Wetter-Eskalation und die 5 Ereignisse.**
 9. **Nachteinsatz:** Vermisster Gast, Stirnlampe, Trage zu zweit.
-10. **Bewertung, Hüttenkasse, Upgrades, nächste Saison.**
-11. **Proximity-Sprachchat und Funkgerät.**
-12. **Erste echte Grafik:** Asset-Pack einsetzen, Figuren.
-13. **Steam-Seite und eigene App-ID:** Steamworks-Konto anlegen (100 USD), das Spiel von App-ID 480
+10. **Solo-Hüttenhund:** Hilft solo beim Suchen und Tragen, damit eine Saison auch allein zu schaffen
+    ist.
+11. **Bewertung, Hüttenkasse, Upgrades, nächste Saison.**
+12. **Proximity-Sprachchat und Funkgerät.**
+13. **Erste echte Grafik:** Asset-Pack einsetzen, Figuren mit leichtem Wackeln und Ragdoll beim
+    Hinfallen.
+14. **Steam-Seite und eigene App-ID:** Steamworks-Konto anlegen (100 USD), das Spiel von App-ID 480
     auf die eigene umstellen, Bilder, Trailer und Text, live schalten. Danach Freundestest mit einer
     ganzen Saison, `/playtest-report` und `/gate-check`.
+
+Die Systeme dahinter mit Abhängigkeiten und Design-Reihenfolge stehen in `design/gdd/systems-index.md`.
 
 ## Umfang und Zeit
 
@@ -105,12 +114,14 @@ Upgrades, dann das dritte Gericht und der dritte Gast.
 - **Asset-Pack** für die Grafik: welches, was es kostet, welche Lizenz gilt.
 - **Sprachchat:** Vivox oder Dissonance (Kosten, Aufwand, Funkgerät-Effekt).
 - **Steamworks-Konto** und App-Gebühr (Steam Direct, 100 USD pro Spiel, nicht erstattbar, wird ab
-  1.000 USD Umsatz zurückgezahlt): Das legt der Entwickler selbst an, vor Schritt 13. Bis dahin
+  1.000 USD Umsatz zurückgezahlt): Das legt der Entwickler selbst an, vor Schritt 14. Bis dahin
   genügt die kostenlose Test-App 480.
-- **Solo:** Trage und Truhe gehen nur zu zweit. KONZEPT plant für Solo einen Hüttenhund. Kommt der in
-  den Vertical Slice, oder ist Solo dort nur zum Testen gedacht?
-- **Figuren:** Ragdoll beim Hinfallen (KONZEPT) im Vertical Slice oder später?
-- **Musik** (Zither, Akkordeon, dichter mit dem Sturm) im Vertical Slice oder später?
+- **Solo-Hüttenhund:** Truhe und Trage gehen nur zu zweit. Wie schafft man sie solo, zum Beispiel
+  mit einem Schlitten, den der Hund zieht? Das klärt das GDD des Hundes.
+- **Ragdoll im Netz:** Nur Zustand und Wurzelposition übertragen oder mehr? Das klärt das GDD und ein
+  früher Versuch.
+
+Entschieden: Ragdoll und Solo-Hüttenhund kommen in den Vertical Slice, die Musik in die Alpha.
 
 ## Neue Pakete
 

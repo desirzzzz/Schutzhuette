@@ -56,3 +56,6 @@ commands:
   test: '"C:/Program Files/Unity/Hub/Editor/6000.6.6f1/Editor/Unity.exe" -batchmode -runTests -projectPath . -testPlatform EditMode -testResults test-results/editmode.xml'
   run: "Builds/Win64/Schutzhuette.exe -screen-width 1280 -screen-height 720 -screen-fullscreen 0"
   smoke: '"C:/Program Files/Unity/Hub/Editor/6000.6.6f1/Editor/Unity.exe" -batchmode -quit -projectPath . -logFile -'
+
+modes:
+  rigor: standard

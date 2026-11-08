@@ -54,7 +54,7 @@
 #   in any other shape is reported as unsupported layout, with its number.
 
 version: 1
-last_updated: ""
+last_updated: "2026-11-08"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -94,7 +94,234 @@ entities: []
 # Attribute fields: value_gold, weight, stackable, category, and any stat
 #   modifiers that another system (e.g., economy, crafting) might reference.
 
-items: []
+items:
+  - name: holzscheit
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: brennstoff
+    mass_kg: 3
+    carry_mode: alone
+    impact_sound: holz
+    burn_seconds: 45
+    added: 2026-11-08
+    revised: ""
+  - name: holzklotz
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: rohstoff
+    mass_kg: 12
+    carry_mode: alone
+    impact_sound: holz
+    chop_result: holzscheit
+    chop_count: 4
+    added: 2026-11-08
+    revised: ""
+  - name: vorratskiste
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: vorratspaket
+    mass_kg: 10
+    carry_mode: alone
+    impact_sound: holz
+    portions: 6
+    ware: "beim Erscheinen gesetzt"
+    added: 2026-11-08
+    revised: ""
+  - name: wasserkanister
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: vorratspaket
+    mass_kg: 20
+    carry_mode: alone
+    impact_sound: weich
+    portions: 10
+    ware: ware_wasser
+    added: 2026-11-08
+    revised: ""
+  - name: truhe
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: vorratspaket
+    mass_kg: 80
+    carry_mode: two_person
+    impact_sound: holz
+    portions: 20
+    ware: "beim Erscheinen gesetzt"
+    added: 2026-11-08
+    revised: ""
+  - name: trage
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: sperrgut
+    mass_kg: 15
+    carry_mode: two_person
+    impact_sound: holz
+    notes: "vorläufig, Leermasse; Masse mit Person legt das Nachteinsatz-GDD fest"
+    added: 2026-11-08
+    revised: ""
+  - name: tee
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: gericht
+    mass_kg: 0.5
+    carry_mode: alone
+    impact_sound: weich
+    break_speed_ms: 7.0
+    cool_time_s: 90
+    added: 2026-11-08
+    revised: ""
+  - name: speckbrot
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: gericht
+    mass_kg: 0.8
+    carry_mode: alone
+    impact_sound: holz
+    notes: "kühlt nicht ab, zerbricht nicht"
+    added: 2026-11-08
+    revised: ""
+  - name: kaiserschmarrn
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: gericht
+    mass_kg: 0.8
+    carry_mode: alone
+    impact_sound: weich
+    break_speed_ms: 7.0
+    cool_time_s: 150
+    added: 2026-11-08
+    revised: ""
+  - name: axt
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: werkzeug
+    mass_kg: 2
+    carry_mode: alone
+    impact_sound: holz
+    tool_action: hacken
+    added: 2026-11-08
+    revised: ""
+  - name: erste_hilfe
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: werkzeug
+    mass_kg: 3
+    carry_mode: alone
+    impact_sound: weich
+    tool_action: erste_hilfe
+    added: 2026-11-08
+    revised: ""
+  - name: stirnlampe
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: werkzeug
+    mass_kg: 0.3
+    carry_mode: alone
+    impact_sound: weich
+    tool_action: licht
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: funkgeraet
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: werkzeug
+    mass_kg: 0.5
+    carry_mode: alone
+    impact_sound: weich
+    tool_action: funk
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_speck
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "vorläufig, das Kochen-GDD legt die Waren fest"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_brot
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_mehl
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_eier
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_milch
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_tee
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "vorläufig"
+    added: 2026-11-08
+    revised: ""
+  - name: ware_wasser
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    category: ware
+    notes: "fester Inhalt des Wasserkanisters"
+    added: 2026-11-08
+    revised: ""
 
 # Example:
 #
@@ -123,7 +350,92 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: solo_mass_valid
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    variables:
+      - carry_mode
+      - mass_kg
+      - max_solo_mass
+    output_range: [0, 1]
+    expression: "(carry_mode == two_person) OR (mass_kg <= max_solo_mass)"
+    notes: "bool; false = Editor-Fehler. Hängt am Tempoverlust 0,01 pro kg aus dem Tragen."
+    added: 2026-11-08
+    revised: ""
+  - name: breaks_on_impact
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    variables:
+      - is_fragile
+      - state
+      - impact_speed
+      - break_speed
+    output_range: [0, 1]
+    expression: "is_fragile AND state == falling AND impact_speed > break_speed"
+    notes: "bool; impact_speed = größter Normalanteil der Relativgeschwindigkeit über die Kontaktpunkte eines Kollisionsereignisses, derselbe Messwert wie bei den Geräuschen."
+    added: 2026-11-08
+    revised: ""
+  - name: release_fall_speed
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    variables:
+      - gravity
+      - hold_height
+      - surface_height
+    output_range: [0, 6.11]
+    expression: "sqrt(2 * gravity * max(0, hold_height - surface_height))"
+    notes: "Haltehöhe hängt am Haltepunkt im Tragen (0,2 m über der Kamera)."
+    added: 2026-11-08
+    revised: ""
+  - name: is_warm
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    variables:
+      - server_time
+      - cooked_time
+      - cool_time
+    output_range: [0, 1]
+    expression: "(server_time - cooked_time) < cool_time"
+    notes: "bool; cool_time <= 0 oder fehlend = immer wahr. Die Gäste lesen das Ergebnis."
+    added: 2026-11-08
+    revised: ""
+  - name: warm_fraction
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    variables:
+      - server_time
+      - cooked_time
+      - cool_time
+    output_range: [0, 1]
+    expression: "clamp(1 - (server_time - cooked_time) / cool_time, 0, 1)"
+    notes: "Nur Anzeige (Dampf); cool_time <= 0 oder fehlend = 0."
+    added: 2026-11-08
+    revised: ""
+  - name: chop_mass_balance
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    variables:
+      - result_count
+      - result_mass_kg
+      - source_mass_kg
+    output_range: [-80, 80]
+    expression: "result_count * result_mass_kg - source_mass_kg"
+    notes: "Sollwert 0; Hinweis ab mehr als 10 % der Ausgangsmasse. Holz hacken nutzt sie."
+    added: 2026-11-08
+    revised: ""
 
 # Example:
 #
@@ -156,7 +468,16 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: max_solo_mass
+    status: active
+    source: design/gdd/gegenstandsarten.md
+    referenced_by:
+      - design/gdd/gegenstandsarten.md
+    value: 25
+    unit: kg
+    added: 2026-11-08
+    revised: ""
 
 # Example:
 #
