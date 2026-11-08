@@ -528,6 +528,32 @@ Transport's `SimulatorUtility.cs`.
 - Pitfall when setting it by editor script: `EditorSceneManager.OpenScene` unloads unused assets,
   so load the preset asset after opening the scene, or the reference is saved as null.
 
+## Client-side prediction for pick-up, drop and throw (project code, 2026-11-08)
+
+Not an NGO feature; this is how `PlayerCarry` hides the round trip on clients. The host stays
+authoritative (CLAUDE.md rule 2); prediction is purely visual on the owner's machine.
+- **Grab:** on E the client sends `PickUpRpc`, hides the real crate locally
+  (`Carryable.SetLocallyHidden`) and shows a non-networked copy (`Carryable.CreateLocalGhost`) at the
+  hold point. It swaps back once the host has parented the real crate to the player and the crate
+  reached the hold point (or 0.4 s after parenting), or reveals it again if someone else took it or
+  nothing happened within 0.75 s.
+- **Release (drop/throw):** the client sends `DropRpc` with its own crate pose and velocity, hides
+  the real crate and lets a local copy with its own Rigidbody fly. The copy ignores collisions with
+  the player's CharacterController and with the real crate (`Physics.IgnoreCollision`, re-applied
+  every frame because enabling a collider resets it). It swaps back when the copy rests and the real
+  crate is within 0.3 m, or after 2.5 s.
+- **Fast sequences:** releasing while a grab is still pending reuses the grab copy's pose; the host
+  receives `PickUpRpc` then `DropRpc` in order. A just-thrown crate (its copy or the hidden real
+  crate) can be targeted and picked up again immediately.
+- The host predicts nothing: its own RPCs run locally at once.
+- **Lesson from testing:** an Editor that is open while scripts change on disk may not recompile on
+  its own (here it kept running a 09:27 `Assembly-CSharp.dll` after 09:49 edits). Check the DLL time
+  in `Library/ScriptAssemblies/` or a version marker in the HUD before trusting a test; Ctrl+R
+  forces the refresh.
+- **Tested (Editor, MPPM, 100 ms simulated ping, 2026-11-08):** the user reported carrying as the
+  client as "much better", and fast pick-up/throw sequences as clean after the fixes. No errors in
+  either Editor log.
+
 ## Multiplayer Play Mode 2.0.2 (docs read for 2.0; the project resolves 3.0.0, see above)
 
 - `com.unity.multiplayer.playmode` 2.0.2 (2026-03-12). Minimum editor 6000.3.0b10 (changelog 2.0.1);

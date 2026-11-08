@@ -29,6 +29,7 @@ namespace Schutzhuette.Net
         private NetworkManager _networkManager;
         private UnityTransport _transport;
         private string _statusMessage = string.Empty;
+        private float _smoothedFps;
 
         private void Awake()
         {
@@ -53,10 +54,18 @@ namespace Schutzhuette.Net
             _networkManager.OnClientDisconnectCallback -= HandleClientDisconnect;
         }
 
+        // Bilder pro Sekunde, geglättet. Zeigt, ob ein Fenster (z. B. "Player 2") selbst ruckelt.
+        private void Update()
+        {
+            float currentFps = 1f / Mathf.Max(Time.unscaledDeltaTime, 0.0001f);
+            _smoothedFps = _smoothedFps <= 0f ? currentFps : Mathf.Lerp(_smoothedFps, currentFps, 0.05f);
+        }
+
         private void OnGUI()
         {
             GUI.matrix = Matrix4x4.Scale(new Vector3(_uiScale, _uiScale, 1f));
             GUILayout.BeginArea(new Rect(10f, 10f, 260f, 400f));
+            GUILayout.Label($"FPS: {_smoothedFps:0}");
 
             // IsListening: Läuft gerade eine Sitzung (als Host oder Client)?
             if (_networkManager.IsListening)

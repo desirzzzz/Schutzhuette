@@ -23,15 +23,71 @@ namespace Schutzhuette.Carrying
         private Rigidbody _rigidbody;
         private NetworkRigidbody _networkRigidbody;
         private Collider _collider;
+        private Renderer[] _renderers;
 
         /// <summary>Wird der Gegenstand gerade getragen? Stimmt auf Host und Clients.</summary>
         public bool IsCarried => transform.parent != null;
+
+        /// <summary>
+        /// Ist die echte Kiste auf diesem Rechner gerade ausgeblendet, weil eine
+        /// Vorhersage-Kopie an ihrer Stelle angezeigt wird? Gilt nur lokal.
+        /// </summary>
+        public bool IsLocallyHidden { get; private set; }
+
+        /// <summary>Der Collider der echten Kiste (für Physics.IgnoreCollision der Vorhersage).</summary>
+        public Collider Collider => _collider;
 
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
             _networkRigidbody = GetComponent<NetworkRigidbody>();
             _collider = GetComponent<Collider>();
+            _renderers = GetComponentsInChildren<Renderer>();
+        }
+
+        /// <summary>
+        /// Blendet die echte Kiste nur auf diesem Rechner aus oder wieder ein.
+        /// Ändert nichts am Netzwerkzustand, die anderen Spieler sehen sie weiter.
+        /// </summary>
+        public void SetLocallyHidden(bool hidden)
+        {
+            IsLocallyHidden = hidden;
+            foreach (Renderer itemRenderer in _renderers)
+            {
+                itemRenderer.enabled = !hidden;
+            }
+        }
+
+        /// <summary>
+        /// Erzeugt eine nicht vernetzte Darstellungs-Kopie mit gleicher Form, Größe und Farbe,
+        /// an der aktuellen Weltposition. Nur für die Vorhersage auf dem eigenen Rechner.
+        /// </summary>
+        /// <param name="withPhysics">true: mit Collider und Rigidbody (zum Fallen und Fliegen).</param>
+        public GameObject CreateLocalGhost(bool withPhysics)
+        {
+            var ghost = new GameObject($"{name} (Vorhersage)");
+            ghost.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            ghost.transform.localScale = transform.lossyScale;
+
+            if (TryGetComponent(out MeshFilter sourceFilter))
+            {
+                ghost.AddComponent<MeshFilter>().sharedMesh = sourceFilter.sharedMesh;
+            }
+
+            if (TryGetComponent(out MeshRenderer sourceRenderer))
+            {
+                ghost.AddComponent<MeshRenderer>().sharedMaterials = sourceRenderer.sharedMaterials;
+            }
+
+            if (withPhysics)
+            {
+                // Ein BoxCollider passt sich beim Hinzufügen an das Mesh an.
+                ghost.AddComponent<BoxCollider>();
+                var body = ghost.AddComponent<Rigidbody>();
+                body.mass = _rigidbody.mass;
+            }
+
+            return ghost;
         }
 
         /// <inheritdoc />
