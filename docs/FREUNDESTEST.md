@@ -2,12 +2,17 @@
 
 **Die eine Frage:** Macht es Spaß, zu zweit eine schwere Kiste durch eine Hütte zu tragen?
 
-Build: `Builds/Schutzhuette-Prototyp-0.1.2.zip` (Windows, 64 Bit). Version 0.1.2.
+Build: `Builds/Schutzhuette-Prototyp-0.1.3.zip` (Windows, 64 Bit). Version 0.1.3.
+
+**Updates:** Ab 0.1.3 aktualisiert sich das Spiel selbst. Gibt es eine neue Version, steht im
+Menü „Neue Version … verfügbar!“ mit dem Knopf **Jetzt aktualisieren**. Ein Klick lädt sie,
+das Spiel schließt sich kurz (ein kleines Fenster zeigt „wird aktualisiert“) und startet neu.
+Das Spiel muss dafür in einem normalen Ordner liegen (z. B. Desktop oder Downloads), nicht unter
+„Programme“. Wer noch 0.1.2 oder älter hat, lädt 0.1.3 einmal von Hand:
+https://github.com/desirzzzz/Schutzhuette/releases
 
 **Alle brauchen dieselbe Version.** Sie steht oben links im Menü. Mit einer anderen Version
-lehnt der Host den Beitritt ab und sagt, welche Version fehlt. Neue Versionen gibt es unter
-https://github.com/desirzzzz/Schutzhuette/releases. Ein automatisches Update gibt es noch nicht:
-neue Zip laden, entpacken, die neue `Schutzhuette.exe` starten.
+lehnt der Host den Beitritt ab und sagt, wer aktualisieren muss.
 
 **Neu seit 0.1.0:** Spielfiguren statt Kapseln, Hütte mit Farben, Dach und warmem Licht.
 Gewicht ist spürbar (die Kamera wippt mit Last, schwere Kisten bremsen, die Truhe schaukelt).

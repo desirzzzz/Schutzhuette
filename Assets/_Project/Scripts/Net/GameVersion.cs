@@ -49,11 +49,33 @@ namespace Schutzhuette.Net
             return !string.IsNullOrEmpty(clientVersion) && clientVersion == hostVersion;
         }
 
-        /// <summary>Meldung für den abgelehnten Spieler.</summary>
+        /// <summary>Meldung für den abgelehnten Spieler: Wer muss aktualisieren?</summary>
         public static string MismatchReason(string hostVersion, string clientVersion)
         {
+            if (IsNewer(clientVersion, hostVersion))
+            {
+                return $"Falsche Version: Der Host spielt {hostVersion}, du {clientVersion}. Der Host muss aktualisieren.";
+            }
+
             string yours = string.IsNullOrEmpty(clientVersion) ? "eine ältere" : clientVersion;
-            return $"Falsche Version: Der Host spielt {hostVersion}, du {yours}. Bitte die Version {hostVersion} laden.";
+            return $"Falsche Version: Der Host spielt {hostVersion}, du {yours}. Bitte aktualisieren (Knopf im Menü).";
+        }
+
+        /// <summary>Versionsnummer aus einem Release-Tag, z. B. "v0.1.3" → "0.1.3".</summary>
+        public static string FromTag(string tag)
+        {
+            return string.IsNullOrEmpty(tag) ? string.Empty : tag.Trim().TrimStart('v', 'V');
+        }
+
+        /// <summary>
+        /// Ist <paramref name="candidate"/> neuer als <paramref name="current"/>? Vergleicht
+        /// Zahl für Zahl (0.1.10 ist neuer als 0.1.9). Unlesbare Nummern gelten nie als neuer.
+        /// </summary>
+        public static bool IsNewer(string candidate, string current)
+        {
+            return System.Version.TryParse(candidate, out System.Version a)
+                && System.Version.TryParse(current, out System.Version b)
+                && a > b;
         }
     }
 }

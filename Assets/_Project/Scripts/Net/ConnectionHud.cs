@@ -7,7 +7,8 @@ namespace Schutzhuette.Net
 {
     /// <summary>
     /// Provisorische Verbindungs-Knöpfe für den Prototyp: Host starten,
-    /// beitreten, trennen, dazu eine Statuszeile.
+    /// beitreten, trennen, dazu eine Statuszeile und im Menü der Update-Knopf
+    /// (<see cref="GameUpdater"/>).
     /// </summary>
     /// <remarks>
     /// Bewusst mit OnGUI (IMGUI) gebaut: Das braucht keinen Canvas und kein
@@ -28,6 +29,7 @@ namespace Schutzhuette.Net
 
         private NetworkManager _networkManager;
         private UnityTransport _transport;
+        private GameUpdater _updater;
         private string _statusMessage = string.Empty;
         private float _smoothedFps;
 
@@ -35,6 +37,13 @@ namespace Schutzhuette.Net
         {
             _networkManager = GetComponent<NetworkManager>();
             _transport = GetComponent<UnityTransport>();
+
+            // Der Updater gehört zum Menü. Er wird hier angehängt, damit die Szene dafür
+            // nicht geändert werden muss; seine Einstellungen haben feste Startwerte.
+            if (!TryGetComponent(out _updater))
+            {
+                _updater = gameObject.AddComponent<GameUpdater>();
+            }
         }
 
         private void OnEnable()
@@ -104,6 +113,47 @@ namespace Schutzhuette.Net
             if (GUILayout.Button("Beenden"))
             {
                 Application.Quit();
+            }
+
+            DrawUpdate();
+        }
+
+        // Update-Hinweis und -Knopf, nur im Menü (nicht während einer Sitzung).
+        private void DrawUpdate()
+        {
+            switch (_updater.State)
+            {
+                case GameUpdater.UpdateState.Checking:
+                    GUILayout.Label("Suche nach Updates ...");
+                    break;
+                case GameUpdater.UpdateState.CheckFailed:
+                    GUILayout.Label("Update-Suche nicht möglich (offline?).");
+                    break;
+                case GameUpdater.UpdateState.Available:
+                    GUILayout.Label($"Neue Version {_updater.LatestVersion} verfügbar!");
+                    if (GUILayout.Button("Jetzt aktualisieren"))
+                    {
+                        _updater.InstallUpdate();
+                    }
+
+                    break;
+                case GameUpdater.UpdateState.Downloading:
+                    GUILayout.Label($"Lade Update ... {_updater.Progress * 100f:0} %");
+                    break;
+                case GameUpdater.UpdateState.Installing:
+                    GUILayout.Label("Prüfe und entpacke Update ...");
+                    break;
+                case GameUpdater.UpdateState.Restarting:
+                    GUILayout.Label("Spiel startet neu ...");
+                    break;
+                case GameUpdater.UpdateState.Failed:
+                    GUILayout.Label("Update fehlgeschlagen: " + _updater.Message);
+                    if (GUILayout.Button("Nochmal versuchen"))
+                    {
+                        _updater.InstallUpdate();
+                    }
+
+                    break;
             }
         }
 
