@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 1052065544361577029}
   - component: {fileID: 1739589005101590098}
   - component: {fileID: 244365549332954761}
+  - component: {fileID: 712503269495074152}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -343,6 +344,9 @@ MonoBehaviour:
   _throwSpeed: 8
   _maxThrowSpeed: 15
   _maxServerDistance: 4
+  _slowdownPerKg: 0.01
+  _minCarrySpeed: 0.6
+  _cameraLoadPerKg: 0.05
   _grabTimeout: 0.75
   _releaseMaxTime: 2.5
   _swapDistance: 0.3
@@ -362,6 +366,7 @@ MonoBehaviour:
   _cameraMount: {fileID: 7219984379283611179}
   _interactRange: 2.5
   _maxServerGrabDistance: 2.5
+  _carryTurnFactor: 0.6
 --- !u!114 &244365549332954761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -391,6 +396,19 @@ MonoBehaviour:
   _armMaxLength: 1.1
   _leanPerSpeed: 3
   _bobHeight: 0.05
+--- !u!114 &712503269495074152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2179597229054303953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d533d19c7e39743a0a67d3b59ed932, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.FootstepSound
+  _settings: {fileID: 11400000, guid: 63c3d4f315d63e648ad8518f95139d90, type: 2}
 --- !u!1 &2671321266527195765
 GameObject:
   m_ObjectHideFlags: 0

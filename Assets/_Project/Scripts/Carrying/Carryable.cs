@@ -1,3 +1,4 @@
+using Schutzhuette.Audio;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -78,6 +79,12 @@ namespace Schutzhuette.Carrying
                 ghost.AddComponent<BoxCollider>();
                 var body = ghost.AddComponent<Rigidbody>();
                 body.mass = _rigidbody.mass;
+
+                // Die fliegende Kopie macht ihre Aufprall-Geräusche selbst (Vorhersage).
+                if (TryGetComponent(out ImpactSound impactSound))
+                {
+                    impactSound.AttachToGhost(ghost);
+                }
             }
 
             return ghost;

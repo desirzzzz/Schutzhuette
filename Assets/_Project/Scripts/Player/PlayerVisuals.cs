@@ -48,6 +48,9 @@ namespace Schutzhuette.Player
         private float _walkPhase;
         private MaterialPropertyBlock _propertyBlock;
 
+        /// <summary>Die Truhe, von der diese Figur ein Ende hält, sonst null. Stimmt auf Host und Clients.</summary>
+        public HeavyCarryable HeldChest => _heldChest;
+
         /// <summary>Wird von der Truhe aufgerufen: Diese Figur hält jetzt ein Ende von ihr.</summary>
         public void SetHeldChest(HeavyCarryable chest)
         {

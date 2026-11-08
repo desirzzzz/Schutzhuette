@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6105746155108691659}
   - component: {fileID: 6179422854278253008}
   - component: {fileID: 1810818261832071108}
+  - component: {fileID: 4838641882317983678}
   m_Layer: 0
   m_Name: Crate
   m_TagString: Untagged
@@ -247,3 +248,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Carrying.Carryable
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &4838641882317983678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3903322549749023954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddb88d664f929154bbb1dde7a4f76950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.ImpactSound
+  ShowTopMostFoldoutHeaderGroup: 1
+  _settings: {fileID: 11400000, guid: 63c3d4f315d63e648ad8518f95139d90, type: 2}

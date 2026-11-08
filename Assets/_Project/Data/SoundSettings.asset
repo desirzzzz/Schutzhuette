@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd6ad9e8780eedc4ebde6efe317586d3, type: 3}
+  m_Name: SoundSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.SoundSettings
+  _impactClips:
+  - {fileID: 8300000, guid: 0e4ee498c52a23c4198b1c8c1fdc0e3e, type: 3}
+  - {fileID: 8300000, guid: 82cfc9f09ba381146bc7afb5a83e95ba, type: 3}
+  - {fileID: 8300000, guid: 37d427f67e95fd94f98473e59cbed02e, type: 3}
+  - {fileID: 8300000, guid: 2ae2fa01c835e1344a881275fbbc70bc, type: 3}
+  - {fileID: 8300000, guid: 2b9d2081f14ab394c9eeabcdcbd259a5, type: 3}
+  _heavyImpactClips:
+  - {fileID: 8300000, guid: 7ac35e08b525685438183f1257c923e5, type: 3}
+  - {fileID: 8300000, guid: e9c8f41e21c4e2749bf677b2db53107d, type: 3}
+  - {fileID: 8300000, guid: 1d811507dec0d4d48816da759fadf30e, type: 3}
+  - {fileID: 8300000, guid: 7005fc6919e0079428d866231629e19a, type: 3}
+  - {fileID: 8300000, guid: 84d33d696c379fe47a89e3848a32de26, type: 3}
+  _impactVolume: 1
+  _minImpactSpeed: 0.6
+  _fullImpactSpeed: 6
+  _lightMass: 3
+  _heavyMass: 80
+  _lightPitch: 1.15
+  _heavyPitch: 0.6
+  _lightCutoff: 9000
+  _heavyCutoff: 1400
+  _impactCooldown: 0.12
+  _impactMaxDistance: 30
+  _woodSteps:
+  - {fileID: 8300000, guid: df686d8c099d63c41bfad6a927553e9e, type: 3}
+  - {fileID: 8300000, guid: f564d63b8d19c5044be68993d852663b, type: 3}
+  - {fileID: 8300000, guid: efb13df5875c81f4dbaf76aa63409bd3, type: 3}
+  - {fileID: 8300000, guid: d7a22c847756e65489c04a33f3cf9972, type: 3}
+  - {fileID: 8300000, guid: 3f413bd919a51cd43b2f9da804e5cada, type: 3}
+  _snowSteps:
+  - {fileID: 8300000, guid: d9d00d861765e4a4c84687df77df8cee, type: 3}
+  - {fileID: 8300000, guid: d3ad7cbebc160b7498ddf1a71fb1be99, type: 3}
+  - {fileID: 8300000, guid: 3688af7777cdcad4f82a3a4a3567ad9e, type: 3}
+  - {fileID: 8300000, guid: 5221d697034c2a34888809d786bd4f30, type: 3}
+  - {fileID: 8300000, guid: 27de3711b20198d408c043dba90b6521, type: 3}
+  _stepVolume: 0.35
+  _loadedStepVolume: 0.75
+  _stepPitch: 1
+  _loadedStepPitch: 0.78
+  _stepLength: 1.1
+  _loadedStepLength: 1.3
+  _fullLoadMass: 40
+  _stepMaxDistance: 20
+  _stoveLoop: {fileID: 8300000, guid: 47a606aa7f6df5e48b2c4a5ed5d279ae, type: 3}
+  _stoveVolume: 0.8
+  _stoveMaxDistance: 12
+  _stoveFadeSeconds: 1.5
+  _windLoop: {fileID: 8300000, guid: ad60bcfffec492f4aa15e9c9a39868b9, type: 3}
+  _windOutdoorVolume: 0.35
+  _windIndoorVolume: 0.12
+  _windIndoorCutoff: 700
+  _windFadeSeconds: 0.6
+  _gustStrength: 0.3
+  _roofCheckHeight: 8

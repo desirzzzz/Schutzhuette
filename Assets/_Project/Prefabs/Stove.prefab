@@ -311,6 +311,7 @@ GameObject:
   - component: {fileID: 5718337362610736147}
   - component: {fileID: 2824154940922015324}
   - component: {fileID: 4608960893707694906}
+  - component: {fileID: 6608579276638349096}
   m_Layer: 0
   m_Name: Stove
   m_TagString: Untagged
@@ -400,3 +401,16 @@ MonoBehaviour:
   _settings: {fileID: 11400000, guid: 4279cf299e0aea940bb80b604a3ead5a, type: 2}
   _fireLight: {fileID: 3923542129529333457}
   _fireVisual: {fileID: 6878786545060072818}
+--- !u!114 &6608579276638349096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7230411484400455977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 968a768d5f5e98c40ad0cc38f0ef3bf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.StoveSound
+  _settings: {fileID: 11400000, guid: 63c3d4f315d63e648ad8518f95139d90, type: 2}

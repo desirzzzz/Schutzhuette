@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 9154552729785879285}
   - component: {fileID: 5037891365898932533}
   - component: {fileID: 4812375535518034755}
+  - component: {fileID: 7552202985462751931}
   m_Layer: 0
   m_Name: Firewood
   m_TagString: Untagged
@@ -261,3 +262,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Hut.FuelItem
   _burnSeconds: 45
+--- !u!114 &7552202985462751931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1989595317476219397}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddb88d664f929154bbb1dde7a4f76950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.ImpactSound
+  ShowTopMostFoldoutHeaderGroup: 1
+  _settings: {fileID: 11400000, guid: 63c3d4f315d63e648ad8518f95139d90, type: 2}
