@@ -50,6 +50,19 @@ namespace Schutzhuette.Carrying
         private Collider _collider;
         private Renderer[] _renderers;
         private bool _carriedOnServer;
+        private Vector3 _lastCarryCenter;
+        private float _swaySpeed;
+
+        /// <summary>
+        /// Leichtes Schaukeln einer getragenen Truhe: bis 3 Grad seitlich und 1,8 Grad
+        /// nach vorn und hinten, je schneller getragen wird (ab 2 m/s volle Stärke).
+        /// Reine Rechnung ohne Zustand, damit Host und Vorhersage gleich schaukeln.
+        /// </summary>
+        public static Quaternion Sway(float time, float speed)
+        {
+            float amount = Mathf.Clamp01(speed / 2f) * 3f;
+            return Quaternion.Euler(Mathf.Sin(time * 2.7f) * amount * 0.6f, 0f, Mathf.Sin(time * 4f) * amount);
+        }
 
         /// <summary>Waagrechter Mindestabstand der zwei Träger.</summary>
         public float MinCarrierDistance => _minCarrierDistance;
@@ -269,7 +282,14 @@ namespace Schutzhuette.Carrying
             {
                 ComputeCarryPose(carrierA.transform.position, carrierB.transform.position, _reach, _handHeight,
                     out Vector3 center, out Quaternion rotation);
-                transform.SetPositionAndRotation(center, rotation);
+
+                // Leicht schaukeln, je schneller getragen wird, desto mehr.
+                float deltaTime = Mathf.Max(Time.deltaTime, 0.0001f);
+                float centerSpeed = (center - _lastCarryCenter).magnitude / deltaTime;
+                _lastCarryCenter = center;
+                _swaySpeed = Mathf.Lerp(_swaySpeed, Mathf.Min(centerSpeed, 5f), 5f * deltaTime);
+
+                transform.SetPositionAndRotation(center, rotation * Sway(Time.time, _swaySpeed));
             }
         }
 
@@ -307,6 +327,10 @@ namespace Schutzhuette.Carrying
             _carriedOnServer = carried;
             if (carried)
             {
+                // Schaukeln ruhig beginnen lassen.
+                _lastCarryCenter = transform.position;
+                _swaySpeed = 0f;
+
                 if (!_rigidbody.isKinematic)
                 {
                     _rigidbody.linearVelocity = Vector3.zero;

@@ -141,13 +141,32 @@ namespace Schutzhuette.Player
             _camera.SetParent(_cameraMount, false);
             _camera.localPosition = Vector3.zero;
             _camera.localRotation = Quaternion.identity;
+
+            // Wippen, Schwanken und Ruck nur für die eigene Kamera.
+            if (!TryGetComponent(out CameraFeel feel))
+            {
+                feel = gameObject.AddComponent<CameraFeel>();
+            }
+
+            feel.SetCamera(_camera);
+            Feel = feel;
         }
+
+        /// <summary>
+        /// Kamera-Gefühl der eigenen Figur (Wippen, Ruck), sonst null. Nur auf dem eigenen Rechner.
+        /// </summary>
+        public CameraFeel Feel { get; private set; }
 
         private void DetachSceneCamera()
         {
             if (_camera == null)
             {
                 return;
+            }
+
+            if (Feel != null)
+            {
+                Feel.SetCamera(null);
             }
 
             _camera.SetParent(null, false);

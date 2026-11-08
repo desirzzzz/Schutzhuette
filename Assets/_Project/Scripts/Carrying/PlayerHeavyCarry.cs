@@ -39,6 +39,16 @@ namespace Schutzhuette.Carrying
         // Vorhersage beim Tragen zu zweit (nur Clients): Kopie der Truhe aus eigener Sicht.
         private GameObject _chestGhost;
         private HeavyCarryable _hiddenChest;
+        private Vector3 _ghostLastCenter;
+        private float _ghostSwaySpeed;
+
+        [Header("Gewicht")]
+        [Tooltip("Beim Tragen zu zweit dreht man sich nur so schnell (Faktor auf das Umschauen).")]
+        [SerializeField, Range(0.1f, 1f)] private float _carryTurnFactor = 0.6f;
+
+        private PlayerLook _look;
+        private bool _wasHeldBack;
+        private bool _wasChestBlocked;
 
         /// <summary>
         /// Hält diese Figur gerade ein Ende eines schweren Gegenstands?
@@ -58,6 +68,7 @@ namespace Schutzhuette.Carrying
             }
 
             _controller = GetComponent<CharacterController>();
+            _look = GetComponent<PlayerLook>();
             _carry = GetComponent<PlayerCarry>();
 
             if (InputSystem.actions != null)
@@ -100,6 +111,10 @@ namespace Schutzhuette.Carrying
                 _chestGhost = _current.CreateLocalGhost();
                 _hiddenChest = _current;
                 _hiddenChest.SetLocallyHidden(true);
+
+                // Schaukeln ruhig beginnen lassen.
+                _ghostLastCenter = _chestGhost.transform.position;
+                _ghostSwaySpeed = 0f;
             }
 
             // Dieselbe Rechnung wie beim Host, aber mit der eigenen, aktuellen Position
@@ -109,7 +124,13 @@ namespace Schutzhuette.Carrying
             Vector3 other = partner.transform.position;
             _current.ComputePose(myEnd == 0 ? me : other, myEnd == 0 ? other : me,
                 out Vector3 center, out Quaternion rotation);
-            _chestGhost.transform.SetPositionAndRotation(center, rotation);
+            // Leicht schaukeln wie die echte Truhe beim Host.
+            float deltaTime = Mathf.Max(Time.deltaTime, 0.0001f);
+            float centerSpeed = (center - _ghostLastCenter).magnitude / deltaTime;
+            _ghostLastCenter = center;
+            _ghostSwaySpeed = Mathf.Lerp(_ghostSwaySpeed, Mathf.Min(centerSpeed, 5f), 5f * deltaTime);
+
+            _chestGhost.transform.SetPositionAndRotation(center, rotation * HeavyCarryable.Sway(Time.time, _ghostSwaySpeed));
         }
 
         private void EndChestPrediction()
@@ -140,6 +161,12 @@ namespace Schutzhuette.Carrying
             // Beim Tragen soll der Gegenstand die eigene Figur nicht wegschieben oder blockieren.
             SetIgnoreCollision(holding ? _current.Collider : null);
 
+            // Gewicht in der Kamera: zu zweit getragen = volle Last, allein angepackt = halbe.
+            if (holding && _look != null && _look.Feel != null)
+            {
+                _look.Feel.AddLoad(_current.HolderCount == 2 ? 1f : 0.5f);
+            }
+
             bool locked = Cursor.lockState == CursorLockMode.Locked;
             bool inputAllowed = locked && _cursorWasLocked;
             _cursorWasLocked = locked;
@@ -168,6 +195,8 @@ namespace Schutzhuette.Carrying
         {
             if (!IsHolding)
             {
+                _wasHeldBack = false;
+                _wasChestBlocked = false;
                 return desiredDelta;
             }
 
@@ -176,7 +205,7 @@ namespace Schutzhuette.Carrying
             if (_current.TryGetPartner(NetworkObject, out NetworkObject partner))
             {
                 Vector3 partnerPosition = partner.transform.position;
-                Vector3 delta = KeepDistance(currentPosition, desiredDelta, partnerPosition,
+                Vector3 delta = KeepDistanceWithKick(currentPosition, desiredDelta, partnerPosition,
                     _current.MinCarrierDistance, _current.MaxCarrierDistance);
 
                 _current.IsHeldBy(NetworkObject, out int myEnd);
@@ -188,13 +217,24 @@ namespace Schutzhuette.Carrying
                     return delta;
                 }
 
-                return CarryCollision.Slide(delta,
+                Vector3 allowed = CarryCollision.Slide(delta,
                     step => ChestBlockedAt(currentPosition + step, partnerPosition, myEnd, halfExtents));
+
+                // Truhe stößt gerade an: kurzer Ruck nach vorn (Schwung der Last).
+                bool chestBlocked = (allowed - delta).sqrMagnitude > 0.000001f;
+                if (chestBlocked && !_wasChestBlocked && _look != null && _look.Feel != null)
+                {
+                    _look.Feel.Kick(delta, 0.8f);
+                }
+
+                _wasChestBlocked = chestBlocked;
+
+                return allowed;
             }
 
             // Allein: Der Gegenstand bewegt sich nicht, man kommt nicht von seinem Ende weg.
             _current.IsHeldBy(NetworkObject, out int end);
-            return KeepDistance(currentPosition, desiredDelta, _current.GetEndPosition(end),
+            return KeepDistanceWithKick(currentPosition, desiredDelta, _current.GetEndPosition(end),
                 0f, _current.SingleHolderRadius);
         }
 
@@ -202,7 +242,25 @@ namespace Schutzhuette.Carrying
         /// <remarks>Die Lage der Truhe hängt nur von den Positionen der Träger ab, Drehen ändert nichts.</remarks>
         public float ConstrainYaw(Vector3 currentPosition, Quaternion currentRotation, float desiredYawDegrees)
         {
-            return desiredYawDegrees;
+            // Mit der Truhe zu zweit dreht man sich träger.
+            return IsHolding && _current.HolderCount == 2 ? desiredYawDegrees * _carryTurnFactor : desiredYawDegrees;
+        }
+
+        // Wie KeepDistance, gibt aber beim ersten Zurückhalten einen kurzen Ruck in der Kamera:
+        // Der Partner hält einen fest oder schiebt einen weg.
+        private Vector3 KeepDistanceWithKick(Vector3 position, Vector3 delta, Vector3 other, float min, float max)
+        {
+            Vector3 allowed = KeepDistance(position, delta, other, min, max);
+            Vector3 removed = delta - allowed;
+            bool heldBack = removed.sqrMagnitude > 0.000001f;
+
+            if (heldBack && !_wasHeldBack && _look != null && _look.Feel != null)
+            {
+                _look.Feel.Kick(-removed, 0.8f);
+            }
+
+            _wasHeldBack = heldBack;
+            return allowed;
         }
 
         // Ragt die Truhe in feste Umgebung, wenn ich hier stehe und der Partner dort?

@@ -45,6 +45,16 @@ namespace Schutzhuette.Carrying
         [Tooltip("Höchster Abstand Figur–Kiste, den der Host bei Bitten annimmt.")]
         [SerializeField] private float _maxServerDistance = 4f;
 
+        [Header("Gewicht")]
+        [Tooltip("So viel langsamer pro Kilogramm Last (0,01 = 1 % pro kg).")]
+        [SerializeField] private float _slowdownPerKg = 0.01f;
+
+        [Tooltip("Langsamer als dieser Faktor wird man auch mit schwerer Last nicht.")]
+        [SerializeField, Range(0.3f, 1f)] private float _minCarrySpeed = 0.6f;
+
+        [Tooltip("Wie schwer sich eine Last in der Kamera anfühlt, pro Kilogramm (20 kg = volle Last).")]
+        [SerializeField] private float _cameraLoadPerKg = 1f / 20f;
+
         [Header("Vorhersage")]
         [Tooltip("So lange wartet die Aufheb-Vorhersage höchstens auf den Host, in Sekunden.")]
         [SerializeField] private float _grabTimeout = 0.75f;
@@ -84,6 +94,8 @@ namespace Schutzhuette.Carrying
         public bool IsBusy => CurrentlyHeld() != null || _pendingGrab != null;
 
         private PlayerHeavyCarry _heavyCarry;
+        private PlayerLook _look;
+        private bool _wasBlocked;
 
         /// <summary>
         /// Hält diese Figur gerade eine Kiste (oder auf dem eigenen Rechner die Aufheb-Kopie)?
@@ -107,6 +119,7 @@ namespace Schutzhuette.Carrying
 
             _controller = GetComponent<CharacterController>();
             _heavyCarry = GetComponent<PlayerHeavyCarry>();
+            _look = GetComponent<PlayerLook>();
 
             if (InputSystem.actions != null)
             {
@@ -141,6 +154,13 @@ namespace Schutzhuette.Carrying
 
             UpdateGrabPrediction();
             UpdateReleasePrediction();
+
+            // Gewicht der Last in der Kamera spüren lassen.
+            Carryable inHands = ItemInHands();
+            if (inHands != null && _look != null && _look.Feel != null)
+            {
+                _look.Feel.AddLoad(inHands.Mass * _cameraLoadPerKg);
+            }
 
             // Nicht in dem Frame reagieren, in dem ein Klick die Maus erst einfängt,
             // sonst wirft der Klick zum Einfangen gleich die Kiste.
@@ -252,7 +272,15 @@ namespace Schutzhuette.Carrying
         // ----- Hängenbleiben an Wänden (IMovementModifier) -----
 
         /// <inheritdoc />
-        public float SpeedMultiplier => 1f;
+        /// <remarks>Je schwerer die Last, desto langsamer: 1 % pro Kilogramm, höchstens bis zum Minimum.</remarks>
+        public float SpeedMultiplier
+        {
+            get
+            {
+                Carryable item = ItemInHands();
+                return item == null ? 1f : Mathf.Clamp(1f - item.Mass * _slowdownPerKg, _minCarrySpeed, 1f);
+            }
+        }
 
         /// <inheritdoc />
         public Vector3 ConstrainMove(Vector3 currentPosition, Vector3 desiredDelta)
@@ -260,6 +288,7 @@ namespace Schutzhuette.Carrying
             Carryable item = ItemInHands();
             if (item == null)
             {
+                _wasBlocked = false;
                 return desiredDelta;
             }
 
@@ -273,8 +302,18 @@ namespace Schutzhuette.Carrying
                 return desiredDelta;
             }
 
-            return CarryCollision.Slide(desiredDelta,
+            Vector3 allowed = CarryCollision.Slide(desiredDelta,
                 delta => CrateBlockedAt(currentPosition + delta, rotation, halfExtents));
+
+            // Gerade erst angestoßen: kurzer Ruck in der Kamera.
+            bool blocked = (allowed - desiredDelta).sqrMagnitude > 0.000001f;
+            if (blocked && !_wasBlocked && _look != null && _look.Feel != null)
+            {
+                _look.Feel.Kick(desiredDelta, 0.6f);
+            }
+
+            _wasBlocked = blocked;
+            return allowed;
         }
 
         /// <inheritdoc />
