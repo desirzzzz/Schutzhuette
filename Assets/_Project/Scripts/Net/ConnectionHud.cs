@@ -99,6 +99,12 @@ namespace Schutzhuette.Net
             {
                 StartClient();
             }
+
+            // Im Editor beendet das nichts, im fertigen Spiel schließt es das Fenster.
+            if (GUILayout.Button("Beenden"))
+            {
+                Application.Quit();
+            }
         }
 
         private void DrawSessionInfo()

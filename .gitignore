@@ -76,3 +76,6 @@ production/session-state/*
 /docs/consistency-failures.md
 /reports/
 /test-results/
+
+# ─── Aura (Unity-Paket): Konto-, Team- und Projekt-ID bleiben lokal ───
+/.Aura/project.json
