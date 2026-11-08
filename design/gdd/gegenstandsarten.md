@@ -377,7 +377,7 @@ Katalog selbst hängt deshalb nicht am Saison-Ablauf.
 | Holz hacken | hart | Hackbar (Ergebnis, Anzahl), Masse für die Bilanz | kein Dokument |
 | Lager und Vorräte | hart | Vorratspaket (Ware, Portionen), Liste der Waren | kein Dokument |
 | Kochen und Gerichte | hart | Waren, Gericht (Abkühlzeit, Kochzeitpunkt) | kein Dokument |
-| Gäste und Bedürfnisse | hart | Gericht (Bedürfnis, warm/kalt) | kein Dokument |
+| Gäste und Bedürfnisse | hart | Gericht (Bedürfnis, warm/kalt) | `design/gdd/gaeste.md` |
 | Interaktion | hart | Werkzeug (Handlung), Kategorie, Ausrüstung (Platz) | `design/gdd/interaktion.md` |
 | Geräusche | weich | Masse, Aufprallklang, Scherben beim Zerbrechen | gebaut |
 | Nachteinsatz | weich | Trage (Leermasse, zu zweit) | kein Dokument |
@@ -464,7 +464,7 @@ prüft der Editor gegen alte Zahlen. Das Wurftempo verschiebt die obere Grenze f
 | Aufprall-Messwert, Klanggruppen, 3 kg leicht / 80 kg schwer | Geräusche (`ImpactAudio`, `SoundSettings`) | Bruchregel, Aufprallklang |
 | Truhe bewegt sich nur zu zweit | Tragen zu zweit (`HeavyCarryable`) | Trageart |
 | Brenndauer 45 s | Holzofen (`FuelItem`) | Holzscheit |
-| Bedürfnis, Wert kalter Gerichte | Gäste (kein Dokument) | Eigenschaft Gericht |
+| Bedürfnis, Wert kalter Gerichte | Gäste (`design/gdd/gaeste.md`) | Eigenschaft Gericht |
 | Rezepte, endgültige Waren | Kochen (kein Dokument) | Warenliste |
 | Architektur-Regeln 2, 3 und 4 | CLAUDE.md | Host entscheidet, Einfrieren, Datenobjekte |
 
@@ -616,6 +616,6 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 | 5 | ~~Trägt man Stirnlampe und Funkgerät in der Hand oder am Körper?~~ **Beantwortet 2026-11-08:** am Körper (Eigenschaft „Ausrüstung“, Zustand „Am Körper“, Regeln in `design/gdd/interaktion.md` Regel 8) | Dokument Interaktion | erledigt |
 | 6 | Wie schwer ist die Trage mit einer Person darauf? | Dokument zum Nachteinsatz | bei dessen Design |
 | 7 | Welche Waren gibt es endgültig, und welche Rezepte? | Dokument zum Kochen | bei dessen Design |
-| 8 | Was ist ein kaltes Gericht wert? | Dokument zu den Gästen | bei dessen Design |
+| 8 | ~~Was ist ein kaltes Gericht wert?~~ **Beantwortet 2026-11-08:** halb so viel, bei der Zufriedenheit (`cold_factor` 0,5) und beim Trinkgeld (`tip_cold_factor` 0,5), `design/gdd/gaeste.md` Formeln 3 und 7 | Dokument zu den Gästen | erledigt |
 | 9 | Für automatische Tests fehlen noch `.asmdef`-Dateien und `Assets/Tests/`. | `/test-setup` | vor dem ersten Test |
 | 10 | Wie gehen Katalog und Kennung übers Netz (Index oder Text)? | `/architecture-decision` | vor dem Bau |

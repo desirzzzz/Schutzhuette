@@ -2,7 +2,7 @@
 
 > **Status**: Approved (vom Entwickler am 2026-11-08 freigegeben)
 > **Created**: 2026-11-08
-> **Last Updated**: 2026-11-08 (Design-Review Steam-Lobby: Approved)
+> **Last Updated**: 2026-11-09 (Design-Review Gäste und Bedürfnisse: Approved)
 > **Source Concept**: docs/KONZEPT.md (Vollfassung) und design/game-brief.md (Kurzfassung)
 > **Grundlage für den Umfang**: production/milestones/vertical-slice.md
 
@@ -106,7 +106,7 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 8 | Interaktion (inferred) | Core | Vertical Slice | Approved | design/gdd/interaktion.md | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen, Gegenstandsarten, Saison-Ablauf und Spielphasen |
 | 9 | Saison-Ablauf und Spielphasen | Core | Vertical Slice | Approved | design/gdd/saison-ablauf.md | Netzwerk-Sitzung, Gegenstandsarten |
 | 10 | Steam-Lobby und Einladen | Core | Vertical Slice | Approved | design/gdd/steam-lobby.md | Netzwerk-Sitzung, Saison-Ablauf und Spielphasen |
-| 11 | Gäste und Bedürfnisse | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Holzofen und Wärme, Gegenstandsarten, Interaktion |
+| 11 | Gäste und Bedürfnisse | Gameplay | Vertical Slice | Approved | design/gdd/gaeste.md | Netzwerk-Sitzung, Saison-Ablauf und Spielphasen, Holzofen und Wärme, Gegenstandsarten, Interaktion |
 | 12 | Kochen und Gerichte | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Lager und Vorräte |
 | 13 | Lager und Vorräte | Economy | Vertical Slice | Not Started | — | Gegenstandsarten, Tragen und Werfen, Saison-Ablauf und Spielphasen |
 | 14 | Holz hacken | Gameplay | Vertical Slice | Not Started | — | Interaktion, Gegenstandsarten, Holzofen und Wärme |
@@ -299,11 +299,11 @@ der frühe Freundestest möglich ist.
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 34 |
-| Design docs started | 4 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby; 2026-11-08) |
-| Design docs reviewed | 4 (Gegenstandsarten, Interaktion, Saison-Ablauf nach Überarbeitung Approved; Steam-Lobby im ersten Review Approved; 2026-11-08) |
-| Design docs approved | 4 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby; 2026-11-08) |
+| Design docs started | 5 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby; 2026-11-08; Gäste und Bedürfnisse 2026-11-09) |
+| Design docs reviewed | 5 (Gegenstandsarten, Interaktion, Saison-Ablauf nach Überarbeitung Approved; Steam-Lobby im ersten Review Approved; 2026-11-08; Gäste und Bedürfnisse im ersten Review Approved, 2026-11-09) |
+| Design docs approved | 5 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby; 2026-11-08; Gäste und Bedürfnisse 2026-11-09) |
 | MVP systems designed | 0/6 (alle 6 gebaut, ohne GDD auf Stufe `minimal`) |
-| Vertical Slice systems designed | 4/20 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby, alle Approved) |
+| Vertical Slice systems designed | 5/20 (Gegenstandsarten, Interaktion, Saison-Ablauf, Steam-Lobby, Gäste und Bedürfnisse, alle Approved) |
 
 ---
 

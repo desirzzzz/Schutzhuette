@@ -415,7 +415,7 @@ darunter gibt der Editor einen Hinweis.
 | Materialseilbahn | hart | Handlung „Kurbeln“, zu zweit schneller | kein Dokument |
 | Versorgung: Betten und Erste Hilfe | hart | „Bett machen“, „Erste Hilfe“ (Bezugsobjekt Gast) | kein Dokument |
 | Ereignisse (mit Strom und Licht) | hart | „Fenster schließen“, „Generator reparieren“; Stirnlampe am Körper | kein Dokument |
-| Gäste und Bedürfnisse | hart | Handlung „Servieren“ am Gast, mit Gericht in der Hand | kein Dokument |
+| Gäste und Bedürfnisse | hart | Handlung „Servieren“ am Gast, mit Gericht in der Hand | `design/gdd/gaeste.md` |
 | HUD | hart | Hinweis (Taste, Handlung, Grund) und Fortschrittsbalken | kein Dokument |
 | Nachteinsatz | weich | Erste Hilfe am Vermissten, Stirnlampe | kein Dokument |
 | Sprachchat und Funkgerät | weich | Funkgerät am Gürtel | kein Dokument |

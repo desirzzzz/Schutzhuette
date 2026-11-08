@@ -65,9 +65,117 @@ last_updated: "2026-11-08"
 # Attribute fields: any key stats that could appear in another GDD
 #   (health, damage, drops, faction, etc.)
 
-entities: []
+entities:
+  - name: wanderer
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: gaestetyp
+    figures: 1
+    need_chain: [beduerfnis_tee, beduerfnis_speckbrot]
+    patience_s: [150, 150]
+    weight_afternoon: 3
+    weight_evening: 2
+    weight_night: 0
+    notes: "Wird bevorzugt zum Vermissten (Regel 10). Ohne anwesenden Gast entsteht ein eigener vermisster Wanderer."
+    added: 2026-11-08
+    revised: ""
+  - name: familie
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: gaestetyp
+    figures: 2
+    need_chain: [beduerfnis_kaiserschmarrn, beduerfnis_bett]
+    patience_s: [210, 120]
+    weight_afternoon: 1
+    weight_evening: 2
+    weight_night: 0
+    notes: "Zwei Figuren (Elternteil und Kind) sind ein Gast: eine Zufriedenheit, zwei Sitze an einem Tisch, zwei Betten. Kann nicht vermisst werden."
+    added: 2026-11-08
+    revised: ""
+  - name: bergsteiger
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: gaestetyp
+    figures: 1
+    need_chain: [beduerfnis_erste_hilfe, beduerfnis_tee]
+    patience_s: [100, 120]
+    weight_afternoon: 0
+    weight_evening: 1
+    weight_night: 1
+    notes: "Nachts der einzige Typ (Notfall im Sturm)."
+    added: 2026-11-08
+    revised: ""
+  - name: beduerfnis_tee
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: beduerfnis
+    fulfilled_by: servieren
+    amount: 1
+    tip_base: 4
+    enjoy_s: 4
+    notes: "Die Eigenschaft Gericht (gegenstandsarten.md) nennt genau eine Bedürfnis-Kennung."
+    added: 2026-11-08
+    revised: ""
+  - name: beduerfnis_speckbrot
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: beduerfnis
+    fulfilled_by: servieren
+    amount: 1
+    tip_base: 6
+    enjoy_s: 6
+    added: 2026-11-08
+    revised: ""
+  - name: beduerfnis_kaiserschmarrn
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: beduerfnis
+    fulfilled_by: servieren
+    amount: 1
+    tip_base: 12
+    enjoy_s: 8
+    notes: "Die Familie teilt sich eine Portion."
+    added: 2026-11-08
+    revised: ""
+  - name: beduerfnis_bett
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: beduerfnis
+    fulfilled_by: versorgung
+    amount: 1
+    tip_base: 3
+    enjoy_s: 0
+    notes: "Menge 1 je Figur; Versorgung meldet jedes gemachte, reservierte Bett. Gewinn und Trinkgeld einmal, wenn alle gezählt sind; Trinkgeld x Zahl der Betten."
+    added: 2026-11-08
+    revised: ""
+  - name: beduerfnis_erste_hilfe
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    kind: beduerfnis
+    fulfilled_by: versorgung
+    amount: 1
+    tip_base: 8
+    enjoy_s: 5
+    added: 2026-11-08
+    revised: ""
 
-# Example (remove when first real entry is added):
+# Example:
 #
 # entities:
 #   - name: goblin
@@ -164,6 +272,7 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/gaeste.md
     category: sperrgut
     mass_kg: 15
     carry_mode: two_person
@@ -176,6 +285,7 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/gaeste.md
     category: gericht
     mass_kg: 0.5
     carry_mode: alone
@@ -189,6 +299,7 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/gaeste.md
     category: gericht
     mass_kg: 0.8
     carry_mode: alone
@@ -201,6 +312,7 @@ items:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/gaeste.md
     category: gericht
     mass_kg: 0.8
     carry_mode: alone
@@ -376,6 +488,7 @@ formulas:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/gaeste.md
     variables:
       - is_fragile
       - state
@@ -391,6 +504,7 @@ formulas:
     source: design/gdd/gegenstandsarten.md
     referenced_by:
       - design/gdd/gegenstandsarten.md
+      - design/gdd/gaeste.md
     variables:
       - gravity
       - hold_height
@@ -406,6 +520,7 @@ formulas:
     referenced_by:
       - design/gdd/gegenstandsarten.md
       - design/gdd/saison-ablauf.md
+      - design/gdd/gaeste.md
     variables:
       - game_time
       - cooked_time
@@ -495,6 +610,7 @@ formulas:
       - design/gdd/saison-ablauf.md
       - design/gdd/gegenstandsarten.md
       - design/gdd/interaktion.md
+      - design/gdd/gaeste.md
     variables:
       - server_time
       - is_paused
@@ -567,6 +683,7 @@ formulas:
     source: design/gdd/saison-ablauf.md
     referenced_by:
       - design/gdd/saison-ablauf.md
+      - design/gdd/gaeste.md
     variables:
       - phase_index
       - p
@@ -574,6 +691,145 @@ formulas:
     output_range: [0, 1]
     expression: "(phase_index in {0,1,2}) ? p[phase_index] + (p[phase_index+1] - p[phase_index]) * phase_progress : 0"
     notes: "Gemeinsamer Druck der Saison, Stützwerte p = [0; 0,2; 0,6; 1,0]. Gäste, Wetter, Ereignisse und Musik leiten ihre Eskalation daraus ab, statt eigene Kurven zu bauen."
+    added: 2026-11-08
+    revised: ""
+  - name: arrival_rate
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - player_factor
+      - phase_rate_scale
+      - rate_floor
+      - rate_gain
+      - season_pressure
+    output_range: [0, 0.8]
+    expression: "player_factor[n] * phase_rate_scale[phase] * (rate_floor + rate_gain * season_pressure)"
+    notes: "Gäste pro Minute; füllt das Ankunfts-Budget (gekappt bei next_cost, Start initial_budget 0,6). Im Spiel höchstens 0,52/min (Abendende, 4 Spieler), nachts 0,16/min."
+    added: 2026-11-08
+    revised: ""
+  - name: patience_total
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - patience_base
+      - patience_pressure_cut
+      - pressure_at_start
+    output_range: [70, 210]
+    expression: "patience_base[type][step] * (1 - patience_pressure_cut * pressure_at_start)"
+    notes: "Sekunden in game_time. Setzt etwa 45–60 s für Kochen und Weg voraus (Kochen-GDD)."
+    added: 2026-11-08
+    revised: ""
+  - name: fulfill_gain
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - quality
+      - cold_factor
+      - state_before
+      - late_gain
+      - base_gain
+      - speed_floor
+      - patience_fraction
+    output_range: [5, 25]
+    expression: "quality * (state_before == Mault ? late_gain : base_gain * (speed_floor + (1 - speed_floor) * patience_fraction))"
+    notes: "quality = cold_factor bei kaltem Gericht, sonst 1. Wird bei Servieren und bei Meldungen der Versorgung (Bett, Erste Hilfe) angewendet; Zufriedenheit S 0–100 geht an die Bewertung."
+    added: 2026-11-08
+    revised: ""
+  - name: satisfaction_rate
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - warmth
+      - cold_threshold
+      - cold_rate_max
+      - comfort_warmth
+      - warm_rate
+      - warm_cap
+      - blocked_rate
+      - blocked_grace
+    output_range: [-0.6, 0.03]
+    expression: "warm_bonus - cold_drain - blocked_drain"
+    notes: "Punkte pro Sekunde; liest die Ofenwärme 0–100. cold_drain = cold_rate_max * clamp((cold_threshold - warmth) / cold_threshold, 0, 1), nur drinnen."
+    added: 2026-11-08
+    revised: ""
+  - name: noise_penalty
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - broke
+      - impact_speed
+      - noise_speed_min
+      - mass_kg
+      - noise_mass_min
+      - distance
+      - noise_radius
+      - noise_base
+      - noise_lockout
+    output_range: [0, 3]
+    expression: "(is_loud AND inside AND lockout_over) ? noise_base * clamp(1 - distance / noise_radius, 0, 1) : 0"
+    notes: "is_loud = broke OR (impact_speed >= noise_speed_min AND mass_kg >= noise_mass_min). Liest Aufprall-Ereignisse und breaks_on_impact aus gegenstandsarten.md."
+    added: 2026-11-08
+    revised: ""
+  - name: chaos_penalty
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - item_state
+      - hit_speed
+      - chaos_speed_min
+      - chaos_base
+      - chaos_lockout
+    output_range: [0, 15]
+    expression: "(item_state == Fällt AND inside AND hit_speed >= chaos_speed_min AND lockout_over) ? chaos_base : 0"
+    notes: "Zustand „Fällt“ aus gegenstandsarten.md. Ein Treffer am Gast zählt nur als Chaos, nicht zusätzlich als Lärm."
+    added: 2026-11-08
+    revised: ""
+  - name: mood
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - state
+      - blocked_time
+      - S
+      - mault_in
+      - mault_out
+      - happy_in
+      - happy_out
+    output_range: [0, 2]
+    expression: "(state == Mault OR blocked_past_grace OR S < mault_in) ? mault : (S >= happy_in ? zufrieden : neutral)"
+    notes: "enum mault (0), neutral (1), zufrieden (2), mit Hysterese 20/25 und 65/60. Geht übers Netz an Gesicht, Geräusche und HUD."
+    added: 2026-11-08
+    revised: ""
+  - name: tip_coins
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    variables:
+      - state_before
+      - S_before
+      - tip_base
+      - amount
+      - tip_full
+      - tip_cold_factor
+      - tip_factor
+    output_range: [0, 18]
+    expression: "(state_before == Mault OR S_before <= 0) ? 0 : max(1, round(tip_base[need] * amount * clamp(S_before / tip_full, 0, 1) * w * tip_factor[n]))"
+    notes: "Münzen an die Hüttenkasse; w = tip_cold_factor bei kaltem Gericht, sonst 1; tip_factor 1,5/1,25/1,1/1,0 für 1–4 Spieler. Im Spiel höchstens 15 je Erfüllung, weil S beim ersten Bedürfnis bei höchstens 63–66 liegt. Mittlere Saison etwa 42–51 Münzen."
     added: 2026-11-08
     revised: ""
 
@@ -661,6 +917,86 @@ constants:
       - design/gdd/saison-ablauf.md
     value: 2400
     unit: s
+    added: 2026-11-08
+    revised: ""
+  - name: start_satisfaction
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 60
+    unit: points
+    notes: "Zufriedenheit bei der Ankunft, Skala 0–100 (Bewertung liest sie)"
+    added: 2026-11-08
+    revised: ""
+  - name: cold_threshold
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 40
+    unit: warmth
+    notes: "Ofenwärme 0–100, unter der Kälte die Zufriedenheit senkt; bei 1,5/s Abklingen 40 s Gnadenfrist"
+    added: 2026-11-08
+    revised: ""
+  - name: comfort_warmth
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 60
+    unit: warmth
+    notes: "Ab dieser Ofenwärme steigt die Zufriedenheit langsam (bis warm_cap 85)"
+    added: 2026-11-08
+    revised: ""
+  - name: cold_factor
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 0.5
+    unit: factor
+    notes: "Ein kaltes Gericht bringt halbe Zufriedenheit (beantwortet Offene Frage 8 in gegenstandsarten.md)"
+    added: 2026-11-08
+    revised: ""
+  - name: tip_cold_factor
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 0.5
+    unit: factor
+    notes: "Ein kaltes Gericht bringt halbes Trinkgeld"
+    added: 2026-11-08
+    revised: ""
+  - name: noise_speed_min
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 5.5
+    unit: m/s
+    notes: "Muss zwischen release_fall_speed (bis 5,01) und dem Bruch von Tee (7,0) liegen"
+    added: 2026-11-08
+    revised: ""
+  - name: tip_full
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 80
+    unit: points
+    notes: "Ab dieser Zufriedenheit volles Trinkgeld"
+    added: 2026-11-08
+    revised: ""
+  - name: blocked_max
+    status: active
+    source: design/gdd/gaeste.md
+    referenced_by:
+      - design/gdd/gaeste.md
+    value: 90
+    unit: s
+    notes: "Danach zwängt sich ein blockierter Gast am Hindernis vorbei; der Gegenstand bleibt liegen"
     added: 2026-11-08
     revised: ""
 

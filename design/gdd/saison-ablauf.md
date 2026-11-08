@@ -423,7 +423,7 @@ Hinweis „Saison kann bis 42:00 min dauern (Ziel 30–40)“.
 
 | System | Art | Schnittstelle | Stand |
 | --- | --- | --- | --- |
-| Gäste und Bedürfnisse | hart | Phase, Fortschritt der Phase, `season_pressure` | kein Dokument |
+| Gäste und Bedürfnisse | hart | Phase, Fortschritt der Phase, `season_pressure` | `design/gdd/gaeste.md` |
 | Wetter und Eskalation | hart | Phase, `season_pressure` (statt einer eigenen Kurve) | kein Dokument |
 | Ereignisse (mit Strom und Licht) | hart | Phase („Nacht“ löst den Stromausfall aus), `season_pressure` | kein Dokument |
 | Nachteinsatz | hart | „Nacht beginnt“, `phase_elapsed`; ruft „Einsatz beendet“ auf; bekommt „Nacht vorbei“ mit Grund (`mission`, `timeout`, `abort`) | kein Dokument |
@@ -730,6 +730,6 @@ Platz aus `PlayerSpawnApproval`, mehrere Phasenwechsel in einem Schritt (Kriteri
 | 2 | Gibt es nach einem frühen Einsatzende Leerlauf? | Playtest | erster Freundestest mit Saison |
 | 3 | Wird der Nachmittag ab der 2. Saison zu lang? 480–720 s testen | Playtest | erster Freundestest mit Saison |
 | 4 | Wie Pause und Uhr umgesetzt werden (`Time.timeScale` oder eigener Wert, Abgleich der Serverzeit) | `/architecture-decision` | vor dem Bau |
-| 5 | Gäste, Wetter und Ereignisse müssen `season_pressure` nutzen und dürfen keine eigenen Kurven bauen | deren Dokumente | bei deren Design |
+| 5 | Gäste, Wetter und Ereignisse müssen `season_pressure` nutzen und dürfen keine eigenen Kurven bauen. **Gäste erledigt 2026-11-08:** Ankunft und Geduld nutzen `season_pressure` (`design/gdd/gaeste.md` Formeln 1 und 2). | deren Dokumente | bei deren Design |
 | 6 | Wiederbeitritt mitten in der Saison nach einem Verbindungsabbruch, später vielleicht über die Steam-Identität | nach der Steam-Lobby | nach Schritt 2 im Plan |
 | 7 | Kasse und Upgrades speichern | System „Spielstand speichern“ | Alpha |
