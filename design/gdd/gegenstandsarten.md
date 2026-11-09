@@ -36,8 +36,8 @@ Ohne den Katalog stünde jeder Wert mehrfach im Code. Eine Gewichtsänderung mü
 Stellen passieren, das verbietet Architektur-Regel 4 („Daten in ScriptableObjects“).
 
 Über das Netz wird eine Art nur über ihre feste Kennung verschickt, nie als Objekt. Wie Katalog und
-Kennung technisch umgesetzt werden, legt eine spätere Architektur-Entscheidung fest (ADR, noch nicht
-angelegt).
+Kennung technisch umgesetzt werden, legt ADR-0002 fest
+(`docs/architecture/adr-0002-gegenstandsarten-katalog.md`).
 
 ## Detailed Design
 
@@ -464,7 +464,7 @@ prüft der Editor gegen alte Zahlen. Das Wurftempo verschiebt die obere Grenze f
 | Aufprall-Messwert | `BreakRule.ImpactSpeed` und `ImpactReporter` (ADR-0001; heute noch `ImpactAudio`) | Bruchregel |
 | Klanggruppen, 3 kg leicht / 80 kg schwer | Geräusche (`ImpactAudio`, `SoundSettings`) | Aufprallklang |
 | Truhe bewegt sich nur zu zweit | Tragen zu zweit (`HeavyCarryable`) | Trageart |
-| Brenndauer 45 s | Holzofen (`FuelItem`) | Holzscheit |
+| Brenndauer 45 s | Holzofen (heute `FuelItem`, künftig Katalog nach ADR-0002) | Holzscheit |
 | Bedürfnis, Wert kalter Gerichte | Gäste (`design/gdd/gaeste.md`) | Eigenschaft Gericht |
 | Rezepte, endgültige Waren | Kochen (kein Dokument) | Warenliste |
 | Architektur-Regeln 2, 3 und 4 | CLAUDE.md | Host entscheidet, Einfrieren, Datenobjekte |

@@ -74,6 +74,26 @@ state_ownership:
       - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
     added: 2026-11-09
     revised: ""
+  - state: supply_pack_ware_id
+    status: active
+    owner_system: gegenstandsarten
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    interface: "SupplyPackState.WareId (NetworkVariable<FixedString32Bytes>); Startwert per SetInitialWare vor Spawn, Host überträgt in OnNetworkSpawn; Clients lesen über OnValueChanged und CatalogService.TryGetWare"
+    write_access: host-only
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - state: dish_cooked_time
+    status: active
+    owner_system: gegenstandsarten
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    interface: "DishState.CookedTime (NetworkVariable<double>, Spielzeit aus ADR-0003); Startwert per SetInitialCookedTime vor Spawn; Clients rechnen DishRules.IsWarm / WarmFraction selbst"
+    write_access: host-only
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
 
 # Example:
 #
@@ -125,6 +145,37 @@ interfaces:
     signal_signature: "[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)] von der eigenen Spielfigur; der Host prüft, dann führt er aus"
     referenced_by:
       - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
+  - contract: catalog_lookup
+    status: active
+    pattern: direct_call
+    producer: gegenstandsarten
+    consumers:
+      - gaeste
+      - lager-und-vorraete
+      - kochen-und-gerichte
+      - geraeusche
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    signal_signature: "CatalogService.Current.TryGetKind / TryGetWare / TryGetNeed(in FixedString32Bytes id, out Eintrag) -> bool; nur Laufzeit-Code, Prüfregeln und Tests bekommen den ItemCatalog als Parameter"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - contract: item_kind_reference
+    status: active
+    pattern: direct_call
+    producer: gegenstandsarten
+    consumers:
+      - tragen-und-werfen
+      - tragen-zu-zweit
+      - holzofen-und-waerme
+      - interaktion
+      - gaeste
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    signal_signature: "Item.Kind (ItemKind, schreibgeschützt) am Prefab; Eigenschaften über feste Blöcke mit Enabled (Kind.Fuel, Kind.Chop, Kind.SupplyPack, Kind.Dish, Kind.Fragile, Kind.Tool, Kind.Equipment)"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
     added: 2026-11-09
     revised: ""
 
@@ -227,6 +278,46 @@ api_decisions:
       - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
     added: 2026-11-09
     revised: ""
+  - purpose: item_kind_identity
+    status: active
+    api: Ein Prefab je Art mit Komponente Item -> ItemKind; NGO erzeugt beim Client dasselbe Prefab
+    not: NetworkVariable mit Art-Kennung; ein gemeinsames Prefab für mehrere Arten
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    reason: "Kostet keine Netzdaten; die Art ist beim Client schon in Awake bekannt, auch für die Masse der Vorhersage-Kopie"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: wire_id_format
+    status: active
+    api: "FixedString32Bytes, Muster ^[a-z0-9_]{1,29}$, Präfixe ware_ und beduerfnis_"
+    not: Listen-Index, Hash, ScriptableObject-Verweis, Asset-Pfad
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    reason: "Stabil beim Umsortieren und lesbar im Log; 29 Zeichen passen in FixedString32Bytes"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: catalog_access
+    status: active
+    api: CatalogService.Current am NetworkManager-Objekt, Nachschlagetabellen bei jedem Start neu gebaut
+    not: Resources.Load; Laufzeit-Tabellen oder serialisiertes Dictionary im ScriptableObject
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    reason: "Resources.Load gilt als veraltet, Addressables sind nicht installiert; ohne Domain Reload blieben nicht gespeicherte SO-Felder zwischen zwei Play-Durchläufen alt"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: network_variable_initial_value
+    status: active
+    api: Startwert vor Spawn() in ein normales Feld, der Host überträgt ihn in OnNetworkSpawn in die NetworkVariable
+    not: NetworkVariable vor Spawn() oder erst nach Spawn() schreiben
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    reason: "OnNetworkSpawn läuft vor dem Bau der Spawn-Nachricht; vorher schreiben loggt eine Warnung, danach kommt der Wert einen Tick zu spät"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
 
 # Example:
 #
@@ -276,6 +367,24 @@ forbidden_patterns:
     description: "Effekte zu einem Gegenstand, der gleich entfernt wird, sendet ein dauerhaftes Objekt (ImpactEffects), nie der Gegenstand selbst."
     why: "Nach Despawn ist IsSpawned false; NetworkObjectReference wirft dann, und das Objekt kann keine RPC mehr senden."
     adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+  - pattern: runtime_data_object_write
+    status: active
+    description: "Datenobjekte (ItemKind, WareKind, NeedKind, ItemCatalog, GuestType) werden zur Laufzeit nie geschrieben. Zustand eines einzelnen Gegenstands gehört an den Gegenstand (Feld oder NetworkVariable)."
+    why: "Im Editor ändert das Schreiben das Asset dauerhaft, alle Gegenstände derselben Art teilen den Wert, und ohne Domain Reload bleibt er bis zum nächsten Play."
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+  - pattern: kind_check_by_id_or_name
+    status: active
+    description: "Code erkennt eine Art an ihrer Eigenschaft (Kind.Fuel.Enabled), nie an Kennung, Anzeigename oder Prefab-Name."
+    why: "Neue Arten sollen ohne Code-Änderung funktionieren (Architektur-Regel 4: Daten in ScriptableObjects)."
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+  - pattern: data_object_over_network
+    status: active
+    description: "Über das Netz gehen keine ScriptableObjects, Asset-Pfade oder Listen-Positionen, nur Kennungen als FixedString32Bytes."
+    why: "Listen-Positionen verschieben sich beim Umsortieren still auf eine andere Art; Asset-Verweise lassen sich nicht serialisieren."
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
     added: 2026-11-09
 
 # Example:
