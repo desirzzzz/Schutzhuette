@@ -18,7 +18,7 @@
   Holzofen, Geräusche) haben kein GDD. Für sie gelten die Regeln in CLAUDE.md und der Code in
   `Assets/_Project/Scripts/`.
 - **ADRs Referenced:** ADR-0001 Netz-Autorität und Physik im Netz (Accepted 2026-11-09), ADR-0002
-  Gegenstandsarten-Katalog und Netz-Kennung (Proposed), ADR-0003 Saison-Uhr, Spielzeit und Meldungen
+  Gegenstandsarten-Katalog und Netz-Kennung (Accepted 2026-11-09), ADR-0003 Saison-Uhr, Spielzeit und Meldungen
   (Proposed). Der Abschnitt „ADR Audit“ wird nachgezogen, wenn alle drei angenommen sind.
 - **TD-ARCHITECTURE:** 2026-11-09 — skipped — lean mode
 - **LP-FEASIBILITY:** 2026-11-09 — skipped — lean mode
