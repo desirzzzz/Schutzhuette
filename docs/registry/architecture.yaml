@@ -40,7 +40,7 @@
 #   unsupported layout, with its number.
 
 version: 1
-last_updated: ""
+last_updated: "2026-11-09"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -53,7 +53,27 @@ last_updated: ""
 # interface: how other systems access this state (read-only property, method call,
 #   signal, shared resource, etc.) — this is the contract other ADRs depend on.
 
-state_ownership: []
+state_ownership:
+  - state: item_motion_state
+    status: active
+    owner_system: gegenstandsarten
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    interface: "Liegt / Getragen / Fällt, nur beim Host bekannt. Getragen = transform.parent != null (alle Rechner); Fällt erreicht andere Systeme nur über ImpactReport.WasFalling"
+    write_access: host-only
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
+  - state: player_body_transform
+    status: active
+    owner_system: bewegung-und-kamera
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    interface: "NetworkTransform mit AuthorityMode Owner, nur Position und Y-Drehung; einzige owner-autoritative Ausnahme"
+    write_access: owning-client-only
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
 
 # Example:
 #
@@ -81,7 +101,32 @@ state_ownership: []
 #
 # pattern options: signal | direct_call | event_bus | shared_resource | rpc | none
 
-interfaces: []
+interfaces:
+  - contract: impact_report
+    status: active
+    pattern: event_bus
+    producer: gegenstandsarten
+    consumers:
+      - geraeusche
+      - gaeste
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    signal_signature: "ImpactEvents.Reported(ImpactReport) mit Item, Point, ImpactSpeed, Mass, WasFalling, Broke, Other; nur beim Host"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
+  - contract: client_request
+    status: active
+    pattern: rpc
+    producer: client
+    consumers:
+      - host
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    signal_signature: "[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)] von der eigenen Spielfigur; der Host prüft, dann führt er aus"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
 
 # Example:
 #
@@ -141,7 +186,47 @@ performance_budgets: []
 # Register an API decision when the choice is non-obvious and other ADRs might
 # make a different choice for the same purpose without knowing this was decided.
 
-api_decisions: []
+api_decisions:
+  - purpose: connection_events
+    status: active
+    api: NetworkManager.OnConnectionEvent
+    not: OnClientConnectedCallback / OnClientDisconnectCallback in neuem Code
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    reason: "NGO 2.13 empfiehlt es, die alten Callbacks werden abgelöst; vor StartHost abonnieren"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: fast_throw_collision
+    status: active
+    api: Rigidbody.collisionDetectionMode = ContinuousDynamic nur im Zustand Fällt beim Host, sonst Discrete
+    not: ContinuousSpeculative für alle Gegenstände; eigener SphereCast-Vorausblick
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    reason: "Innenwände 0,2 m, bei 15 m/s 0,3 m pro Physikschritt; kostet nur, solange etwas fliegt"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: network_object_identity
+    status: active
+    api: NetworkObjectReference / NetworkObjectId
+    not: EntityId / InstanceID
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    reason: "EntityId ist 8 Byte und lokal; die Netz-Kennung kommt von NGO"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: client_to_server_rpc
+    status: active
+    api: "[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]"
+    not: ServerRpc mit RequireOwnership
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    reason: "RequireOwnership ist seit NGO 2.7 Obsolete"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+    revised: ""
 
 # Example:
 #
@@ -167,7 +252,31 @@ api_decisions: []
 # Register a pattern when an ADR explicitly bans it AND other ADRs might
 # unknowingly use it (i.e., it's a tempting but wrong approach for this project).
 
-forbidden_patterns: []
+forbidden_patterns:
+  - pattern: client_writes_game_state
+    status: active
+    description: "Clients schreiben keine NetworkVariables und bewegen keine Gegenstände selbst. Sie schicken Wünsche per RPC an den Host."
+    why: "Der Host entscheidet (CLAUDE.md Regel 2); zwei Entscheider erzeugen widersprüchlichen Zustand."
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+  - pattern: prediction_changes_state
+    status: active
+    description: "Vorhersage-Kopien beim Client lösen weder Bruchregel noch Meldedienst noch andere Spiel-Logik aus."
+    why: "Vorhersage ist nur optisch; sonst zerbricht beim Client etwas, das beim Host heil bleibt."
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+  - pattern: gameplay_collision_outside_reporter
+    status: active
+    description: "OnCollisionEnter für Spiel-Logik wertet nur ImpactReporter beim Host aus. Andere Systeme hören an ImpactEvents."
+    why: "Ein Messpunkt: Zerbrechen, Geräusche und Gäste rechnen mit demselben impact_speed."
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
+  - pattern: effect_rpc_from_despawning_object
+    status: active
+    description: "Effekte zu einem Gegenstand, der gleich entfernt wird, sendet ein dauerhaftes Objekt (ImpactEffects), nie der Gegenstand selbst."
+    why: "Nach Despawn ist IsSpawned false; NetworkObjectReference wirft dann, und das Objekt kann keine RPC mehr senden."
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    added: 2026-11-09
 
 # Example:
 #

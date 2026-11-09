@@ -802,7 +802,7 @@ UX-Dokument (siehe UI Requirements).
 | Handlung „Servieren“, Station mit Bedingung, Hinweis am Fadenkreuz, Erste Hilfe | `design/gdd/interaktion.md` | Regel 6, UI Requirements |
 | Ofenwärme 0–100, Abklingrate 1,5/s | `Stove`, `StoveSettings` | Formel 4 |
 | „Drinnen?“ per Strahl zum Dach; kann `inside` liefern | `Shelter` | Formeln 4, 5 |
-| Aufprall beim Host, Masse | `ImpactSound` | Formel 5 |
+| Aufprall beim Host, Masse | Meldedienst `ImpactEvents` (ADR-0001; heute misst noch `ImpactSound`) | Formel 5 |
 | Tische und Maße der Stube | `docs/GRAUBOX.md` | Erwartete Werte, `noise_radius` |
 | Schlafraum mit 4 Betten, Weg vom Hang | `design/levels/huette-skizze.md` | Regeln 4, 5 |
 | Gästetypen, Trinkgeld und Bewertungen | `docs/KONZEPT.md` | Overview |

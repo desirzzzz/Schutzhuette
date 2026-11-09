@@ -131,7 +131,7 @@ entscheidet über alle Übergänge.
 
 | System | Liest aus dem Katalog | Was dort passiert |
 | --- | --- | --- |
-| Tragen und Werfen | Masse, Trageart | Tempo und Kamera-Wippen nach Masse. Meldet Aufprall-Geschwindigkeiten, der Host prüft damit das Zerbrechen. |
+| Tragen und Werfen | Masse, Trageart | Tempo und Kamera-Wippen nach Masse. Setzt beim Loslassen den Zustand „Fällt“; den Aufprall misst `ImpactReporter` am Gegenstand, der Host prüft damit das Zerbrechen (ADR-0001). |
 | Tragen zu zweit | Trageart `zu zweit` | Truhe und Trage brauchen zwei Träger. |
 | Holzofen und Wärme | Brennbar (Brenndauer) | Verbraucht den Gegenstand und verlängert die Brennzeit. |
 | Holz hacken | Hackbar (Ergebnis, Anzahl) | Verbraucht den Klotz und erzeugt die Scheite. |
@@ -371,7 +371,7 @@ Katalog selbst hängt deshalb nicht am Saison-Ablauf.
 
 | System | Art | Schnittstelle (was gelesen wird) | Stand |
 | --- | --- | --- | --- |
-| Tragen und Werfen | hart | Masse, Trageart; meldet Aufprall-Geschwindigkeiten an die Bruchregel | gebaut, liest heute die Rigidbody-Masse |
+| Tragen und Werfen | hart | Masse, Trageart; setzt beim Loslassen „Fällt“ (den Aufprall für die Bruchregel misst `ImpactReporter`, ADR-0001) | gebaut, liest heute die Rigidbody-Masse |
 | Tragen zu zweit | hart | Trageart `zu zweit` | gebaut |
 | Holzofen und Wärme | hart | Brennbar (Brenndauer) | gebaut, Brenndauer heute im Holz selbst (`FuelItem`) |
 | Holz hacken | hart | Hackbar (Ergebnis, Anzahl), Masse für die Bilanz | kein Dokument |
@@ -461,7 +461,8 @@ prüft der Editor gegen alte Zahlen. Das Wurftempo verschiebt die obere Grenze f
 | Wurftempo 8 m/s (höchstens 15); Haltepunkt 0,2 m über der Mitte der Spielfigur (1,28 m über dem Boden, mit 0,08 m Hautdicke), 0,9 m davor; Ablegen ohne Geschwindigkeit | Tragen und Werfen (`PlayerCarry`) | Formel 2, Prüfwerte |
 | Lauftempo 4 m/s | Bewegung und Kamera (`PlayerMovement`) | Formel 1, Untergrenze Abkühlzeit |
 | Ofen nimmt höchstens 240 s Brennzeit auf | Holzofen (`StoveSettings`) | Abnahmekriterium 25 |
-| Aufprall-Messwert, Klanggruppen, 3 kg leicht / 80 kg schwer | Geräusche (`ImpactAudio`, `SoundSettings`) | Bruchregel, Aufprallklang |
+| Aufprall-Messwert | `BreakRule.ImpactSpeed` und `ImpactReporter` (ADR-0001; heute noch `ImpactAudio`) | Bruchregel |
+| Klanggruppen, 3 kg leicht / 80 kg schwer | Geräusche (`ImpactAudio`, `SoundSettings`) | Aufprallklang |
 | Truhe bewegt sich nur zu zweit | Tragen zu zweit (`HeavyCarryable`) | Trageart |
 | Brenndauer 45 s | Holzofen (`FuelItem`) | Holzscheit |
 | Bedürfnis, Wert kalter Gerichte | Gäste (`design/gdd/gaeste.md`) | Eigenschaft Gericht |
