@@ -82,6 +82,9 @@ technisch umgesetzt wird, legt eine spätere Architektur-Entscheidung fest (ADR,
    - Bei jedem weiteren Phasenwechsel meldet der Saison-Ablauf „Phase X beginnt“.
    - Am Ende der Nacht meldet er „Nacht vorbei“ mit einem Grund: `mission` (Einsatz beendet), `timeout`
      (Höchstdauer erreicht) oder `abort` (Host bricht ab).
+   - Bricht der Host ab (Regel 12), meldet er **„Saison abgebrochen“**: nach „Nacht vorbei“ mit `abort`
+     (falls es in der Nacht war) und vor „Vorbereitung beginnt“. Darauf setzt die Hüttenkasse ihren Stand
+     zurück. Code-Form und Reihenfolgen: ADR-0003.
    - Jederzeit lesbar sind die aktuelle Phase, der **Fortschritt der Phase** (0 bis 1, zum Beispiel für
      Licht und Sturmstärke), der Wert **„Spielzeit läuft“** (falsch während der Pause solo) und die
      **Spielzeit `game_time`** (Formel 3a). `game_time` ist die **einzige Zeitbasis** für Spielregeln mit
@@ -105,8 +108,8 @@ technisch umgesetzt wird, legt eine spätere Architektur-Entscheidung fest (ADR,
     zeitgesteuerten Systeme. Sobald ein Client da ist, läuft die Zeit im Menü weiter. Die Pause gilt ab
     dem Moment, in dem beides zutrifft (Menü offen und Host allein), also auch, wenn der letzte Client
     geht, während das Menü schon offen ist. In der Pause steht `game_time`; die anderen Systeme rechnen
-    damit und erfahren den Zustand zusätzlich über „Spielzeit läuft“. Ob Physik und Animation über
-    `Time.timeScale` oder einen eigenen Wert angehalten werden, legt die ADR fest.
+    damit und erfahren den Zustand zusätzlich über „Spielzeit läuft“. Physik und Animation hält
+    `Time.timeScale = 0` an (ADR-0003, `docs/architecture/adr-0003-saison-uhr-und-meldungen.md`).
 12. **Abbrechen:** Der Host kann eine laufende Saison über das Menü abbrechen. Dann gibt es keine
     Bewertung („Nacht vorbei“ mit Grund `abort`, falls es in der Nacht war), die Hüttenkasse fällt auf
     den Stand beim Druck auf „Saison starten“ zurück, und es geht zurück zur Vorbereitung. Die
@@ -432,7 +435,7 @@ Hinweis „Saison kann bis 42:00 min dauern (Ziel 30–40)“.
 | Menüs | hart | Vorbereitung („Bereit“, „Saison starten“), Bildschirme für Bewertung und Upgrades, Abbrechen, Pause solo | kein Dokument |
 | Holzofen und Wärme, Lager und Vorräte | weich | Setzen sich bei „Saison beginnt“ zurück; der Ofen rechnet seine Brennzeit mit `game_time` (steht in der Pause) | Ofen gebaut, Lager kein Dokument |
 | Gegenstandsarten | weich | Kochzeitpunkt und Abkühlen (`is_warm`, `warm_fraction`) rechnen mit `game_time` | `design/gdd/gegenstandsarten.md` |
-| Hüttenkasse und Upgrades | weich | Phase „Upgrades“. Die Kasse setzt sich **nicht** zurück; beim Abbruch fällt sie auf den Stand beim Saisonstart zurück. | kein Dokument |
+| Hüttenkasse und Upgrades | weich | Phase „Upgrades“. Die Kasse setzt sich **nicht** zurück; beim Abbruch fällt sie auf den Stand beim Saisonstart zurück (sie merkt ihn sich bei „Saison beginnt“ und setzt ihn bei „Saison abgebrochen“ zurück). | kein Dokument |
 | Interaktion | weich | `dt` des Fortschritts ist vergangene `game_time` (in der Pause 0); rechnet mit `season_length` in der Faustregel `solo_hold_share` | `design/gdd/interaktion.md` |
 | Musik, Tutorial (Alpha), weitere Hütten (Full Vision) | weich | Phase, `season_pressure` | kein Dokument |
 
@@ -692,8 +695,8 @@ Editor), **[Freundestest]** (zu zweit übers Netz).
 38. **[Freundestest]** In den `tick`-Zeilen zur selben 10-s-Marke unterscheiden sich `progress` und
     `pressure` zwischen Host und Freund um höchstens 0,01.
 39. **[Freundestest + Codeprüfung]** Das Log des Freundes hat pro Saison genau 6 `phase-received`-Zeilen.
-    Synchronisiert werden nur Phase, `phase_start_time`, `paused_total`, Saisonzähler und Bereit-Liste;
-    für `elapsed`,
+    Synchronisiert werden nur Phase, `phase_start_time`, `paused_total`, Saisonzähler und Bereit-Liste
+    (in der Bewertung trägt sie „Weiter“, ADR-0003); für `elapsed`,
     `progress` und `pressure` gibt es keine NetworkVariable und kein RPC.
 40. **[Freundestest]** **GIVEN** Saison 2 **WHEN** der Host startet **THEN** meldet die `spawn-check`-Zeile
     1 s nach dem Start für beide Spieler höchstens 0,1 m Abstand zum Startpunkt, und die Debug-Anzeige des

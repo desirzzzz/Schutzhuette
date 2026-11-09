@@ -94,6 +94,37 @@ state_ownership:
       - docs/architecture/adr-0002-gegenstandsarten-katalog.md
     added: 2026-11-09
     revised: ""
+  - state: season_snapshot
+    status: active
+    owner_system: saison-ablauf
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    interface: "SeasonClock: eine NetworkVariable<SeasonSnapshot> (Phase, PhaseStartTime in game_time, PausedTotal, SeasonNumber) plus NetworkList<ulong> der Bestätigungen (Bereit / Weiter); lesen über SeasonClock.Current"
+    write_access: host-only
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - state: game_time
+    status: active
+    owner_system: saison-ablauf
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    interface: "SeasonClock.Current.GameTime (double); Host nach GDD-Formel 3a, Client max(letztes Bild, ServerTime − PausedTotal) bei Rücksprüngen bis 0,5 s; einzige Zeitbasis für Spielregeln, steht in der Solo-Pause"
+    write_access: host-only
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - state: time_scale
+    status: active
+    owner_system: saison-ablauf
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    interface: "Time.timeScale ist 0 nur in der Solo-Pause (Menü offen, Host allein, Nachmittag/Abend/Nacht), sonst 1; SeasonClock setzt 1 in OnNetworkSpawn, OnNetworkDespawn und bei SubsystemRegistration"
+    write_access: SeasonClock-only
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
 
 # Example:
 #
@@ -145,6 +176,7 @@ interfaces:
     signal_signature: "[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)] von der eigenen Spielfigur; der Host prüft, dann führt er aus"
     referenced_by:
       - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
     revised: ""
   - contract: catalog_lookup
@@ -176,6 +208,52 @@ interfaces:
     signal_signature: "Item.Kind (ItemKind, schreibgeschützt) am Prefab; Eigenschaften über feste Blöcke mit Enabled (Kind.Fuel, Kind.Chop, Kind.SupplyPack, Kind.Dish, Kind.Fragile, Kind.Tool, Kind.Equipment)"
     referenced_by:
       - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+    revised: ""
+  - contract: season_events
+    status: active
+    pattern: event_bus
+    producer: saison-ablauf
+    consumers:
+      - holzofen-und-waerme
+      - lager-und-vorraete
+      - gaeste
+      - huettenkasse-und-upgrades
+      - nachteinsatz
+      - bewertung
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    signal_signature: "SeasonEvents.SeasonStarted(int) / PhaseBegan(SeasonPhase, double startGameTime) / NightOver(NightEndReason) / SeasonAborted(); nur beim Host, jeder Zuhörer in try/catch; Start: entfernen, SeasonStarted, aufstellen, PhaseBegan; Abbruch: NightOver(Abort) falls Nacht, SeasonAborted, PhaseBegan(Preparation)"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - contract: season_clock_read
+    status: active
+    pattern: shared_resource
+    producer: saison-ablauf
+    consumers:
+      - hud
+      - menues
+      - interaktion
+      - gaeste
+      - wetter-und-eskalation
+      - ereignisse
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    signal_signature: "SeasonClock.Current (null erlaubt): Phase, SeasonNumber, GameTime, IsGameTimeRunning, PhaseElapsed (≥ 0), PhaseProgress, Pressure, Confirmed; Event PhaseChanged auf allen Rechnern, nur für Anzeige, einzige Quelle OnValueChanged"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - contract: mission_finished
+    status: active
+    pattern: direct_call
+    producer: nachteinsatz
+    consumers:
+      - saison-ablauf
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    signal_signature: "SeasonClock.MissionFinished() beim Host; einziger Weg des Nachteinsatzes zur Uhr, wirkt nur in der Nacht (frühestens bei night_min)"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
     revised: ""
 
@@ -246,6 +324,7 @@ api_decisions:
     reason: "NGO 2.13 empfiehlt es, die alten Callbacks werden abgelöst; vor StartHost abonnieren"
     referenced_by:
       - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
     revised: ""
   - purpose: fast_throw_collision
@@ -316,6 +395,57 @@ api_decisions:
     reason: "OnNetworkSpawn läuft vor dem Bau der Spawn-Nachricht; vorher schreiben loggt eine Warnung, danach kommt der Wert einen Tick zu spät"
     referenced_by:
       - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: game_time_source
+    status: active
+    api: NetworkManager.ServerTime.Time minus PausedTotal (beim Host während der Pause eingefroren), gelesen über SeasonClock.Current.GameTime
+    not: Time.time, Time.deltaTime, NetworkManager.LocalTime, eigene Uhr je Rechner, Ticks
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    reason: "ServerTime ist auf allen Rechnern abgeglichen und läuft unskaliert; LocalTime ist eine Vorausschätzung für Eingaben"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: solo_pause
+    status: active
+    api: Time.timeScale = 0 durch SeasonClock, nur ohne Clients
+    not: Physics.simulationMode = Script mit eigener Prüfung in jedem System
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    reason: "Eine Stelle hält Physik, Bewegung, Animator und Partikel an; NGO rechnet unskaliert und läuft weiter (QQ-05)"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: atomic_network_state
+    status: active
+    api: Zusammengehörige Werte als ein unmanaged struct (INetworkSerializable, IEquatable über alle Felder) in einer NetworkVariable
+    not: Mehrere NetworkVariables, die nur zusammen einen Sinn ergeben
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    reason: "OnValueChanged feuert je NetworkVariable einzeln in ReadDelta; sonst sieht der Client kurz eine Mischung aus neuen und alten Werten"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: owner_body_teleport
+    status: active
+    api: "[Rpc(SendTo.Owner)]; der Besitzer schaltet den CharacterController aus, setzt die Pose, ruft NetworkTransform.SetState(pos, rot, null, teleportDisabled: false) und schaltet ihn wieder an"
+    not: transform.position vom Host setzen; Position setzen bei aktivem CharacterController
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    reason: "Der Spielerkörper ist owner-autoritativ (ADR-0001); ohne SetState-Teleport gleitet er bei den anderen quer durch die Hütte"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: join_approval
+    status: active
+    api: JoinRules.Decide (rein) im ConnectionApprovalCallback, Reihenfolge Version, Saison läuft, voll; Grund über response.Reason
+    not: Beitritt annehmen und danach wieder trennen; eigene Prüfung je Transport
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    reason: "Ein Weg für IP und Steam (ADR-0006); der Client bekommt den Grund wie bei der Versionsprüfung"
+    referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
     revised: ""
 
@@ -385,6 +515,24 @@ forbidden_patterns:
     description: "Über das Netz gehen keine ScriptableObjects, Asset-Pfade oder Listen-Positionen, nur Kennungen als FixedString32Bytes."
     why: "Listen-Positionen verschieben sich beim Umsortieren still auf eine andere Art; Asset-Verweise lassen sich nicht serialisieren."
     adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    added: 2026-11-09
+  - pattern: gameplay_rule_on_unity_time
+    status: active
+    description: "Spielregeln mit Zeit (Brennzeit, Abkühlen, Fortschritt, Geduld) rechnen nie mit Time.time, Time.deltaTime, Time.unscaledTime oder NetworkManager.ServerTime direkt, sondern mit game_time. Darstellung darf Time.deltaTime nutzen."
+    why: "Nur game_time steht in der Solo-Pause und ist auf allen Rechnern gleich; sonst läuft eine Regel in der Pause weiter oder beim Client anders."
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+  - pattern: derived_season_values_over_network
+    status: active
+    description: "Fortschritt der Phase, Druck und verstrichene Zeit gehen nie als NetworkVariable oder RPC übers Netz; jeder Rechner rechnet sie mit SeasonMath."
+    why: "Sie ändern sich jedes Bild; übertragen kosteten sie Verkehr in jedem Tick und ruckelten beim Client (GDD Saison-Ablauf, Kriterium 39)."
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+  - pattern: manual_raise_after_network_variable_write
+    status: active
+    description: "Der Host löst nach dem Setzen einer NetworkVariable nicht zusätzlich von Hand aus, was schon an OnValueChanged hängt (zum Beispiel SeasonClock.PhaseChanged)."
+    why: "Der Value-Setter ruft OnValueChanged auch beim Host sofort auf; ein Handaufruf meldet doppelt."
+    adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
 
 # Example:
