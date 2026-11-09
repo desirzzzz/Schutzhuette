@@ -17,7 +17,9 @@
   6 gebauten MVP-Systeme (Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen, Tragen zu zweit,
   Holzofen, Geräusche) haben kein GDD. Für sie gelten die Regeln in CLAUDE.md und der Code in
   `Assets/_Project/Scripts/`.
-- **ADRs Referenced:** keine (es gibt noch keine)
+- **ADRs Referenced:** ADR-0001 Netz-Autorität und Physik im Netz (Accepted 2026-11-09), ADR-0002
+  Gegenstandsarten-Katalog und Netz-Kennung (Proposed), ADR-0003 Saison-Uhr, Spielzeit und Meldungen
+  (Proposed). Der Abschnitt „ADR Audit“ wird nachgezogen, wenn alle drei angenommen sind.
 - **TD-ARCHITECTURE:** 2026-11-09 — skipped — lean mode
 - **LP-FEASIBILITY:** 2026-11-09 — skipped — lean mode
 
@@ -232,4 +234,4 @@ einzelner Systeme.
 | QQ-03 | Welches Steam-Transport-Paket passt zu NGO 2.13 und Unity 6.6? | Hoch | ADR-0006 |
 | QQ-04 | UI-Technik als Ersatz für IMGUI (UI Toolkit oder UGUI) | Mittel | ADR-0007 |
 | QQ-05 | Hält die Solo-Pause Physik und Animation über `Time.timeScale` oder über einen eigenen Wert an? | Hoch | ADR-0003 |
-| QQ-06 | `OnConnectionEvent` statt `OnClientConnectedCallback` (NGO kündigt die Ablösung an, die Signatur ist nicht belegt) | Niedrig | ADR-0001 |
+| QQ-06 | ~~`OnConnectionEvent` statt `OnClientConnectedCallback` (NGO kündigt die Ablösung an, die Signatur ist nicht belegt)~~ **Beantwortet 2026-11-09:** Neuer Code nutzt nur `OnConnectionEvent`, abonniert vor `StartHost()`/`StartClient()`, Host-Logik wertet nur `ClientConnected`/`ClientDisconnected` aus; `ConnectionHud` und `PlayerSpawnApproval` wechseln im Plan-Schritt „Steam-Lobby“. Signatur aus dem NGO-2.13.3-Quelltext belegt | Niedrig | ADR-0001 (Accepted) |

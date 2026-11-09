@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted (2026-11-09, vom Entwickler über `/architecture-decision accept ADR-0001`)
 
 > **Wer auf `Accepted` setzen darf: der Entwickler, oder `technical-director` nach ausdrücklicher Bestätigung
 > des Entwicklers.** Kein anderer Agent und kein Skill allein. Stories, die auf eine `Proposed`-ADR

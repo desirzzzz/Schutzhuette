@@ -612,7 +612,7 @@ automatischer Test mit Physik, **[Manuell]** im Editor nach Anleitung, **[Freund
 | --- | --- | --- | --- |
 | 1 | Passt das Bruchfenster (5,51–7,2 m/s) im Spiel? Hebel wäre das Wurftempo. | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
 | 2 | Sollen steile Würfe auf den Boden (ab etwa 38° Neigung) zerbrechen? | Entwickler im Playtest | wenn das Zerbrechen gebaut ist |
-| 3 | Bei 15 m/s können Gegenstände dünne Wände durchfliegen. Braucht es für Würfe eine durchgehende Kollisionsprüfung? | Programmierung (ADR) | vor dem Bau |
+| 3 | ~~Bei 15 m/s können Gegenstände dünne Wände durchfliegen. Braucht es für Würfe eine durchgehende Kollisionsprüfung?~~ **Beantwortet 2026-11-09:** ja, „ContinuousDynamic“, solange ein Gegenstand beim Host fällt, sonst „Discrete“; die Vorhersage-Kopie bekommt es auch. Der Test beim Bau prüft zusätzlich dauerhaft „ContinuousSpeculative“ als Ausweg (`docs/architecture/adr-0001-netz-autoritaet-und-physik.md`, Entscheidung 3, Accepted) | ADR-0001 | erledigt |
 | 4 | Lässt man ein Gericht in einer Wand los, drückt die Physik es mit bis zu 10 m/s heraus. Zerbricht es dabei? | Test, notfalls kurze Schonzeit nach dem Loslassen | beim Bau |
 | 5 | ~~Trägt man Stirnlampe und Funkgerät in der Hand oder am Körper?~~ **Beantwortet 2026-11-08:** am Körper (Eigenschaft „Ausrüstung“, Zustand „Am Körper“, Regeln in `design/gdd/interaktion.md` Regel 8) | Dokument Interaktion | erledigt |
 | 6 | Wie schwer ist die Trage mit einer Person darauf? | Dokument zum Nachteinsatz | bei dessen Design |
