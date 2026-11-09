@@ -20,7 +20,9 @@ Proposed
 
 Entwickler (Projektleitung) mit Claude über `/architecture-decision`. Engine-Prüfung: `unity-specialist`
 (2026-11-09: ein Blocker zum Zeitpunkt der Startwerte, behoben in Entscheidung 5; Hinweise eingearbeitet).
-TD-ADR übersprungen (Review-Modus lean).
+TD-ADR übersprungen (Review-Modus lean). Architektur-Review 2026-11-09 (`architecture-review-2026-11-09.md`,
+CONCERNS) eingearbeitet: W3 (Host-Funktion „Entfernen“), W6 (Startmenü ruft beide Prüfungen), Empfehlung 5
+(eigenes Build-Skript als Hauptweg), Hinweis 11.
 
 ## Summary
 
@@ -40,7 +42,7 @@ je Eintrag in einem Katalog-Objekt, optionale Eigenschaften als feste Blöcke, d
 | **Knowledge Risk** | HIGH (Unity 6.6 und NGO 2.13 liegen nach dem Wissensstand des Modells, `VERSION.md`) |
 | **References Consulted** | `docs/engine-reference/unity/VERSION.md`, `modules/networking.md` (Block „NGO 2.13 for this project“), `breaking-changes.md` (6.6: `Dictionary`-Felder werden serialisiert, YAML-Format geändert), `deprecated-apis.md` (`Resources.Load`), `current-best-practices.md`; NGO 2.13.3 Quelltext `Runtime/NetworkVariable/Serialization/TypedILPPInitializers.cs` (`InitializeSerializer_FixedString<T>`); `Assets/_Project/Scripts/Net/GameVersion.cs` (Versionsprüfung beim Beitritt); `docs/registry/architecture.yaml` (Regeln aus ADR-0001) |
 | **Post-Cutoff APIs Used** | `NetworkVariable<FixedString32Bytes>` und `FixedString32Bytes` als RPC-Parameter (NGO 2.13.3, Serialisierer im Quelltext belegt); `NetworkVariable<double>` |
-| **Verification Required** | (1) Log-Prüfung: Der Client sieht die Ware-Kennung eines Vorratspakets schon in seinem `OnNetworkSpawn`, ohne Warnung „NetworkVariable is written to, but doesn't know its NetworkBehaviour yet“ beim Host. (2) Ein absichtlich kaputter Katalog lässt den Kommandozeilen-Build (`-buildWindows64Player`) mit „Result: Failure“ enden. (3) Nach einer Spielrunde zeigt `git status` keine Änderung an den Katalog-Dateien (GDD Gegenstandsarten, Abnahmekriterium 9). (4) Eine Kennung mit 29 Zeichen passt in `FixedString32Bytes`, eine mit 30 meldet die Prüfung als Fehler. |
+| **Verification Required** | (1) Log-Prüfung: Der Client sieht die Ware-Kennung eines Vorratspakets schon in seinem `OnNetworkSpawn`, ohne Warnung „NetworkVariable is written to, but doesn't know its NetworkBehaviour yet“ beim Host. (2) Ein absichtlich kaputter Katalog lässt das Build-Skript (`-executeMethod`) mit Exit-Code 1 und den Fehlern im Log enden, ohne dass eine `.exe` entsteht; ein heiler Katalog baut wie bisher. Zusätzlich im Editor: Bricht der Build-Hook einen Build aus „Build Profiles“ ab? Wenn nicht, loggt er nur die Fehler. (3) Nach einer Spielrunde zeigt `git status` keine Änderung an den Katalog-Dateien (GDD Gegenstandsarten, Abnahmekriterium 9). (4) Eine Kennung mit 29 Zeichen passt in `FixedString32Bytes`, eine mit 30 meldet die Prüfung als Fehler. |
 
 **Aus dem NGO-2.13.3-Quelltext belegt** (Spezialisten-Prüfung 2026-11-09, Stichproben nachgelesen):
 - `NetworkVariable<FixedString32Bytes>` und `NetworkVariable<double>` brauchen keinen eigenen Serialisierer.
@@ -51,13 +53,18 @@ je Eintrag in einem Katalog-Objekt, optionale Eigenschaften als feste Blöcke, d
 - Eine NetworkVariable vor `Spawn()` zu schreiben, loggt eine Warnung (`NetworkVariableBase.cs`); nach `Spawn()`
   geschriebene Werte kommen erst mit dem nächsten Tick.
 
+**Im Architektur-Review bestätigt** (`unity-specialist`, 2026-11-09):
+- `FixedString32Bytes` fasst 29 Byte Text (der Rest ist die Länge und ein Endzeichen).
+- Unity speichert den Kreisverweis Art → Prefab → Art ohne Probleme; der `GlobalObjectIdHash` hängt nur am
+  Prefab.
+
 **NOT SOURCEABLE** (nicht in `docs/engine-reference/` oder im Quelltext belegt, deshalb in „Verification
 Required“):
-- Der Build-Hook `IPreprocessBuildWithReport` mit `BuildFailedException` (aus älteren Unity-Versionen
-  bekannt). Die Engine-Referenz nennt keinen Weg, einen Build aus Code abzubrechen.
-- Die Zeichengrenze von `FixedString32Bytes` (29 Byte, Trainingswissen).
-- Dass Unity den Kreisverweis Art → Prefab → Art ohne Probleme speichert (Trainingswissen: ja; der
-  `GlobalObjectIdHash` hängt nur am Prefab).
+- `BuildPipeline.BuildPlayer` mit `BuildPlayerOptions` und die Auswertung von `BuildReport.summary.result`
+  (seit Unity 2018 bekannt, Trainingswissen; im Projekt noch nicht benutzt). Das ist der Hauptweg für den
+  Build-Abbruch (Entscheidung 7).
+- Ob der Build-Hook `IPreprocessBuildWithReport` mit `BuildFailedException` in 6.6 einen Build abbricht (aus
+  älteren Unity-Versionen bekannt). Er ist nur noch Zusatzschutz für Builds aus dem Fenster „Build Profiles“.
 
 ## ADR Dependencies
 
@@ -146,6 +153,14 @@ Spätere Änderungen sehen Clients über `OnValueChanged`.
 - Gericht: `NetworkVariable<double>` mit `cooked_time` in Spielzeit. Clients berechnen `is_warm` und
   `warm_fraction` selbst (`DishRules`, rein statisch). Die Spielzeit liefert ADR-0003.
 
+Gegenstände erscheinen und verschwinden nur über zwei Host-Funktionen in `ItemSpawning`:
+- **Erscheinen** (`Spawn`): prüft die Art (und bei Vorratspaketen ohne feste Ware die Ware), ruft
+  `Instantiate`, setzt die Startwerte und ruft `Spawn()`. Eine ungültige Art erscheint nicht.
+- **Entfernen** (`Remove`): stellt die Kollisionsprüfung auf „Discrete“ und ruft danach
+  `NetworkObject.Despawn(true)`. Grund (ADR-0001): Beim Despawn macht NGO den Körper selbst kinematisch, und ein
+  kinematischer Körper mit durchgehender Kollisionsprüfung löst eine Warnung aus. Der Bruch (ADR-0001), die
+  Startaufstellung (ADR-0003) und später das Kochen nutzen dieselbe Funktion.
+
 **6. Zugriff zur Laufzeit über einen globalen Dienst.** Die Komponente `CatalogService` sitzt am Objekt des
 `NetworkManager` (bleibt beim Szenenwechsel bestehen), hält den `ItemCatalog` und stellt sich als
 `CatalogService.Current` bereit. Sie baut die Nachschlagetabellen (Kennung → Eintrag) bei jedem Start neu und
@@ -161,8 +176,15 @@ damit die Regel „jedes Prefab steht in der Liste“ ohne Szene prüfbar bleibt
 die Gäste-Daten (`guest_data_valid`, im Gäste-Code, zum Beispiel in `GuestMath` wie im GDD Gäste) und den
 Querverweis Gericht → Bedürfnis. Angewendet wird die Prüfung:
 - im Editor über einen Menüpunkt und in den EditMode-Tests,
-- beim Build über einen Build-Hook, der bei `StartBlocked` abbricht,
-- beim Host-Start: Bei `StartBlocked` startet der Host nicht, und die Fehler stehen auf dem Bildschirm.
+- beim Build über ein eigenes Build-Skript (`-executeMethod`, wie die bestehenden Batchmode-Skripte): Es ruft
+  beide Prüfungen auf, baut nur ohne Fehler mit `BuildPipeline.BuildPlayer`, wertet `report.summary.result`
+  aus und beendet Unity mit Exit-Code 1, wenn eine Prüfung oder der Build fehlschlägt. `commands.build` in
+  `project.yaml` wechselt beim Bau auf dieses Skript. Ein Build-Hook (`IPreprocessBuildWithReport`) ruft
+  dieselben Prüfungen zusätzlich bei Builds aus dem Fenster „Build Profiles“ auf; ob er dort abbricht, ist
+  nicht belegt (Verification 2), deshalb ist er nur Zusatzschutz,
+- beim Host-Start: Das Startmenü (Presentation, oberste Schicht) ruft vor `StartHost()` beide Prüfungen auf.
+  Bei Fehlern startet der Host nicht, und die Fehler stehen auf dem Bildschirm. Weder der Katalog-Dienst
+  (Foundation) noch der Netz-Code ruft die Gäste-Prüfung (Feature) auf; Aufrufe gehen nur nach unten.
 
 ### Architecture Diagram
 
@@ -173,12 +195,13 @@ Querverweis Gericht → Bedürfnis. Angewendet wird die Prüfung:
  Data/Wares/*.asset (WareKind) ─┼─► ItemCatalog ──► CatalogService.Current
  Data/Needs/*.asset (NeedKind) ─┘        │              (Kennung → Eintrag)
                                          │
- CatalogValidator.Validate ◄─────────────┤ Menü, EditMode-Test, Build-Hook, Host-Start
+ CatalogValidator.Validate ◄─────────────┤ Menüpunkt, EditMode-Test, Build-Skript (+ Hook), Startmenü
    → CatalogReport (StartBlocked)        │
                                          ▼
  Prefab (NetworkObject) ── Item ──► ItemKind ── Masse, Trageart, Blöcke
    │                                                                     NGO erzeugt dasselbe Prefab
-   └── Host: Instantiate → SetInitialWare / SetInitialCookedTime → Spawn
+   └── Host, ItemSpawning.Spawn: Art prüfen → Instantiate → SetInitialWare / SetInitialCookedTime → Spawn
+       (ItemSpawning.Remove: Discrete → Despawn)
          OnNetworkSpawn (Host): Startwert → NetworkVariable
          dann baut NGO die Spawn-Nachricht ───────────────────────────────► beim Client: Art bekannt (Prefab)
            SupplyPackState.WareId (FixedString32Bytes) ───────────────────► Client: Kennung → WareKind
@@ -277,6 +300,17 @@ namespace Schutzhuette.Items
         public void SetInitialCookedTime(double gameTime);       // Host, vor Spawn(); OnNetworkSpawn überträgt
     }
 
+    /// <summary>Die einzigen Wege, Gegenstände erscheinen und verschwinden zu lassen. Nur beim Host.</summary>
+    public static class ItemSpawning
+    {
+        /// <summary>Prüft die Art, Instantiate, Startwerte, Spawn. null bei ungültiger Art (Fehler im Log).</summary>
+        public static NetworkObject Spawn(ItemKind kind, Vector3 position, Quaternion rotation,
+                                          WareKind ware = null, double? cookedTime = null);
+
+        /// <summary>Kollisionsprüfung auf Discrete, dann NetworkObject.Despawn(true).</summary>
+        public static void Remove(NetworkObject item);
+    }
+
     /// <summary>GDD Gegenstandsarten, Formel 3. Rein, ohne Szene testbar.</summary>
     public static class DishRules
     {
@@ -306,8 +340,12 @@ namespace Schutzhuette.Items
 - Prefabs, die ein Editor-Skript anlegt, **müssen** danach ihren `GlobalObjectIdHash` neu erzeugen lassen
   (wie `PrototypeSceneBuilder.RefreshPrefabHashFromCommandLine`), sonst ist er 0 und NGO spawnt sie nicht.
 - Wer ein Vorratspaket ohne feste Ware erzeugt, **muss** die Ware nennen; sonst erscheint es nicht (Fehler).
-- Gegenstände **müssen** über eine Host-Funktion erscheinen, die die Art prüft, bevor sie `Instantiate` und
-  `Spawn` aufruft; eine ungültige Art erscheint nicht.
+- Gegenstände **müssen** über die Host-Funktion `ItemSpawning.Spawn` erscheinen, die die Art prüft, bevor sie
+  `Instantiate` und `Spawn` aufruft; eine ungültige Art erscheint nicht.
+- Gegenstände **müssen** über die Host-Funktion `ItemSpawning.Remove` verschwinden (erst „Discrete“, dann
+  `Despawn(true)`). Eigener Code **darf** `Despawn` oder `Destroy` für Gegenstände nicht direkt aufrufen.
+- Die Gäste-Prüfung **darf nur** von oben aufgerufen werden (Startmenü, Build-Skript, Build-Hook, Tests), nie
+  vom Katalog-Dienst oder anderem Foundation-Code.
 - `CatalogService.Current` **darf nur** Laufzeit-Code nutzen. Prüfregeln, Editor-Code und Tests **müssen** den
   Katalog als Parameter bekommen.
 - Nachschlagetabellen **müssen** zur Laufzeit gebaut werden (im `CatalogService`), nicht als serialisiertes
@@ -370,8 +408,13 @@ namespace Schutzhuette.Items
   `OnNetworkSpawn`“ (Entscheidung 5), Verification 1.
 - **Prefabs aus Editor-Skripten haben `GlobalObjectIdHash` 0** und erscheinen beim Client nicht (im Projekt
   beobachtet, `modules/networking.md`). Gegenmittel: Hash nach dem Anlegen neu erzeugen (Guidelines).
-- **Build-Hook bricht den Kommandozeilen-Build nicht ab.** Gegenmittel: Verification 2; Ausweg: Prüfung als
-  `-executeMethod` vor dem Build in `commands.build`.
+- **Ein kaputter Katalog landet trotzdem in einer `.exe`.** Gegenmittel: Das eigene Build-Skript prüft vor
+  dem Bauen und bricht mit Exit-Code 1 ab (Entscheidung 7, Verification 2). Builds aus „Build Profiles“
+  sichert nur der Build-Hook; ob der dort abbricht, ist nicht belegt. Für Builds, die Freunde bekommen, gilt
+  deshalb nur das Build-Skript.
+- **Startmenü vergisst eine Prüfung** (zum Beispiel beim Umbau für die Steam-Lobby). Gegenmittel: Beide
+  Prüfungen stehen in einer Methode des Startmenüs; die manuelle Prüfung „kaputter Katalog sperrt den
+  Host-Start“ (Validation Criteria) gilt auch für die Gäste-Daten.
 - **Ein Prefab fehlt in der Netzwerk-Prefab-Liste** und erscheint beim Client nicht. Gegenmittel: Prüfregel.
 - **Datenobjekte werden im Editor zur Laufzeit verändert** und die Änderung bleibt gespeichert. Gegenmittel:
   Regel „schreibgeschützt“ und Abnahmekriterium 9 (`git status`).
@@ -411,8 +454,11 @@ Im Plan-Schritt „Gegenstandsarten“, nach `/test-setup` (Assemblies und Test-
    Katalog. Prefabs für neue Arten entstehen, wenn ihre Systeme gebaut werden.
 3. `Item` an `Crate` (→ Art `vorratskiste`), `Firewood` (→ `holzscheit`) und `HeavyChest` (→ `truhe`);
    `Carryable.Mass` und der Ofen lesen aus der Art; `FuelItem` entfällt.
-4. Build-Hook und Prüfung beim Host-Start einbauen; Test mit absichtlich kaputtem Katalog.
-5. Gäste-Datentypen (`GuestType`, Gäste-Einstellungen) im Plan-Schritt „Erster Gast und Tee“.
+4. `ItemSpawning` (Erscheinen und Entfernen) anlegen; `CrateSpawner` und der Ofen nutzen es.
+5. Build-Skript (`-executeMethod`) anlegen und `commands.build` in `project.yaml` darauf umstellen; Build-Hook
+   als Zusatzschutz; Prüfung im Startmenü vor `StartHost()`; Test mit absichtlich kaputtem Katalog.
+6. Gäste-Datentypen (`GuestType`, Gäste-Einstellungen) und ihre Prüfung im Plan-Schritt „Erster Gast und
+   Tee“; dann ruft das Startmenü auch die Gäste-Prüfung auf.
 
 **Rollback plan**: Die Datenobjekte sind ein Zusatz. Bis Schritt 3 laufen die alten Werte weiter; danach lassen
 sich `FuelItem` und die Prefab-Massen aus dem Git-Stand zurückholen.
@@ -427,7 +473,9 @@ sich `FuelItem` und die Prefab-Massen aus dem Git-Stand zurückholen.
   Kennung) und bei einem Vorratspaket die richtige Ware.
 
 ## Related
-- ADR-0001 (Netz-Autorität und Physik; Regeln `network_object_identity`, `impact_report`)
+- ADR-0001 (Netz-Autorität und Physik; Regeln `network_object_identity`, `impact_report`; der Bruch nutzt
+  `ItemSpawning.Remove`)
+- `docs/architecture/architecture-review-2026-11-09.md` (Befunde, die diese Fassung einarbeitet)
 - ADR-0003 (Spielzeit für das Abkühlen), ADR-0004 (Interaktion liest Werkzeug und Ausrüstung), ADR-0005 (Gäste)
 - `design/gdd/gegenstandsarten.md` (Regeln 1–3, Formeln, Edge Cases, Tuning Knobs, Abnahmekriterien A und C)
 - `design/gdd/gaeste.md` (Regeln 1–2, Formel `guest_data_valid`, Edge Cases zu falschen Daten)

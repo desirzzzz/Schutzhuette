@@ -397,7 +397,13 @@ above disagree, this block wins. Gaps are marked `NOT SOURCEABLE`.
 - `public IReadOnlyList<ulong> ConnectedClientsIds { get; }`, `ConnectedClients`, `ConnectedClientsList`
 - `public event Action<ulong> OnClientConnectedCallback` and `OnClientDisconnectCallback`. The API
   remark: "It is recommended to use OnConnectionEvent instead, as this will eventually be
-  deprecated." (`OnConnectionEvent`'s signature was not read: `NOT SOURCEABLE`.)
+  deprecated."
+- `public event Action<NetworkManager, ConnectionEventData> OnConnectionEvent`; `ConnectionEventData` has
+  `ConnectionEvent EventType`, `ulong ClientId`, `NativeArray<ulong> PeerClientIds`; `ConnectionEvent` is
+  `ClientConnected`, `PeerConnected`, `ClientDisconnected`, `PeerDisconnected`. `StartHost()` raises
+  `ClientConnected` for the host's own client, so subscribe before starting. `PeerClientIds` is filled only in
+  a client's own `ClientConnected` (check `IsCreated`) and is freed right after the call (`Allocator.Temp`):
+  copy it, never store it. (Read in the NGO 2.13.3 source for ADR-0001, 2026-11-09.)
 - `public string DisconnectReason { get; }`: read it after `OnClientDisconnectCallback`.
 - `public event Action OnServerStarted`, `OnClientStarted`, `OnPreShutdown`, `OnTransportFailure`;
   `public event Action<bool> OnServerStopped`, `OnClientStopped` (bool = was host).

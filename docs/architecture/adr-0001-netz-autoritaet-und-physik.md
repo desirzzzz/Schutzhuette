@@ -20,6 +20,9 @@ Proposed
 
 Entwickler (Projektleitung) mit Claude über `/architecture-decision`. Engine-Prüfung: `unity-specialist`
 (2026-11-09: keine Blocker, sechs Hinweise eingearbeitet). TD-ADR übersprungen (Review-Modus lean).
+Architektur-Review 2026-11-09 (`architecture-review-2026-11-09.md`, CONCERNS) eingearbeitet: Gutachter-Befund 1
+(Bruch eines liegenden Gegenstands), W2 (eine Abmelde-Regel), W3 (Entfernen über ADR-0002), W7 („Am Körper“),
+Empfehlung 4 (beide Varianten testen), Hinweis 10.
 
 ## Summary
 
@@ -39,7 +42,7 @@ und jeder Aufprall geht beim Host an einen Meldedienst `ImpactEvents`.
 | **Knowledge Risk** | HIGH (Unity 6.6 und NGO 2.13 liegen nach dem Wissensstand des Modells, `VERSION.md`) |
 | **References Consulted** | `docs/engine-reference/unity/VERSION.md`, `modules/networking.md` (Block „NGO 2.13 for this project“), `modules/physics.md`, `breaking-changes.md`, `deprecated-apis.md`, `current-best-practices.md`; NGO 2.13.3 Quelltext in `Library/PackageCache/com.unity.netcode.gameobjects@277a288a1cea/Runtime/` (`Core/NetworkManager.cs`, `Core/NetworkObject.cs`, `Connection/NetworkConnectionManager.cs`, `Serialization/NetworkObjectReference.cs`, `Spawning/NetworkSpawnManager.cs`, `Messaging/MessageDelivery.cs`, `Components/NetworkRigidBodyBase.cs`); `docs/GRAUBOX.md` (Wandstärken); `ProjectSettings/TimeManager.asset` (Physik-Takt 0,02 s). `modules/physics.md` ist Stand 6.3 und sagt nichts zu durchgehender Kollisionsprüfung bei kinematischen Körpern. |
 | **Post-Cutoff APIs Used** | `[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]` (NGO ≥ 2.7), `NetworkTransform.AuthorityMode` und `SwitchTransformSpaceWhenParented`, `NetworkRigidbody.AutoUpdateKinematicState` und `SetIsKinematic`, `NetworkObject.TrySetParent`/`TryRemoveParent`, `NetworkManager.OnConnectionEvent` mit `ConnectionEventData` (aus dem 2.13.3-Quelltext gelesen), `Rigidbody.linearVelocity` (kompiliert im Projekt) |
-| **Verification Required** | (1) Umschalten der Kollisionsprüfung: keine Konsolen-Warnung bei Host und Client (auch nicht beim Bruch, wenn NGO den Körper beim `Despawn` kinematisch setzt), eine Tasse mit 15 m/s fliegt nicht durch eine 0,2 m dicke Innenwand. (2) Ein Wurf mit 8–15 m/s trifft den Collider eines Gastes (Plan-Schritt 5). (3) Log-Prüfung: `OnConnectionEvent` meldet beim Host `ClientConnected` für den eigenen Client (laut Quelltext ja). |
+| **Verification Required** | (1) Umschalten der Kollisionsprüfung: keine Konsolen-Warnung bei Host und Client (auch nicht beim Bruch, wenn NGO den Körper beim `Despawn` kinematisch setzt), eine Tasse mit 15 m/s fliegt nicht durch eine 0,2 m dicke Innenwand. Dieselben Fälle einmal mit dauerhaft „ContinuousSpeculative“ wiederholen; zeigt „ContinuousDynamic“ Warnungen oder Durchflüge, Speculative aber nicht, gilt der Dauerwert (Rollback plan). (2) Ein Wurf mit 8–15 m/s trifft den Collider eines Gastes (Plan-Schritt 5). (3) Log-Prüfung: `OnConnectionEvent` meldet beim Host `ClientConnected` für den eigenen Client (laut Quelltext ja). |
 
 **Aus dem NGO-2.13.3-Quelltext belegt** (Spezialisten-Prüfung 2026-11-09, Stichproben nachgelesen):
 - `NetworkObject.Despawn(true)` aus einem Physik-Callback ist unbedenklich: Es läuft synchron durch, das
@@ -55,11 +58,20 @@ und jeder Aufprall geht beim Host an einen Meldedienst `ImpactEvents`.
 - `StartHost()` löst am Ende `ClientConnected` für den eigenen Client aus (`Core/NetworkManager.cs`). Beim
   Host kommt bei jedem Beitritt zusätzlich `PeerConnected`.
 
+**Im Architektur-Review belegt** (`unity-specialist`, 2026-11-09, Stichproben nachgelesen):
+- `NetworkRigidbody.AutoSetKinematicOnDespawn` ist standardmäßig an: NGO setzt beim Despawn selbst
+  `isKinematic` (`Components/NetworkRigidBodyBase.cs` 46).
+- Ein direktes `Destroy` auf ein gespawntes Objekt löst beim Host das Despawn aus (`Core/NetworkObject.cs`
+  1827–1832); `OnNetworkDespawn` läuft also auch dann.
+
 **NOT SOURCEABLE** (nicht in `docs/engine-reference/` und nicht im Quelltext belegt, deshalb in „Verification
 Required“):
 - Änderungen an PhysX in Unity 6.4–6.6 (`breaking-changes.md` nennt keine, das ist kein Beleg für keine).
 - Wie sich `CollisionDetectionMode.ContinuousDynamic` bei einem Körper verhält, der kinematisch wird oder
   es ist. Bekannt aus älteren Unity-Versionen: Kinematische Körper unterstützen nur „Speculative“.
+  Verification 1 testet deshalb beide Varianten.
+- In welcher Reihenfolge zwei Körper bei einem Zusammenstoß ihren `OnCollisionEnter` bekommen. Die
+  Entscheidung nimmt an, dass sie nicht festgelegt ist (Entscheidung 4); Validation Criteria, PlayMode.
 
 ## ADR Dependencies
 
@@ -142,6 +154,10 @@ Clients sind sie immer kinematisch. Beim Host gibt es drei Zustände:
 - **Getragen:** Kind der Spielfigur, kinematisch, Collider aus. Wände prüft der Träger mit `CarryCollision`.
 - **Fällt:** nach dem Loslassen, nach einem Treffer durch einen bewegten Körper oder beim Sturz des Trägers.
   Der Host rechnet die Physik voll. Der Zustand „Fällt“ ist nur beim Host bekannt und geht nicht ins Netz.
+  Ein liegender Gegenstand erkennt den Treffer selbst (Entscheidung 4).
+
+Ausrüstung, die ein Spieler „am Körper“ trägt (GDD Gegenstandsarten, Kriterium 34), legt ADR-0004 als eigenen
+Zustand fest. Bis dahin gilt: Sie wechselt nie in „Fällt“, auch nicht beim Sturz des Trägers.
 
 **3. Durchgehende Kollisionsprüfung nur im Fall.** Solange ein Gegenstand beim Host „fällt“ und nicht
 kinematisch ist, gilt `collisionDetectionMode = ContinuousDynamic`, sonst „Discrete“. Das gleicht eine einzige
@@ -151,6 +167,9 @@ Trägers selbst loslässt. Wo der eigene Code einen Körper kinematisch macht (`
 stellt er vorher auf „Discrete“. An NGO-eigenen Stellen (Despawn, Besitzerwechsel) lässt sich das nicht
 erzwingen; ob dort Warnungen entstehen, prüft Verification 1. Die Vorhersage-Kopie beim Client bekommt beim
 Erzeugen ebenfalls „ContinuousDynamic“, damit sie nicht dort durch die Wand fliegt, wo die echte abprallt.
+Verification 1 testet dieselben Fälle auch mit dauerhaft „ContinuousSpeculative“ (ohne Umschalten). Zeigt
+„ContinuousDynamic“ Warnungen oder Durchflüge und der Dauerwert nicht, wechselt das Projekt auf den Dauerwert;
+die Abgleichstelle entfällt dann.
 
 **4. Aufprall messen und melden.** Jeder Gegenstand hat beim Host eine Komponente `ImpactReporter`. Sie ist die
 einzige Stelle, die `OnCollisionEnter` für Spiel-Logik auswertet. Sie misst `impact_speed` als größten
@@ -159,10 +178,17 @@ und meldet das Ergebnis einmal an den Meldedienst `ImpactEvents`. Jeder beteilig
 eigenen Aufprall. Doppelte Wirkung verhindern die Sperrzeiten der Zuhörer (zum Beispiel `noise_lockout` je
 Gast).
 
+Liegt der Gegenstand und trifft ihn ein Körper mit nicht kinematischem Rigidbody (`collision.rigidbody`),
+schaltet sein `ImpactReporter` ihn im selben Callback zuerst auf „Fällt“ und prüft erst danach die
+Bruchregel. Grund: Die Bruchregel verlangt „Fällt“, und welcher der beiden Körper seinen Callback zuerst
+bekommt, ist nicht festgelegt. Ohne diese Reihenfolge zerbräche eine liegende Tasse nie, wenn eine geworfene
+Kiste sie trifft (GDD Gegenstandsarten, Kriterium 15). Schläft der Körper wieder ein, ist er wieder „Liegt“.
+
 **5. Zerbrechen.** Die Bruchregel ist eine reine statische Funktion (`BreakRule.BreaksOnImpact`). Zerbricht ein
 Gegenstand, sperrt sich `ImpactReporter` gegen weitere Kontakte im selben Physikschritt, meldet den Aufprall
 mit `Broke = true`, stellt auf „Discrete“ und entfernt den Gegenstand danach per
-`NetworkObject.Despawn(true)`. Die Reihenfolge Melden → Despawn ist wichtig: NGO stellt die Nachrichten in
+`NetworkObject.Despawn(true)`. Im Bau bündelt ADR-0002 die beiden letzten Schritte in der Host-Funktion
+„Entfernen“; der Bruch ruft sie auf, statt `Despawn` selbst. Die Reihenfolge Melden → Despawn ist wichtig: NGO stellt die Nachrichten in
 Sendereihenfolge zu, die Scherben-RPC kommt also vor dem Entfernen an. Scherben-Effekt und
 Scherben-Klang schickt nicht der Gegenstand selbst, sondern ein dauerhaftes Objekt `ImpactEffects`
 (Presentation), das am Meldedienst zuhört und `PlayBreakRpc` an alle sendet. Die Vorhersage-Kopie zerbricht
@@ -269,8 +295,11 @@ public class ImpactEffects : NetworkBehaviour
   und lösen weder Bruchregel noch Meldedienst aus.
 - `OnCollisionEnter` für Spiel-Logik **darf nur** `ImpactReporter` beim Host auswerten (`IsServer`).
   Andere Systeme **müssen** am Meldedienst `ImpactEvents` zuhören.
+- Trifft ein nicht kinematischer Körper einen liegenden Gegenstand, **muss** dessen `ImpactReporter` ihn im
+  selben Callback zuerst auf „Fällt“ schalten und erst danach die Bruchregel prüfen.
 - Kontaktpunkte **müssen** ohne Allokation gelesen werden (`contactCount` und `GetContact(i)`), nie über
-  `collision.contacts`.
+  `collision.contacts`. Den `Collision`-Parameter **darf** niemand über den Callback hinaus speichern (Unity
+  verwendet das Objekt wieder); was ein Zuhörer braucht, steht im `ImpactReport`.
 - Ein zerbrochener Gegenstand **muss** genau einmal gemeldet und entfernt werden (Sperre gegen weitere
   Kontakte im selben Physikschritt).
 - Effekte zu einem Gegenstand, der gleich entfernt wird, **müssen** von einem dauerhaften Objekt gesendet
@@ -281,9 +310,17 @@ public class ImpactEffects : NetworkBehaviour
 - Eine `NetworkObjectReference` **darf nur** aus einem gespawnten Objekt gebaut werden (`IsSpawned` prüfen);
   wer eine Referenz empfängt, **muss** ein fehlschlagendes `TryGet` vertragen.
 - `ImpactEvents.Raise` **muss** jeden Zuhörer einzeln absichern, damit ein Fehler das Despawn nicht verhindert.
+  Dafür darf es `GetInvocationList()` nutzen; die kleine Allokation je Aufprall ist bei wenigen Aufprallen pro
+  Sekunde vertretbar. Zeigt der Profiler sie als Problem, hält `ImpactEvents` die Zuhörer in einer eigenen
+  Liste.
 - `Rigidbody.linearVelocity` **darf nur** beim Loslassen (Startgeschwindigkeit) und beim Aufheben (auf null)
   geschrieben werden. Laufende Kräfte gehen über `AddForce`.
-- Wer `ImpactEvents.Reported` abonniert, **muss** sich in `OnDestroy` oder `OnNetworkDespawn` wieder abmelden.
+- An- und Abmelden an einem Meldedienst (`ImpactEvents` hier, `SeasonEvents` aus ADR-0003) folgt einer Regel:
+  NetworkBehaviours **müssen** sich in `OnNetworkSpawn` anmelden (nur bei `IsServer`) und in
+  `OnNetworkDespawn` abmelden; das läuft auch, wenn jemand das Objekt direkt zerstört. Reine MonoBehaviours
+  **müssen** sich in `OnEnable` an- und in `OnDisable` abmelden. NetworkBehaviours **dürfen** `OnDestroy` nur
+  als `override` mit `base.OnDestroy()` haben: Ein eigenes `private void OnDestroy()` verdeckt
+  `NetworkBehaviour.OnDestroy`, und NGO gibt dann die NetworkVariables nicht frei.
 - Jedes statische Feld **muss** in einer Methode mit
   `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` zurückgesetzt werden.
 - Rechenregeln (Bruch, Pose, Ofen) **müssen** reine statische Funktionen sein, damit EditMode-Tests sie ohne
@@ -316,8 +353,9 @@ public class ImpactEffects : NetworkBehaviour
 - **Rejection Reason**: Widerspricht „der Host entscheidet“ und würde gebaute, getestete Systeme ersetzen.
 
 ### Teilentscheidungen (je kurz)
-- **Kollisionsprüfung immer „ContinuousSpeculative“:** einfach, auch für kinematische Körper erlaubt, kann
-  aber Geister-Kontakte vor Kanten erzeugen. Verworfen zugunsten „nur im Fall“.
+- **Kollisionsprüfung immer „ContinuousSpeculative“:** einfach, auch für kinematische Körper erlaubt, spart
+  die Abgleichstelle, kann aber Geister-Kontakte vor Kanten erzeugen. Verworfen zugunsten „nur im Fall“;
+  bleibt der getestete Ausweg (Verification 1, Architektur-Review Empfehlung 4).
 - **Eigener Vorausblick per SphereCast:** volle Kontrolle, aber mehr Code und kein Aufprall-Ereignis von der
   Physik. Verworfen.
 - **Event je Gegenstand oder Gäste suchen selbst (OverlapSphere):** Gäste müssten jeden Gegenstand kennen
@@ -351,8 +389,10 @@ public class ImpactEffects : NetworkBehaviour
   Geometrie) oder „ContinuousSpeculative“.
 - **Schnelle Würfe treffen Gäste nicht** (Gäste sind keine feste Geometrie). Gegenmittel: Prüfung in Plan-
   Schritt 5; Ausweg: Gäste mit kinematischem Rigidbody, oder ein Treffer-Test per SphereCast nur für Gäste.
-- **Vergessenes Abmelden vom Meldedienst** führt zu Aufrufen auf zerstörte Objekte. Gegenmittel: Regel oben,
-  Zurücksetzen bei `SubsystemRegistration`, Code-Review.
+- **Vergessenes Abmelden vom Meldedienst** führt zu Aufrufen auf zerstörte Objekte. Gegenmittel: eine
+  Abmelde-Regel für alle Meldedienste (Guidelines), Zurücksetzen bei `SubsystemRegistration`, Code-Review.
+- **Eine liegende Tasse zerbricht nicht, wenn eine Kiste sie trifft**, weil sie im Callback noch „Liegt“.
+  Gegenmittel: Wechsel auf „Fällt“ vor der Bruchregel im selben Callback (Entscheidung 4); PlayMode-Test.
 - **Kopie und Original laufen auseinander** (Kopie fliegt weiter, Original zerbricht). Gegenmittel: Die
   Kopie verschwindet mit dem Original (gebaut).
 - **Viele gleichzeitige Aufpralle** (umfallender Stapel) erzeugen viele RPCs. Gegenmittel: Sperrzeit je
@@ -370,7 +410,7 @@ public class ImpactEffects : NetworkBehaviour
 
 | GDD System | Requirement | How This ADR Addresses It |
 |------------|-------------|--------------------------|
-| gegenstandsarten.md | TR-gegenstandsarten-003 (vorläufig): Bruchregel `breaks_on_impact`, der Host entscheidet (Formel 2) | `BreakRule` als reine Funktion, nur `ImpactReporter` beim Host wertet aus, Despawn plus Scherben vom Dauer-Objekt (Entscheidung 4, 5) |
+| gegenstandsarten.md | TR-gegenstandsarten-003 (vorläufig): Bruchregel `breaks_on_impact`, der Host entscheidet (Formel 2) | `BreakRule` als reine Funktion, nur `ImpactReporter` beim Host wertet aus; ein getroffener liegender Gegenstand wechselt vor der Prüfung auf „Fällt“; Despawn plus Scherben vom Dauer-Objekt (Entscheidung 4, 5) |
 | gegenstandsarten.md | TR-gegenstandsarten-005 (vorläufig): Würfe bis 15 m/s durchfliegen keine dünnen Wände (Open Question 3) | „ContinuousDynamic“ im Zustand „Fällt“, auch für die Vorhersage-Kopie (Entscheidung 3) |
 | gegenstandsarten.md | Edge Cases: mehrere Kontakte im selben Physikschritt → einmal entfernt, ein Scherben-Geräusch; die Kopie zerbricht nie selbst | Sperre nach dem Bruch; Kopie löst nichts aus (Entscheidung 5, Guidelines) |
 | gaeste.md | TR-gaeste-004 (vorläufig): Reaktion auf Lärm (Aufprall in der Nähe, zerbrochenes Geschirr) und Chaos (Treffer), Formel 5 | `ImpactEvents.Reported` liefert Ort, `ImpactSpeed`, Masse, `WasFalling`, `Broke` und den getroffenen Collider |
@@ -393,7 +433,8 @@ Der Ist-Stand bleibt; diese ADR hält ihn fest. Neu gebaut wird in drei Plan-Sch
 1. **„Gegenstandsarten“:** `ImpactReporter`, `BreakRule`, `ImpactEvents` und `ImpactEffects` anlegen;
    `ImpactSound` verliert seinen eigenen `OnCollisionEnter` und wird zu einem Teil von `ImpactEffects`;
    eine Abgleichstelle für die Kollisionsprüfung je Gegenstand beim Host (deckt `Carryable.Detach`, `AttachTo`,
-   Einschlafen und das Loslassen durch NGO in `OnNetworkObjectParentChanged` ab); Kopie mit „ContinuousDynamic“.
+   Einschlafen und das Loslassen durch NGO in `OnNetworkObjectParentChanged` ab); Kopie mit „ContinuousDynamic“;
+   Wechsel „Liegt → Fällt“ bei einem Treffer im `ImpactReporter`; Verification 1 mit beiden Varianten.
 2. **„Erster Gast und Tee“:** Gäste hören an `ImpactEvents` zu (Lärm, Chaos).
 3. **„Steam-Lobby“:** `ConnectionHud` und `PlayerSpawnApproval` wechseln auf `OnConnectionEvent`.
 
@@ -405,7 +446,8 @@ Der Ist-Stand bleibt; diese ADR hält ihn fest. Neu gebaut wird in drei Plan-Sch
   7,0) und `ImpactSpeed` (Wurf 40° schräg = 6,1 m/s).
 - **PlayMode, nur Host:** Eine Tasse mit 15 m/s gegen eine 0,2 m dicke Innenwand fliegt nicht hindurch; eine
   Tasse zerbricht bei mehreren Kontakten im selben Schritt genau einmal, `ImpactEvents.Reported` meldet genau
-  einmal `Broke = true`.
+  einmal `Broke = true`. GDD Gegenstandsarten, Kriterium 15: Eine liegende Tasse zerbricht, wenn eine Kiste
+  mit 8 m/s sie trifft, und bleibt heil, wenn die Kiste aus Haltehöhe (5,01 m/s) darauf fällt.
 - **Editor, MPPM mit 100 ms Ping:** Bruch bei Host und Client sichtbar, genau ein Scherben-Klang je Rechner,
   keine Fehler oder Warnungen zur Kollisionsprüfung in beiden Logs; Tragen und Werfen fühlen sich für den
   Client so an wie in Prototyp 0.1.4.
@@ -418,5 +460,6 @@ Der Ist-Stand bleibt; diese ADR hält ihn fest. Neu gebaut wird in drei Plan-Sch
 - `docs/engine-reference/unity/modules/networking.md` (Ist-Stand im Detail)
 - Code: `Assets/_Project/Scripts/Carrying/` (`Carryable`, `PlayerCarry`, `HeavyCarryable`, `CarryCollision`,
   `LocalGhost`), `Assets/_Project/Scripts/Audio/ImpactSound.cs`, `Assets/_Project/Scripts/Net/`
-- Nachfolgende ADRs: ADR-0002 (Katalog, Art-Kennung), ADR-0003 (Meldungen), ADR-0005 (Gäste), ADR-0009
-  (Ragdoll)
+- Nachfolgende ADRs: ADR-0002 (Katalog, Art-Kennung, Host-Funktion „Entfernen“), ADR-0003 (Meldungen),
+  ADR-0004 (Zustand „Am Körper“), ADR-0005 (Gäste), ADR-0009 (Ragdoll)
+- `docs/architecture/architecture-review-2026-11-09.md` (Befunde, die diese Fassung einarbeitet)

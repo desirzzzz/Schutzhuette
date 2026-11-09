@@ -58,12 +58,13 @@ state_ownership:
     status: active
     owner_system: gegenstandsarten
     adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
-    interface: "Liegt / Getragen / Fällt, nur beim Host bekannt. Getragen = transform.parent != null (alle Rechner); Fällt erreicht andere Systeme nur über ImpactReport.WasFalling"
+    # Alt (bis Architektur-Review 2026-11-09): "Liegt / Getragen / Fällt, nur beim Host bekannt. Getragen = transform.parent != null (alle Rechner); Fällt erreicht andere Systeme nur über ImpactReport.WasFalling"
+    interface: "Liegt / Getragen / Fällt, nur beim Host bekannt. Getragen = transform.parent != null (alle Rechner); Fällt erreicht andere Systeme nur über ImpactReport.WasFalling. Ein liegender Gegenstand, den ein nicht kinematischer Körper trifft, wechselt im eigenen ImpactReporter vor der Bruchregel auf Fällt. Am Körper (Ausrüstung) legt ADR-0004 fest; bis dahin nie Fällt"
     write_access: host-only
     referenced_by:
       - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
     added: 2026-11-09
-    revised: ""
+    revised: 2026-11-09
   - state: player_body_transform
     status: active
     owner_system: bewegung-und-kamera
@@ -108,13 +109,14 @@ state_ownership:
     status: active
     owner_system: saison-ablauf
     adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
-    interface: "SeasonClock.Current.GameTime (double); Host nach GDD-Formel 3a, Client max(letztes Bild, ServerTime − PausedTotal) bei Rücksprüngen bis 0,5 s; einzige Zeitbasis für Spielregeln, steht in der Solo-Pause"
+    # Alt (bis Architektur-Review 2026-11-09): "SeasonClock.Current.GameTime (double); Host nach GDD-Formel 3a, Client max(letztes Bild, ServerTime − PausedTotal) bei Rücksprüngen bis 0,5 s; einzige Zeitbasis für Spielregeln, steht in der Solo-Pause"
+    interface: "SeasonClock.Current.GameTime (double); Host nach GDD-Formel 3a, Client immer max(letztes Bild, ServerTime − PausedTotal), Merkwert nur in OnNetworkSpawn zurückgesetzt, große Rücksprünge nur geloggt; läuft nie rückwärts; einzige Zeitbasis für Spielregeln, steht in der Solo-Pause"
     write_access: host-only
     referenced_by:
       - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
       - docs/architecture/adr-0002-gegenstandsarten-katalog.md
     added: 2026-11-09
-    revised: ""
+    revised: 2026-11-09
   - state: time_scale
     status: active
     owner_system: saison-ablauf
@@ -430,21 +432,46 @@ api_decisions:
     revised: ""
   - purpose: owner_body_teleport
     status: active
-    api: "[Rpc(SendTo.Owner)]; der Besitzer schaltet den CharacterController aus, setzt die Pose, ruft NetworkTransform.SetState(pos, rot, null, teleportDisabled: false) und schaltet ihn wieder an"
-    not: transform.position vom Host setzen; Position setzen bei aktivem CharacterController
+    # Alt (bis Architektur-Review 2026-11-09): api "... ruft NetworkTransform.SetState(pos, rot, null, teleportDisabled: false) ..."
+    api: "[Rpc(SendTo.Owner)]; der Besitzer schaltet den CharacterController aus, setzt die Pose, ruft NetworkTransform.Teleport(pos, rot, transform.localScale) und schaltet ihn wieder an"
+    not: transform.position vom Host setzen; Position setzen bei aktivem CharacterController; SetState(..., teleportDisabled false) für diesen Zweck
     adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
-    reason: "Der Spielerkörper ist owner-autoritativ (ADR-0001); ohne SetState-Teleport gleitet er bei den anderen quer durch die Hütte"
+    reason: "Der Spielerkörper ist owner-autoritativ (ADR-0001); ohne Teleport gleitet er bei den anderen quer durch die Hütte. Teleport wirft auf der falschen Seite, SetState weicht still aus"
     referenced_by:
       - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
-    revised: ""
+    revised: 2026-11-09
   - purpose: join_approval
     status: active
-    api: JoinRules.Decide (rein) im ConnectionApprovalCallback, Reihenfolge Version, Saison läuft, voll; Grund über response.Reason
-    not: Beitritt annehmen und danach wieder trennen; eigene Prüfung je Transport
+    # Alt (bis Architektur-Review 2026-11-09): "JoinRules.Decide (rein) im ConnectionApprovalCallback, Reihenfolge Version, Saison läuft, voll; Grund über response.Reason" (JoinRules in Core, mit SeasonPhase)
+    api: "JoinRules.Decide (rein, Foundation Net/) im ConnectionApprovalCallback von PlayerSpawnApproval, Reihenfolge Version, Saison läuft, voll; Grund über response.Reason. Saison läuft ist ein bool an PlayerSpawnApproval, den SeasonClock (Core) von oben setzt"
+    not: Beitritt annehmen und danach wieder trennen; eigene Prüfung je Transport; Foundation liest SeasonClock oder SeasonPhase
     adr: docs/architecture/adr-0003-saison-uhr-und-meldungen.md
-    reason: "Ein Weg für IP und Steam (ADR-0006); der Client bekommt den Grund wie bei der Versionsprüfung"
+    reason: "Ein Weg für IP und Steam (ADR-0006); der Client bekommt den Grund wie bei der Versionsprüfung. Foundation kennt nichts aus Core (Schichtenregel)"
     referenced_by:
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: 2026-11-09
+  - purpose: event_bus_subscription
+    status: active
+    api: "An- und Abmelden an ImpactEvents und SeasonEvents: NetworkBehaviours in OnNetworkSpawn (nur IsServer) und OnNetworkDespawn; reine MonoBehaviours in OnEnable und OnDisable; OnDestroy in NetworkBehaviours nur als override mit base.OnDestroy()"
+    not: Abmelden nur in OnDestroy; Anmelden in OnNetworkSpawn und Abmelden in OnDisable; private void OnDestroy() in einem NetworkBehaviour
+    adr: docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+    reason: "Eine Regel für beide Meldedienste (Architektur-Review W2). OnNetworkDespawn läuft auch bei direktem Destroy; ein privates OnDestroy verdeckt NetworkBehaviour.OnDestroy, und NGO gibt die NetworkVariables nicht frei"
+    referenced_by:
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
+      - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
+    added: 2026-11-09
+    revised: ""
+  - purpose: item_spawn_and_remove
+    status: active
+    api: "ItemSpawning.Spawn (Art prüfen, Instantiate, Startwerte, Spawn) und ItemSpawning.Remove (collisionDetectionMode Discrete, dann NetworkObject.Despawn(true)); nur beim Host"
+    not: Instantiate plus Spawn oder Despawn / Destroy für Gegenstände direkt aufrufen
+    adr: docs/architecture/adr-0002-gegenstandsarten-katalog.md
+    reason: "Eine ungültige Art erscheint nie; NGO macht Körper beim Despawn kinematisch, mit durchgehender Kollisionsprüfung gäbe das eine Warnung (ADR-0001). Bruch, Startaufstellung und Kochen nutzen denselben Weg"
+    referenced_by:
+      - docs/architecture/adr-0002-gegenstandsarten-katalog.md
+      - docs/architecture/adr-0001-netz-autoritaet-und-physik.md
       - docs/architecture/adr-0003-saison-uhr-und-meldungen.md
     added: 2026-11-09
     revised: ""

@@ -21,7 +21,10 @@ Proposed
 Entwickler (Projektleitung) mit Claude über `/architecture-decision`. Engine-Prüfung: `unity-specialist`
 (2026-11-09: keine Blocker; Hinweise zu `OnValueChanged` beim Host, Startabgleich, Teleport und
 `timeScale`-Fallen eingearbeitet, die wichtigsten im Quelltext nachgelesen). TD-ADR übersprungen
-(Review-Modus lean).
+(Review-Modus lean). Architektur-Review 2026-11-09 (`architecture-review-2026-11-09.md`, CONCERNS)
+eingearbeitet: Gutachter-Befund 2 und W4 (Client-Spielzeit immer `max`), W1 (`JoinRules` in Foundation), W2
+(eine Abmelde-Regel), W3 (Entfernen über ADR-0002), W5 (`ClientJoined`), Empfehlungen 3 (Eingaben bei offenem
+Menü aus) und 7 (`Teleport`), Hinweise 8, 9 und 11.
 
 ## Summary
 
@@ -42,7 +45,7 @@ ADR-0001 über einen statischen Meldedienst nur beim Host.
 | **Knowledge Risk** | HIGH (Unity 6.6 und NGO 2.13 liegen nach dem Wissensstand des Modells, `VERSION.md`) |
 | **References Consulted** | `docs/engine-reference/unity/VERSION.md`, `modules/networking.md` (Block „NGO 2.13 for this project“), `breaking-changes.md` und `current-best-practices.md` (6.6: Domain Reload aus), `deprecated-apis.md`; NGO 2.13.3 Quelltext in `Library/PackageCache/com.unity.netcode.gameobjects@277a288a1cea`: `Runtime/Timing/NetworkTimeSystem.cs`, `NetworkTickSystem.cs`, `RealTimeProvider.cs`, `NetworkTime.cs`, `Runtime/Core/NetworkManager.cs`, `Runtime/NetworkVariable/NetworkVariable.cs`, `Runtime/Messaging/Messages/NetworkVariableDeltaMessage.cs`, `Runtime/NetworkVariable/Serialization/TypedILPPInitializers.cs`, `Runtime/NetworkVariable/Collections/NetworkList.cs`, `Runtime/Messaging/RpcTargets/OwnerRpcTarget.cs`; `Assets/_Project/Scripts/Net/PlayerSpawnApproval.cs`, `Hut/Stove.cs`; `docs/registry/architecture.yaml` (Regeln aus ADR-0001 und ADR-0002) |
 | **Post-Cutoff APIs Used** | `NetworkManager.ServerTime` (`NetworkTime.Time`, double); `NetworkVariable<T>` mit eigenem `unmanaged` struct (`INetworkSerializable`, `IEquatable<T>`); `NetworkList<ulong>`; `[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]` und `[Rpc(SendTo.Owner)]`; `NetworkManager.OnConnectionEvent` (ADR-0001) |
-| **Verification Required** | (1) Solo mit Testprofil: Esc-Menü 20 s offen im Nachmittag, während eine geworfene Kiste fliegt → sie hängt in der Luft und fliegt danach weiter, `ServerTime` im Log läuft weiter, `game_time` steht, keine NaN-Werte in Bewegung oder Kamera (GDD Saison-Ablauf, Kriterium 28). (2) Play bei offenem Menü (Pause) beenden, neu starten → `Time.timeScale` ist im ersten Bild 1. (3) Mit Network Simulator (100 ms): Beim Client wird `game_time` in keinem Bild kleiner als im Bild davor (Log-Prüfung), und `|gt − start| ≤ 0,5 s` bei `phase-received` (Kriterium 37). (4) Beim Client gibt es keine Log-Zeile, in der die Phase neu ist, der Phasenstart aber noch alt, und `PhaseChanged` feuert beim Host genau einmal pro Wechsel. (5) Der struct `SeasonSnapshot` in einer NetworkVariable kompiliert und kommt beim Client an. (6) Ein Client, der in der Bewertung beitritt, sieht Phase und Saison-Nr. richtig, auch wenn andere Objekte vor `SeasonClock` bei ihm erscheinen. (7) Beim Saisonstart springt der Spieler des Freundes beim Host an den Startpunkt, ohne quer durch die Hütte zu gleiten (Kriterium 40). |
+| **Verification Required** | (1) Solo mit Testprofil: Esc-Menü 20 s offen im Nachmittag, während eine geworfene Kiste fliegt → sie hängt in der Luft und fliegt danach weiter, `ServerTime` im Log läuft weiter, `game_time` steht, keine NaN-Werte in Bewegung oder Kamera (GDD Saison-Ablauf, Kriterium 28). (2) Play bei offenem Menü (Pause) beenden, neu starten → `Time.timeScale` ist im ersten Bild 1. (3) Mit Network Simulator (100 ms): Beim Client wird `game_time` in keinem Bild kleiner als im Bild davor (Log-Prüfung), und `|gt − start| ≤ 0,5 s` bei `phase-received` (Kriterium 37). (4) Beim Client gibt es keine Log-Zeile, in der die Phase neu ist, der Phasenstart aber noch alt, und `PhaseChanged` feuert beim Host genau einmal pro Wechsel. (5) Der struct `SeasonSnapshot` in einer NetworkVariable kompiliert und kommt beim Client an. (6) Ein Client, der in der Bewertung beitritt, sieht Phase und Saison-Nr. richtig, auch wenn andere Objekte vor `SeasonClock` bei ihm erscheinen. (7) Beim Saisonstart springt der Spieler des Freundes beim Host an den Startpunkt, ohne quer durch die Hütte zu gleiten (Kriterium 40). (8) Solo mit offenem Menü: Maus und Tasten bewegen weder Blick noch Figur, E und Werfen tun nichts; nach dem Schließen geht alles wieder. |
 
 **Aus dem NGO-2.13.3-Quelltext belegt** (2026-11-09 gelesen):
 - Die Netzzeit läuft mit `Time.unscaledDeltaTime` (`RealTimeProvider.UnscaledDeltaTime`, aufgerufen in
@@ -68,11 +71,24 @@ ADR-0001 über einen statischen Meldedienst nur beim Host.
   auf.
 - `NetworkBehaviour.OnDestroy` gibt alle NetworkVariables und NetworkLists frei (`networkVar.Dispose()`);
   wer `OnDestroy` überschreibt, muss `base.OnDestroy()` aufrufen.
-- `NetworkTransform.SetState(pos, rot, scale, teleportDisabled: false)` setzt die Werte „sofort“, ohne
-  Interpolation (Doku-Kommentar in `NetworkTransform.cs`); sinnvoll nur auf der autoritativen Seite.
+- `NetworkTransform.Teleport(pos, rot, scale)` setzt die Werte sofort, ohne Interpolation, und wirft eine
+  Exception, wenn die nicht autoritative Seite es aufruft (`NetworkTransform.cs`, `Teleport` prüft
+  `CanCommitToTransform`). `SetState(…, teleportDisabled: false)` landet in derselben internen Methode, weicht
+  auf der nicht autoritativen Seite aber aus: Beim Host schickt es den Wunsch per RPC an den Besitzer weiter
+  (`SetStateClientRpc`), bei einem fremden Client loggt es nur einen Fehler.
 - `serializer.SerializeValue(ref Phase)` für ein enum mit `byte` als Basistyp hat eine eigene Überladung
   `where T : unmanaged, Enum` (`Serialization/BufferSerializer.cs`) und braucht 1 Byte (vom
   `unity-specialist` gelesen).
+
+**Im Architektur-Review belegt** (`unity-specialist`, 2026-11-09, Stichproben nachgelesen):
+- Die Zeit des Clients läuft erst, wenn er verbunden ist (`Timing/NetworkTimeSystem.cs` 155), und
+  `ConnectionApproved` setzt sie zurück, bevor die Objekte erscheinen
+  (`Messaging/Messages/ConnectionApprovedMessage.cs` 294–296). Nach `OnNetworkSpawn` von `SeasonClock` gibt es
+  also keinen „großen Rücksprung vor dem ersten Zeitabgleich“ mehr.
+- Die Interpolation von `NetworkTransform` rechnet mit skalierter Zeit (`Components/NetworkTransform.cs` 4254,
+  `RealTimeProvider.DeltaTime`). `timeScale = 0` würde bei Clients Bewegungen einfrieren.
+- `NetworkVariable<SeasonSnapshot>` braucht kein `[GenerateSerializationForType]`, solange der Wert ein Feld
+  des NetworkBehaviours ist (`Editor/CodeGen/NetworkBehaviourILPP.cs` 1406–1429).
 
 **NOT SOURCEABLE** (nicht in `docs/engine-reference/` oder im Quelltext belegt, deshalb in „Verification
 Required“):
@@ -83,17 +99,12 @@ Required“):
   setzt es deshalb selbst zurück; Prüfung (2).
 - In welcher Reihenfolge NGO die schon vorhandenen Objekte bei einem neuen Client erzeugt. Die Entscheidung
   verlangt deshalb, dass `SeasonClock.Current == null` erlaubt ist; Prüfung (6).
-- Ob die Interpolation von `NetworkTransform` beim Client mit skalierter Zeit rechnet
-  (`RealTimeProvider.DeltaTime` ist skaliert). Für diese ADR egal, weil die Pause nur ohne Clients gilt.
-- Ob ein eigener struct in `NetworkVariable<T>` ohne `[GenerateSerializationForType]` auskommt, solange er in
-  derselben Assembly wie das NetworkBehaviour liegt (Trainingswissen: ja; ILPP-Code nicht gelesen);
-  Prüfung (5).
 
 ## ADR Dependencies
 
 | Field | Value |
 |-------|-------|
-| **Depends On** | ADR-0001 (Host entscheidet, Meldedienst-Muster `ImpactEvents`, `OnConnectionEvent`, RPC-Form; muss vor der Umsetzung `Accepted` sein), ADR-0002 (Startaufstellung erzeugt Gegenstände über den Katalog und die Host-Funktion zum Erscheinen; Startwerte von NetworkVariables in `OnNetworkSpawn`; muss vor der Umsetzung `Accepted` sein) |
+| **Depends On** | ADR-0001 (Host entscheidet, Meldedienst-Muster `ImpactEvents`, `OnConnectionEvent`, RPC-Form; muss vor der Umsetzung `Accepted` sein), ADR-0002 (Startaufstellung erzeugt Gegenstände über den Katalog und die Host-Funktionen zum Erscheinen und Entfernen (`ItemSpawning`); Startwerte von NetworkVariables in `OnNetworkSpawn`; muss vor der Umsetzung `Accepted` sein) |
 | **Enables** | ADR-0004 (Interaktion rechnet `dt` mit `game_time`), ADR-0005 (Gäste hören auf Phasen-Meldungen und lesen `season_pressure`), ADR-0006 (Steam-Transport übernimmt die Beitrittsregel „nur zwischen den Saisons“), ADR-0007 (UI liest `SeasonClock` für HUD und Menüs) |
 | **Blocks** | Plan-Schritt „Saison“ in `production/milestones/vertical-slice.md`; das Abkühlen von Gerichten (ADR-0002, Ordering Note). Epics und Stories gibt es noch keine. |
 | **Ordering Note** | `CrateSpawner` wird durch die Startaufstellung ersetzt, sobald der Katalog aus ADR-0002 gebaut ist. Den Ofen erst auf `game_time` umstellen, wenn `SeasonClock` existiert. |
@@ -129,8 +140,11 @@ System seine eigene Zeit benutzt.
 - Schichten (architecture.md): Saison ist Core. Nach unten wird aufgerufen, nach oben nur gemeldet. GDD
   Saison-Ablauf, Kriterium 33: Die Saison-Skripte verweisen auf keine Klasse aus `Hut/`, `Guests/` oder
   `Weather/`.
-- Der eigene Spielerkörper ist owner-autoritativ (ADR-0001): Der Host kann einen Spieler nicht selbst
-  versetzen.
+- Der eigene Spielerkörper ist owner-autoritativ (ADR-0001). `SetState` beim Host würde den Wunsch zwar per
+  RPC an den Besitzer weiterreichen, aber dessen aktiver `CharacterController` überschreibt eine von außen
+  gesetzte Position. Der Besitzer muss sich also selbst versetzen.
+- Schichten (architecture.md): Foundation (Netz-Sitzung, `Net/`) darf nichts aus Core kennen. Die
+  Beitrittsregel braucht aber „läuft eine Saison?“.
 - Kein neues Paket.
 
 ### Requirements
@@ -178,10 +192,13 @@ Fortschritt, Druck und verstrichene Zeit werden **nie** übertragen; jeder Rechn
   `pause_time` und `is_paused` kennt nur der Host.
 - Beim Client: `game_time = max(game_time des letzten Bildes, server_time − paused_total)`. Der Client ist nie
   in Pause (Pause geht nur ohne Clients). Das `max` fängt die Rücksprünge der NGO-Zeitschätzung ab: Statt
-  rückwärts zu laufen, steht die Spielzeit dann kurz still. So ist `dt` nie negativ. Geklemmt werden nur
-  kleine Rücksprünge bis 0,5 s; einen größeren (etwa vor dem ersten Zeitabgleich) übernimmt der Client und
-  loggt ihn, sonst stünde seine Uhr lange still. Der gemerkte Wert wird in `OnNetworkSpawn` zurückgesetzt,
-  weil die Serverzeit bei jedem Host-Start bei 0 beginnt.
+  rückwärts zu laufen, steht die Spielzeit dann kurz still. So ist `dt` nie negativ und `game_time` läuft
+  nie rückwärts (GDD Formel 3a). Das `max` gilt **immer**, ohne Ausnahme für große Sprünge. Grund
+  (NGO-Quelltext, Architektur-Review): Die Client-Zeit läuft erst nach dem Verbinden und wird zurückgesetzt,
+  bevor Objekte erscheinen; ein großer Rücksprung vor dem ersten Abgleich kommt nach `OnNetworkSpawn` nicht
+  mehr vor. Einen Rücksprung über 0,5 s loggt der Client nur (`[Season] time-jump`), er übernimmt ihn nicht.
+  Den gemerkten Wert setzt er **nur** in `OnNetworkSpawn` zurück, weil die Serverzeit bei jedem Host-Start
+  bei 0 beginnt.
 - `SeasonClock.PhaseElapsed` liefert nie weniger als 0 (die Formel aus dem GDD darf beim Client kurz negativ
   werden, die Anzeige nicht).
 - `SeasonClock.Current.GameTime` ist der einzige Zugang. Reine Funktionen bekommen die Spielzeit als
@@ -194,10 +211,15 @@ an; NGO und das Menü rechnen mit unskalierter Zeit und laufen weiter. Nur `Seas
 `Time.timeScale`. Es setzt den Wert in `OnNetworkSpawn`, `OnNetworkDespawn` und in einer
 `SubsystemRegistration`-Methode auf 1, weil Domain Reload aus ist. „Allein“ erfährt der Host über
 `OnConnectionEvent` (ADR-0001): Geht der letzte Client, während das Menü offen ist, beginnt die Pause in
-diesem Moment. Dass die Pause nur ohne Clients gilt, ist auch technisch wichtig: Teile von NGO (vermutlich
-die Interpolation) lesen skalierte Zeit, bei Clients würde `timeScale = 0` also Bewegungen einfrieren. In der
-Pause ist `Time.deltaTime` 0; Code, der durch `Time.deltaTime` teilt, muss das abfangen (der heutige Code
-tut es mit `Mathf.Max(Time.deltaTime, 0.0001f)`).
+diesem Moment. Dass die Pause nur ohne Clients gilt, ist auch technisch wichtig: Die Interpolation von
+`NetworkTransform` rechnet mit skalierter Zeit (NGO-Quelltext), bei Clients würde `timeScale = 0` also
+Bewegungen einfrieren. In der Pause ist `Time.deltaTime` 0; Code, der durch `Time.deltaTime` teilt, muss das
+abfangen (der heutige Code tut es mit `Mathf.Max(Time.deltaTime, 0.0001f)`).
+
+`Time.timeScale` hält keine Eingaben an: Mausdrehung liefe weiter, und die eigenen RPCs des Hosts (Aufheben,
+Werfen) laufen sofort lokal. Deshalb schaltet das Menü beim Öffnen die Gameplay-Action-Maps des Input Systems
+aus (Bewegung, Blick, Interaktion) und beim Schließen wieder an, mit und ohne Pause. Das Menü selbst nutzt
+eine eigene Action-Map, die an bleibt.
 
 **5. Meldungen über einen Meldedienst beim Host (übernimmt das Muster aus ADR-0001).** Die statische Klasse
 `SeasonEvents` meldet nur beim Host an Spiel-Logik: `SeasonStarted`, `PhaseBegan`, `NightOver` (Grund
@@ -221,24 +243,37 @@ einem Hänger), kommt beim Client nur der letzte an; Anzeigen dürfen also keine
 **6. Wünsche und Aufrufe.** Clients schicken „Bereit“ und „Weiter“ per
 `[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]` von ihrer eigenen Spielfigur
 (Komponente `PlayerSeasonRequests`); der Host gibt sie mit der Absender-Kennung an `SeasonClock` weiter.
+„Weiter zu den Upgrades, wenn alle verbundenen Spieler ‚Weiter‘ gedrückt haben“ (GDD Regel 8) braucht die
+Liste der Verbundenen: `SeasonClock` übergibt beim Spawn die schon verbundenen Kennungen
+(`NetworkManager.ConnectedClientsIds`) an `SeasonDirector.ClientJoined` und danach jedes `ClientConnected` und
+`ClientDisconnected` aus `OnConnectionEvent` (ADR-0001). Grund für den ersten Schritt: Das Uhr-Objekt
+erscheint erst nach `StartHost()` und verpasst die Meldung über den eigenen Client.
 Starten, Abbrechen, „Weiter“ des Hosts, „Nächste Saison“ und das Menü sind Host-Aufrufe an `SeasonClock`.
 Der Nachteinsatz ruft nur `SeasonClock.MissionFinished()` auf und kennt sonst nichts von der Uhr.
 
 **7. Startaufstellung, Beitritt, Abbruch.**
 - Die Startaufstellung ist ein Datenobjekt `StartLayout` mit Einträgen „Platz-Kennung → Art (und Ware)“. In
   der Szene stehen Marker `ItemSlot` mit derselben Kennung. Beim Start entfernt der Host jeden Gegenstand
-  (jedes gespawnte Objekt mit `Item`, auch getragene) mit `Despawn(true)` und erzeugt die neuen über die
-  Host-Funktion aus ADR-0002. Ein unbekannter Eintrag lässt den Platz leer und loggt einen Fehler. Eine
-  reine Prüffunktion vergleicht Aufstellung, Marker-Kennungen und Katalog.
+  (jedes gespawnte Objekt mit `Item`, auch getragene) mit `ItemSpawning.Remove` und erzeugt die neuen mit
+  `ItemSpawning.Spawn` (beide ADR-0002). Ein unbekannter Eintrag lässt den Platz leer und loggt einen
+  Fehler. Eine reine Prüffunktion vergleicht Aufstellung, Marker-Kennungen und Katalog.
 - Spieler stellt der Host über `[Rpc(SendTo.Owner)]` an ihren Startpunkt; der Besitzer versetzt seinen
   Körper selbst (owner-autoritativ, ADR-0001): `CharacterController` aus, Position und Drehung setzen,
-  `NetworkTransform.SetState(pos, rot, null, teleportDisabled: false)` (springt, statt zu gleiten),
-  Fallgeschwindigkeit auf 0, `CharacterController` wieder an. Ein aktiver `CharacterController` würde eine
-  direkt gesetzte Position sonst überschreiben. Startpunkte sind die aus `PlayerSpawnApproval`.
+  `NetworkTransform.Teleport(pos, rot, transform.localScale)` (springt, statt zu gleiten; wirft auf der
+  falschen Seite eine Exception, statt still auszuweichen), Fallgeschwindigkeit auf 0, `CharacterController`
+  wieder an. Ein aktiver `CharacterController` würde eine direkt gesetzte Position sonst überschreiben.
+  Startpunkte sind die aus `PlayerSpawnApproval`.
 - Beitritt: Eine reine Funktion `JoinRules.Decide` prüft in der Reihenfolge Version → Saison läuft → voll;
   `PlayerSpawnApproval` ruft sie im `ConnectionApprovalCallback` auf und gibt den Grund über
-  `response.Reason` zurück. Solange ein angenommener Spieler noch nicht erschienen ist, lehnt der Director
-  „Saison starten“ ab (`start-blocked reason=join-pending`).
+  `response.Reason` zurück. Beide liegen in Foundation (`Net/`, Namespace `Schutzhuette.Net`), damit die
+  Netz-Sitzung nichts aus Core kennt (Schichtenregel). `JoinRules` kennt deshalb keine Phase, nur den Wert
+  „Saison läuft“ (`bool`, wahr in Nachmittag, Abend und Nacht; GDD Regel 10). Diesen Wert hält
+  `PlayerSpawnApproval` (`SeasonRunning`); `SeasonClock` setzt ihn beim Host bei jedem Phasenwechsel von oben
+  (Core ruft Foundation, also nach unten). Hält der Server an,
+  fällt er auf `false`. Dieselbe Regel nutzt später der Steam-Transport (ADR-0006).
+- Solange ein angenommener Spieler noch nicht erschienen ist, lehnt der Director „Saison starten“ ab
+  (`start-blocked reason=join-pending`). Die Zahl wartender Beitritte liest `SeasonClock` bei
+  `PlayerSpawnApproval` (`PendingJoins`) und übergibt sie an `TryStart`.
 - Abbruch: Die Hüttenkasse merkt sich ihren Stand bei `SeasonStarted` und setzt ihn bei `SeasonAborted`
   zurück. Der Saisonzähler steigt erst bei „Nächste Saison“, ein Abbruch ändert ihn nicht.
 
@@ -268,8 +303,9 @@ Der Nachteinsatz ruft nur `SeasonClock.MissionFinished()` auf und kennt sonst ni
 
  SeasonClock schreibt:  NetworkVariable<SeasonSnapshot> ─────────────► OnValueChanged → PhaseChanged
                         NetworkList<ulong> (bestätigt) ──────────────► Bereit-/Weiter-Anzeige
+ SeasonClock setzt (Host, nach unten): PlayerSpawnApproval.SeasonRunning (Foundation, Net/) → JoinRules
  Alle Rechner lesen:    GameTime, Phase, PhaseElapsed, PhaseProgress, Pressure, IsGameTimeRunning
-                        (aus ServerTime + SeasonSnapshot, beim Client mit max gegen Rücksprung)
+                        (aus ServerTime + SeasonSnapshot, beim Client immer max gegen Rücksprung)
 ```
 
 ### Key Interfaces
@@ -338,6 +374,7 @@ namespace Schutzhuette.Core
         public void HostContinue(double serverTime);                 // Bewertung → Upgrades
         public void NextSeason(double serverTime);                   // Upgrades → Vorbereitung
         public void SetPauseInputs(bool menuOpen, bool hostAlone, double serverTime);
+        public void ClientJoined(ulong clientId);                    // zählt ab jetzt bei „alle verbunden“ mit
         public void ClientLeft(ulong clientId, double serverTime);
     }
 
@@ -386,19 +423,14 @@ namespace Schutzhuette.Core
         private readonly NetworkList<ulong> _confirmed = new();
 
         // OnNetworkSpawn: Current setzen, _snapshot.OnValueChanged abonnieren (alle Rechner),
-        //   Startwert einmal selbst übernehmen, gemerkte Spielzeit zurücksetzen, timeScale = 1.
+        //   Startwert einmal selbst übernehmen, gemerkte Spielzeit zurücksetzen (nur hier), timeScale = 1.
+        //   Nur Host: ConnectedClientsIds an Director.ClientJoined, OnConnectionEvent abonnieren,
+        //   PlayerSpawnApproval.SeasonRunning setzen.
         // OnNetworkDespawn: abmelden, Current = null, timeScale = 1.
-        // OnDestroy (falls überschrieben): base.OnDestroy() aufrufen.
+        // OnDestroy nur als override mit base.OnDestroy() (sonst gibt NGO die NetworkVariables nicht frei).
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() { Current = null; Time.timeScale = 1f; }
-    }
-
-    /// <summary>Beitrittsregel (GDD Kriterium 26). Rein.</summary>
-    public static class JoinRules
-    {
-        public enum Result { Approved, VersionMismatch, SeasonRunning, Full }
-        public static Result Decide(bool versionMatches, SeasonPhase phase, int connectedPlayers, int slots);
     }
 
     /// <summary>Startaufstellung (Datenobjekt): Platz-Kennung → Art, optional Ware.</summary>
@@ -406,6 +438,24 @@ namespace Schutzhuette.Core
 
     /// <summary>Marker in der Szene.</summary>
     public class ItemSlot : MonoBehaviour { public string SlotId { get; } }
+}
+
+// Foundation, Assets/_Project/Scripts/Net/ (kennt nichts aus Core):
+namespace Schutzhuette.Net
+{
+    /// <summary>Beitrittsregel (GDD Regel 10, Kriterium 26). Rein.</summary>
+    public static class JoinRules
+    {
+        public enum Result { Approved, VersionMismatch, SeasonRunning, Full }
+        public static Result Decide(bool versionMatches, bool seasonRunning, int connectedPlayers, int slots);
+    }
+
+    // Bestehende Komponente am NetworkManager, erweitert:
+    // public class PlayerSpawnApproval : MonoBehaviour
+    // {
+    //     public bool SeasonRunning { get; set; }   // setzt SeasonClock (Host); false beim Server-Stopp
+    //     public int PendingJoins { get; }          // angenommen, aber noch nicht erschienen
+    // }
 }
 
 // An der Spielfigur (Player-Prefab):
@@ -416,8 +466,9 @@ public class PlayerSeasonRequests : NetworkBehaviour
 
     [Rpc(SendTo.Owner)]
     public void MoveToStartRpc(Vector3 position, Quaternion rotation);
-    // Besitzer: CharacterController aus, Position setzen, NetworkTransform.SetState(..., teleportDisabled: false),
-    // Fallgeschwindigkeit 0, CharacterController an.
+    // Besitzer: CharacterController aus, Position setzen,
+    // NetworkTransform.Teleport(position, rotation, transform.localScale), Fallgeschwindigkeit 0,
+    // CharacterController an.
 }
 ```
 
@@ -437,14 +488,22 @@ public class PlayerSeasonRequests : NetworkBehaviour
 - Nur der Host **darf** `SeasonSnapshot` und die Bestätigungsliste schreiben. Fortschritt, Druck und
   verstrichene Zeit **dürfen nie** als NetworkVariable oder RPC übertragen werden (GDD Kriterium 39).
 - Spiel-Logik **muss** an `SeasonEvents` zuhören und **darf** dort nur beim Host etwas tun. Anzeigen
-  **müssen** `SeasonClock.Current` und `PhaseChanged` nutzen. Zuhörer **müssen** sich in `OnDisable`
-  abmelden.
+  **müssen** `SeasonClock.Current` und `PhaseChanged` nutzen. An- und Abmelden folgt der Regel aus ADR-0001
+  (Register `event_bus_subscription`): NetworkBehaviours in `OnNetworkSpawn` (nur `IsServer`) und
+  `OnNetworkDespawn`, reine MonoBehaviours in `OnEnable` und `OnDisable`.
+- Die Spielzeit beim Client **muss** mit `max` gegen das letzte Bild laufen, ohne Ausnahme; der gemerkte Wert
+  **darf nur** in `OnNetworkSpawn` zurückgesetzt werden.
+- Das Menü **muss** beim Öffnen die Gameplay-Action-Maps (Bewegung, Blick, Interaktion) ausschalten und beim
+  Schließen wieder an, mit und ohne Pause.
+- Foundation-Code (`Net/`) **darf nie** `SeasonClock`, `SeasonPhase` oder anderes aus Core kennen. Core
+  setzt Werte in Foundation von oben (`PlayerSpawnApproval.SeasonRunning`).
 - Jedes System **muss** sich bei `SeasonStarted` selbst zurücksetzen. Der Saison-Code **darf nie** Klassen
   aus `Hut/`, `Guests/`, `Weather/` oder anderen Feature-Ordnern kennen (GDD Kriterium 33).
 - Code, der `SeasonClock.Current` liest, **muss** `null` vertragen (Objekt noch nicht gespawnt) und dann
   keine Zeitregel ausführen.
-- Wer einen Gegenstand hält oder auf ihn verweist, **muss** damit umgehen, dass der Host ihn per
-  `Despawn(true)` entfernt (Startaufstellung, Zerbrechen aus ADR-0001).
+- Gegenstände **müssen** über `ItemSpawning.Remove` (ADR-0002) entfernt werden, nie per `Despawn` direkt.
+  Wer einen Gegenstand hält oder auf ihn verweist, **muss** damit umgehen, dass der Host ihn entfernt
+  (Startaufstellung, Zerbrechen aus ADR-0001).
 - Phasenlängen und Druckwerte **müssen** im `SeasonProfile` stehen; in den Saison-Skripten **dürfen** 600,
   720, 480 oder 1080 nicht als feste Zahlen stehen (GDD Kriterium 18).
 - Der Director **muss** beim Wechsel nach Zeit `neuer Start = alter Start + Länge` rechnen, nicht die Zeit des
@@ -510,14 +569,20 @@ public class PlayerSeasonRequests : NetworkBehaviour
 
 ## Risks
 
-- **Rücksprung der NGO-Zeit beim Client** (ab 0,2 s Abweichung). Gegenmittel: `max` in Entscheidung 3;
-  Verification 3.
+- **Rücksprung der NGO-Zeit beim Client** (ab 0,2 s Abweichung). Gegenmittel: `max` in Entscheidung 3, immer
+  und ohne Ausnahme; große Sprünge nur im Log; Verification 3.
 - **`Time.timeScale` bleibt nach Play auf 0** (Domain Reload aus). Gegenmittel: Zurücksetzen an drei Stellen
   (Entscheidung 4); Verification 2.
 - **Ein System rechnet doch mit `Time.time`** und läuft in der Pause weiter. Gegenmittel: Regel oben, Suche
   nach `Time.time`/`Time.deltaTime` in Regel-Code bei der Code-Prüfung.
-- **Vergessenes Abmelden von `SeasonEvents`** führt zu Aufrufen auf zerstörte Objekte. Gegenmittel: Abmelden
-  in `OnDisable`, `ResetStatics`.
+- **Vergessenes Abmelden von `SeasonEvents`** führt zu Aufrufen auf zerstörte Objekte. Gegenmittel: eine
+  Abmelde-Regel für alle Meldedienste (ADR-0001, Guidelines), `ResetStatics`.
+- **Der Host hebt in der Pause auf oder wirft**, weil seine eigenen RPCs sofort lokal laufen und
+  `timeScale` keine Eingaben anhält. Gegenmittel: Das Menü schaltet die Gameplay-Action-Maps aus
+  (Entscheidung 4); Verification 8.
+- **Ein Spieler, der in der Bewertung beitritt, hält „alle haben Weiter gedrückt“ auf oder wird übersehen.**
+  Gegenmittel: `ClientJoined` aus `ConnectedClientsIds` und `OnConnectionEvent` (Entscheidung 6); EditMode-Test
+  im Director.
 - **Hänger beim Host** (großes `unscaledDeltaTime`) lässt `game_time` springen. Gegenmittel: Der Director
   meldet mehrere Phasenwechsel einzeln (Kriterium 14); der Ofen verbrennt die vergangene Zeit, das ist
   gewollt.
@@ -526,7 +591,7 @@ public class PlayerSeasonRequests : NetworkBehaviour
 - **Teleport an den Startpunkt kommt erst nach einer Netzrunde an**; kurz stehen Spieler noch am alten Ort.
   Gegenmittel: GDD Kriterium 40 prüft 1 s nach dem Start.
 - **Andere sehen den Spieler quer durch die Hütte gleiten**, wenn der Besitzer nur `transform.position` setzt.
-  Gegenmittel: `SetState(..., teleportDisabled: false)` (Entscheidung 7); Verification 7.
+  Gegenmittel: `NetworkTransform.Teleport` beim Besitzer (Entscheidung 7); Verification 7.
 - **Doppelte `PhaseChanged`-Meldung beim Host**, wenn jemand sie zusätzlich von Hand auslöst. Gegenmittel:
   eine Quelle (Entscheidung 5, Guideline); Verification 4.
 - **NaN in Bewegung oder Kamera in der Pause** durch Teilen durch `Time.deltaTime = 0`. Gegenmittel:
@@ -541,7 +606,7 @@ public class PlayerSeasonRequests : NetworkBehaviour
 | saison-ablauf.md | TR-saison-003 (vorläufig): Meldungen „Saison beginnt“, „Phase X beginnt“, „Nacht vorbei“ mit Grund, „Spielzeit läuft“; jedes System setzt sich selbst zurück | `SeasonEvents` mit festen Reihenfolgen; `IsGameTimeRunning` lesbar (Entscheidung 5) |
 | saison-ablauf.md | TR-saison-004 (vorläufig): gemeinsamer Druck `season_pressure` | `SeasonMath.Pressure`, auf jedem Rechner gerechnet, `SeasonClock.Pressure` (Entscheidung 2) |
 | saison-ablauf.md | TR-saison-005 (vorläufig): Startaufstellung | `StartLayout` + `ItemSlot`, Entfernen vor `SeasonStarted`, Spieler per Owner-RPC (Entscheidung 7) |
-| saison-ablauf.md | TR-saison-006 (vorläufig): Beitritt nur zwischen den Saisons | `JoinRules.Decide` im `ConnectionApprovalCallback`, Start gesperrt bei wartendem Beitritt (Entscheidung 7) |
+| saison-ablauf.md | TR-saison-006 (vorläufig): Beitritt nur zwischen den Saisons | `JoinRules.Decide` (Foundation, mit dem Wert „Saison läuft“, den `SeasonClock` von oben setzt) im `ConnectionApprovalCallback`, Start gesperrt bei wartendem Beitritt (Entscheidung 7) |
 | saison-ablauf.md | TR-saison-007 (vorläufig): Abbruch ohne Bewertung, Kasse fällt zurück | `SeasonAborted`; Kasse merkt sich ihren Stand bei `SeasonStarted` (Entscheidung 5, 7) |
 | saison-ablauf.md | Formeln 1–7, Kriterien 1–45 (Messweg `[Season]`-Log, `Step(double serverTime)`) | `SeasonMath`, `SeasonDirector` mit übergebener Serverzeit, `ISeasonOutput.Log` |
 | interaktion.md | TR-interaktion-003 (vorläufig): `dt` des Fortschritts ist vergangene `game_time` | `GameTime` nie rückwärts, `dt ≥ 0`; in der Pause 0 (Entscheidung 3) |
@@ -561,8 +626,8 @@ public class PlayerSeasonRequests : NetworkBehaviour
 
 Im Plan-Schritt „Saison“, nach `/test-setup` (Test-Gerüst) und dem Katalog aus ADR-0002:
 
-1. `SeasonMath`, `SeasonProfile` (Spiel- und Testprofil per Editor-Skript), `JoinRules` und EditMode-Tests
-   nach GDD Abschnitt B, C, D.
+1. `SeasonMath`, `SeasonProfile` (Spiel- und Testprofil per Editor-Skript), `JoinRules` (in `Net/`) und
+   EditMode-Tests nach GDD Abschnitt B, C, D.
 2. `SeasonDirector` mit `ISeasonOutput`-Stub und EditMode-Tests nach Abschnitt A, E, F.
 3. `SeasonEvents`, `SeasonClock`, `PlayerSeasonRequests`; das NetworkObject erzeugt der Host beim Start
    (Prefab per Editor-Skript, `GlobalObjectIdHash` neu erzeugen, in die Netzwerk-Prefab-Liste).
@@ -570,15 +635,17 @@ Im Plan-Schritt „Saison“, nach `/test-setup` (Test-Gerüst) und dem Katalog 
    Spiel-Assembly `Schutzhuette.Runtime`; sie muss auf `Unity.Netcode.Runtime` verweisen).
 4. `StartLayout`, `ItemSlot`-Marker in der Hütte (per Editor-Skript), Startaufstellung über die Host-Funktion
    aus ADR-0002; `CrateSpawner` entfernen (GDD Kriterium 7).
-5. `PlayerSpawnApproval` ruft `JoinRules.Decide` auf.
+5. `PlayerSpawnApproval` bekommt `SeasonRunning` und `PendingJoins` und ruft `JoinRules.Decide` auf;
+   `SeasonClock` setzt `SeasonRunning` bei jedem Phasenwechsel.
 6. Ofen auf `game_time` umstellen (`Stove.Step` bekommt `dt` aus der Spielzeit statt `Time.deltaTime`) und
    bei `SeasonStarted` zurücksetzen.
-7. Test-Menü (Esc) mit Pause, Debug-Anzeige und Debug-Befehl „Einsatz beendet“ nach GDD.
+7. Test-Menü (Esc) mit Pause, Debug-Anzeige und Debug-Befehl „Einsatz beendet“ nach GDD; es schaltet beim
+   Öffnen die Gameplay-Action-Maps aus.
 
 ## Validation Criteria
 
 - Alle EditMode-Tests aus GDD Saison-Ablauf, Abschnitte A–F, laufen grün.
-- Verification Required (1)–(6) bestanden.
+- Verification Required (1)–(8) bestanden; (7) im Freundestest.
 - Freundestest mit Testprofil: Kriterien 36–45 (Abschnitt G) erfüllt.
 - In `Assets/_Project/Scripts/` stehen in Regel-Code keine `Time.time`/`Time.deltaTime` mehr (Code-Prüfung),
   und nur `SeasonClock` schreibt `Time.timeScale`.
@@ -587,8 +654,9 @@ Im Plan-Schritt „Saison“, nach `/test-setup` (Test-Gerüst) und dem Katalog 
 
 - ADR-0001 Netz-Autorität und Physik im Netz (Meldedienst-Muster, `OnConnectionEvent`, RPC-Form,
   owner-autoritativer Körper)
-- ADR-0002 Gegenstandsarten-Katalog und Netz-Kennung (Katalog, Host-Funktion zum Erscheinen, Startwerte in
-  `OnNetworkSpawn`, Abkühlen mit `game_time`)
+- ADR-0002 Gegenstandsarten-Katalog und Netz-Kennung (Katalog, `ItemSpawning` zum Erscheinen und
+  Entfernen, Startwerte in `OnNetworkSpawn`, Abkühlen mit `game_time`)
 - `design/gdd/saison-ablauf.md`, `design/gdd/interaktion.md`, `design/gdd/gaeste.md`,
   `design/gdd/gegenstandsarten.md`
 - `docs/architecture/architecture.md` (QQ-05 wird hier beantwortet)
+- `docs/architecture/architecture-review-2026-11-09.md` (Befunde, die diese Fassung einarbeitet)
