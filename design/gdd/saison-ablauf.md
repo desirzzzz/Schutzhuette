@@ -732,7 +732,7 @@ Platz aus `PlayerSpawnApproval`, mehrere Phasenwechsel in einem Schritt (Kriteri
 | 1 | Start und Frist des Nachteinsatzes müssen zu `night_max` passen: Start + Frist + 60 s ≤ 1080 s | Dokument zum Nachteinsatz | bei dessen Design |
 | 2 | Gibt es nach einem frühen Einsatzende Leerlauf? | Playtest | erster Freundestest mit Saison |
 | 3 | Wird der Nachmittag ab der 2. Saison zu lang? 480–720 s testen | Playtest | erster Freundestest mit Saison |
-| 4 | Wie Pause und Uhr umgesetzt werden (`Time.timeScale` oder eigener Wert, Abgleich der Serverzeit) | `/architecture-decision` | vor dem Bau |
+| 4 | ~~Wie Pause und Uhr umgesetzt werden (`Time.timeScale` oder eigener Wert, Abgleich der Serverzeit)~~ **Beantwortet 2026-11-09:** Die Solo-Pause setzt `Time.timeScale = 0` (nur `SeasonClock` schreibt den Wert, Rücksetzen an drei Stellen), das Menü schaltet die Gameplay-Eingaben aus. Die Uhr rechnet aus `NetworkManager.ServerTime` minus Pausensumme; übertragen wird nur ein `SeasonSnapshot` (Phase, Phasenstart, Pausensumme, Saisonzähler), beim Client läuft `game_time` mit `max` nie rückwärts (`docs/architecture/adr-0003-saison-uhr-und-meldungen.md`, Entscheidungen 2–4, Accepted) | ADR-0003 | erledigt |
 | 5 | Gäste, Wetter und Ereignisse müssen `season_pressure` nutzen und dürfen keine eigenen Kurven bauen. **Gäste erledigt 2026-11-08:** Ankunft und Geduld nutzen `season_pressure` (`design/gdd/gaeste.md` Formeln 1 und 2). | deren Dokumente | bei deren Design |
 | 6 | Wiederbeitritt mitten in der Saison nach einem Verbindungsabbruch, später vielleicht über die Steam-Identität | nach der Steam-Lobby | nach dem Plan-Schritt „Steam-Lobby“ |
 | 7 | Kasse und Upgrades speichern | System „Spielstand speichern“ | Alpha |

@@ -18,8 +18,8 @@
   Holzofen, Geräusche) haben kein GDD. Für sie gelten die Regeln in CLAUDE.md und der Code in
   `Assets/_Project/Scripts/`.
 - **ADRs Referenced:** ADR-0001 Netz-Autorität und Physik im Netz (Accepted 2026-11-09), ADR-0002
-  Gegenstandsarten-Katalog und Netz-Kennung (Accepted 2026-11-09), ADR-0003 Saison-Uhr, Spielzeit und Meldungen
-  (Proposed). Der Abschnitt „ADR Audit“ wird nachgezogen, wenn alle drei angenommen sind.
+  Gegenstandsarten-Katalog und Netz-Kennung (Accepted 2026-11-09), ADR-0003 Saison-Uhr, Spielzeit und
+  Meldungen (Accepted 2026-11-09).
 - **TD-ARCHITECTURE:** 2026-11-09 — skipped — lean mode
 - **LP-FEASIBILITY:** 2026-11-09 — skipped — lean mode
 
@@ -160,14 +160,21 @@ die ADRs fest.
 
 ## ADR Audit
 
-Es gibt keine ADRs (`docs/architecture/adr-*.md`: 0 Treffer). Es gibt nichts zu prüfen.
+Drei ADRs, alle Accepted (2026-11-09): ADR-0001 und ADR-0002 (Foundation), ADR-0003 (Core).
+Engine-Angaben einheitlich (Unity 6000.6.6f1, NGO 2.13.3), Abhängigkeiten kreisfrei (0002 → 0001,
+0003 → 0001 und 0002). Das Architektur-Review vom 2026-11-09
+(`docs/architecture/architecture-review-2026-11-09.md`, CONCERNS) fand keine Konflikte zwischen den ADRs;
+seine Befunde sind eingearbeitet (Commit a189fed).
 
-**Traceability:** 0 von 29 Anforderungen sind von einer ADR gedeckt, 29 sind Lücken. Jede gehört zu einer
-der Pflicht-ADRs unten.
+**Traceability (Stand des Reviews, vor der Einarbeitung):** 33 Anforderungen (29 aus dieser Fassung, 4 vom
+Review neu vergeben), davon 16 gedeckt, 8 teilweise, 9 Lücken. Die Lücken liegen in Core und Feature und
+gehören zu ADR-0004 bis ADR-0006 (unten). Die Zahlen sind seit der Einarbeitung und der Annahme nicht neu
+gezählt; das macht ein neues `/architecture-review` in einer frischen Sitzung.
 
 ## Required ADRs
 
-**Vor dem ersten Code (Foundation und Core, Plan-Schritt 1):**
+**Vor dem ersten Code (Foundation und Core, Plan-Schritt 1):** erledigt, alle drei geschrieben und
+Accepted (2026-11-09).
 
 1. **ADR-0001 Netz-Autorität und Physik im Netz.** Hält den Ist-Stand des Prototyps fest: Host entscheidet;
    der eigene Spielerkörper ist owner-autoritativ; Tragen per Parenting mit Client-Vorhersage; ruhende
@@ -233,5 +240,5 @@ einzelner Systeme.
 | QQ-02 | Netz-Bandbreite bei 4 Spielern, vollen Gästen und fallenden Dingen | Mittel | Network Profiler in Plan-Schritt 5 und 10 |
 | QQ-03 | Welches Steam-Transport-Paket passt zu NGO 2.13 und Unity 6.6? | Hoch | ADR-0006 |
 | QQ-04 | UI-Technik als Ersatz für IMGUI (UI Toolkit oder UGUI) | Mittel | ADR-0007 |
-| QQ-05 | Hält die Solo-Pause Physik und Animation über `Time.timeScale` oder über einen eigenen Wert an? | Hoch | ADR-0003 |
+| QQ-05 | ~~Hält die Solo-Pause Physik und Animation über `Time.timeScale` oder über einen eigenen Wert an?~~ **Beantwortet 2026-11-09:** über `Time.timeScale = 0`, nur ohne Clients; nur `SeasonClock` schreibt den Wert und setzt ihn an drei Stellen auf 1 zurück; NGO rechnet unskaliert weiter; das Menü schaltet die Gameplay-Eingaben aus | Hoch | ADR-0003 (Accepted) |
 | QQ-06 | ~~`OnConnectionEvent` statt `OnClientConnectedCallback` (NGO kündigt die Ablösung an, die Signatur ist nicht belegt)~~ **Beantwortet 2026-11-09:** Neuer Code nutzt nur `OnConnectionEvent`, abonniert vor `StartHost()`/`StartClient()`, Host-Logik wertet nur `ClientConnected`/`ClientDisconnected` aus; `ConnectionHud` und `PlayerSpawnApproval` wechseln im Plan-Schritt „Steam-Lobby“. Signatur aus dem NGO-2.13.3-Quelltext belegt | Niedrig | ADR-0001 (Accepted) |
