@@ -48,9 +48,9 @@ angelegt).
    läuft. Daneben gibt es „Über IP hosten“ als Ausweg. Ein Host nutzt genau einen Weg: Wer über Steam
    hostet, ist nicht über IP erreichbar, und umgekehrt.
 2. **Steam-Anbindung:** Beim Start meldet sich das Spiel bei Steam an. Bis zur Steam-Seite nutzt es die
-   App-ID 480. Die App-ID steht in einer Einstellung, damit der Wechsel auf die eigene ID in Schritt 14
-   ohne Code-Änderung geht. Läuft Steam nicht, ist der Steam-Weg ausgegraut, mit dem Hinweis „Steam läuft
-   nicht, über IP spielen“.
+   App-ID 480. Die App-ID steht in einer Einstellung, damit der Wechsel auf die eigene ID im
+   Plan-Schritt „Steam-Seite“ ohne Code-Änderung geht. Läuft Steam nicht, ist der Steam-Weg ausgegraut,
+   mit dem Hinweis „Steam läuft nicht, über IP spielen“.
 3. **Lobby:** Wer über Steam hostet, legt eine **private** Steam-Lobby an, sichtbar nur mit Einladung und
    mit `lobby_slots` Plätzen (höchstens 4). Die Lobby trägt zwei Daten: `game=schutzhuette` und
    `version=<Spielversion>`. So
@@ -62,7 +62,7 @@ angelegt).
    - Der Freund nimmt die Einladung an, im Overlay oder im Steam-Chat. **Bis zur eigenen App-ID startet er
      Schutzhütte vorher selbst**: Mit der Test-App 480 würde Steam beim Annehmen sonst Spacewar starten.
      Ab der eigenen App-ID startet Steam das Spiel selbst und übergibt die Lobby (`+connect_lobby`); das
-     wird in Schritt 14 geprüft.
+     wird im Plan-Schritt „Steam-Seite“ geprüft.
    - Das Spiel tritt der Lobby bei und verbindet sich über den Steam-Transport mit dem Host.
    - Dann prüft der Host wie heute: dieselbe Version, ein freier Platz, keine laufende Saison.
    - Wird der Beitritt abgelehnt, sieht der Freund den Grund und verlässt die Lobby.
@@ -278,7 +278,7 @@ nie im Code.
 
 | Stellschraube | Start | Bereich | Ablage | Wirkung |
 |---|---|---|---|---|
-| App-ID | 480 | 480 oder die eigene | Netzwerk-Einstellungen | Test-App oder eigenes Spiel. Gewechselt wird in Schritt 14. |
+| App-ID | 480 | 480 oder die eigene | Netzwerk-Einstellungen | Test-App oder eigenes Spiel. Gewechselt wird im Plan-Schritt „Steam-Seite“. |
 | `joinTimeoutSeconds` | 20 s | 11–60 s | Netzwerk-Einstellungen | Ab wann ein hängender Steam-Beitritt abbricht |
 | `name_max` | 16 | 8–24 | Netzwerk-Einstellungen | Länge der Namensschilder |
 | `max_players` | 4 | 1–4 | Freigabe (`PlayerSpawnApproval`) | Zusammen mit den Spawnpunkten ergibt das `lobby_slots`. |
@@ -323,7 +323,7 @@ Ablehnungsgrund nicht mehr an.
 | IP-Weg, Port 7777, Meldung „Verbindung getrennt.“ | `ConnectionHud` | Regel 9 |
 | Host-Puffer 10 s, Transport 60 × 1 s | `Prototype.unity` (NetworkManager, Unity Transport) | Formel 1 |
 | Beitritt nur zwischen den Saisons | `design/gdd/saison-ablauf.md` | Regel 6 |
-| Test-App 480, Wechsel in Schritt 14, Pakete nur nach OK | `production/milestones/vertical-slice.md`, CLAUDE.md | Regel 2, Dependencies |
+| Test-App 480, Wechsel im Plan-Schritt „Steam-Seite“, Pakete nur nach OK | `production/milestones/vertical-slice.md`, CLAUDE.md | Regel 2, Dependencies |
 
 ## Acceptance Criteria
 
@@ -455,7 +455,7 @@ Steam-Konten, nie zwei Fenster).
     „Ja“ und steht danach in der Hütte des Entwicklers.
 28. **[EditMode, erst ab eigener App-ID]** **GIVEN** die Kommandozeile enthält `+connect_lobby <id>`, die
     Anmeldung kommt bei t = 8,0 **WHEN** das Spiel startet **THEN** tritt es nach der Anmeldung genau
-    dieser Lobby bei (`join-start t=8.000`). Dazu ein Freundestest mit Kaltstart in Schritt 14.
+    dieser Lobby bei (`join-start t=8.000`). Dazu ein Freundestest mit Kaltstart im Plan-Schritt „Steam-Seite“.
 
 ### E. Namen (Regel 8)
 
@@ -508,6 +508,6 @@ Steam-Konten, nie zwei Fenster).
 |---|---|---|---|
 | 1 | Welche Pakete: Facepunch.Steamworks plus welcher NGO-Transport für Unity 6.6 und NGO 2.13? | `/architecture-decision`, danach OK des Entwicklers | vor dem Bau |
 | 2 | Beitrittsdauer im Freundestest messen, besonders hinter strengem NAT über das Steam-Relay | Freundestest | erster Steam-Freundestest |
-| 3 | Automatischer Spielstart über eine Einladung (`+connect_lobby`) | Schritt 14 | mit der eigenen App-ID |
+| 3 | Automatischer Spielstart über eine Einladung (`+connect_lobby`) | Plan-Schritt „Steam-Seite“ | mit der eigenen App-ID |
 | 4 | Welche Schrift fürs Namensschild, und kann sie Umlaute, kyrillische und chinesische Zeichen sowie Emoji? | Grafik und HUD | erste echte Grafik |
 | 5 | Wer abgelehnt wird oder die Zeit überschreitet, muss die Lobby sofort verlassen; das muss der Freundestest bestätigen. | Freundestest | erster Steam-Freundestest |

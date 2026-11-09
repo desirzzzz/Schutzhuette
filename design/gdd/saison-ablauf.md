@@ -731,5 +731,5 @@ Platz aus `PlayerSpawnApproval`, mehrere Phasenwechsel in einem Schritt (Kriteri
 | 3 | Wird der Nachmittag ab der 2. Saison zu lang? 480–720 s testen | Playtest | erster Freundestest mit Saison |
 | 4 | Wie Pause und Uhr umgesetzt werden (`Time.timeScale` oder eigener Wert, Abgleich der Serverzeit) | `/architecture-decision` | vor dem Bau |
 | 5 | Gäste, Wetter und Ereignisse müssen `season_pressure` nutzen und dürfen keine eigenen Kurven bauen. **Gäste erledigt 2026-11-08:** Ankunft und Geduld nutzen `season_pressure` (`design/gdd/gaeste.md` Formeln 1 und 2). | deren Dokumente | bei deren Design |
-| 6 | Wiederbeitritt mitten in der Saison nach einem Verbindungsabbruch, später vielleicht über die Steam-Identität | nach der Steam-Lobby | nach Schritt 2 im Plan |
+| 6 | Wiederbeitritt mitten in der Saison nach einem Verbindungsabbruch, später vielleicht über die Steam-Identität | nach der Steam-Lobby | nach dem Plan-Schritt „Steam-Lobby“ |
 | 7 | Kasse und Upgrades speichern | System „Spielstand speichern“ | Alpha |

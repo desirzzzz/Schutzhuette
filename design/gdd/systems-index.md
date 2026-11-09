@@ -114,7 +114,7 @@ Mitreißen, Musik (wird mit dem Sturm dichter), Spielstand speichern *(abgeleite
 | 16 | Materialseilbahn | Gameplay | Vertical Slice | Not Started | — | Interaktion, Tragen und Werfen, Lager und Vorräte, Wetter und Eskalation, Gegenstandsarten |
 | 17 | Wetter und Eskalation | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen |
 | 18 | Ereignisse (mit Strom und Licht) | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Wetter und Eskalation, Interaktion, Holzofen und Wärme, Lager und Vorräte, Materialseilbahn |
-| 19 | Nachteinsatz | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Wetter und Eskalation, Gäste und Bedürfnisse, Tragen zu zweit, Ereignisse (mit Strom und Licht), Sprachchat und Funkgerät, Interaktion |
+| 19 | Nachteinsatz | Gameplay | Vertical Slice | Not Started | — | Saison-Ablauf und Spielphasen, Wetter und Eskalation, Gäste und Bedürfnisse, Tragen zu zweit, Ereignisse (mit Strom und Licht), Sprachchat und Funkgerät (weich), Interaktion |
 | 20 | Solo-Hüttenhund | Gameplay | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Tragen und Werfen, Nachteinsatz, Gegenstandsarten |
 | 21 | Figuren-Animation und Ragdoll | Gameplay | Vertical Slice | Not Started | — | Netzwerk-Sitzung, Bewegung und Kamera, Tragen und Werfen |
 | 22 | Bewertung | Progression | Vertical Slice | Not Started | — | Gäste und Bedürfnisse, Saison-Ablauf und Spielphasen, Nachteinsatz |
@@ -229,13 +229,13 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
 | 3 | Saison-Ablauf und Spielphasen | Vertical Slice | Core | game-designer | M |
 | 4 | Steam-Lobby und Einladen | Vertical Slice | Core | network-programmer | S |
 | 5 | Gäste und Bedürfnisse | Vertical Slice | Feature | game-designer, ai-programmer | L |
-| 6 | Kochen und Gerichte | Vertical Slice | Feature | game-designer | M |
-| 7 | Lager und Vorräte | Vertical Slice | Feature | game-designer, economy-designer | S |
+| 6 | Lager und Vorräte | Vertical Slice | Feature | game-designer, economy-designer | S |
+| 7 | Kochen und Gerichte | Vertical Slice | Feature | game-designer | M |
 | 8 | Holzofen und Wärme (Erweiterung) | MVP | Feature | game-designer | S |
 | 9 | Holz hacken | Vertical Slice | Feature | game-designer | S |
 | 10 | Versorgung: Betten und Erste Hilfe | Vertical Slice | Feature | game-designer | S |
-| 11 | Materialseilbahn | Vertical Slice | Feature | game-designer, gameplay-programmer | M |
-| 12 | Wetter und Eskalation | Vertical Slice | Feature | game-designer | M |
+| 11 | Wetter und Eskalation | Vertical Slice | Feature | game-designer | M |
+| 12 | Materialseilbahn | Vertical Slice | Feature | game-designer, gameplay-programmer | M |
 | 13 | Ereignisse (mit Strom und Licht) | Vertical Slice | Feature | game-designer, systems-designer | M |
 | 14 | Nachteinsatz | Vertical Slice | Feature | game-designer, level-designer | L |
 | 15 | Solo-Hüttenhund | Vertical Slice | Feature | game-designer, ai-programmer | M |
@@ -256,8 +256,10 @@ Narrative entfällt: Es gibt keine Story-Kampagne (KONZEPT, „Bewusst nicht dab
 
 Effort: S = 1 Sitzung, M = 2–3 Sitzungen, L = 4 oder mehr. Eine Sitzung ist ein Design-Gespräch, an
 dessen Ende ein fertiges GDD steht. Die Reihenfolge folgt dem Bauplan in
-`production/milestones/vertical-slice.md`: Lobby, Saison und der erste Gast mit Tee kommen früh, damit
-der frühe Freundestest möglich ist.
+`production/milestones/vertical-slice.md`: Saison, Interaktion und der erste Gast mit Tee kommen früh,
+damit der frühe Freundestest möglich ist. Das Lager kommt vor dem Kochen und das Wetter vor der
+Seilbahn, weil das jeweils zweite System das erste braucht (korrigiert am 2026-11-09 nach dem
+Gate-Check). Die Steam-Lobby ist schon designt, gebaut wird sie nach dem frühen Freundestest.
 
 ---
 
@@ -312,7 +314,9 @@ der frühe Freundestest möglich ist.
 - [x] Review and approve this systems enumeration (2026-11-08)
 - [ ] Vertical-Slice-Systeme in der Reihenfolge oben designen (`/design-system [system-name]` oder `/map-systems next`)
 - [ ] Nach jedem GDD `/design-review` laufen lassen
-- [ ] Gebaut wird erst, wenn der Prototyp-Prüfpunkt bestanden ist (Freundestest 2 mit 0.1.4, dann `/gate-check`)
+- [x] Spaßfrage des Prototyp-Prüfpunkts mit Bedenken bestanden (Freundestest 2 mit 0.1.4, 2026-11-09)
+- [ ] Gebaut wird erst nach Schritt 1 des Plans (Architektur, ADRs, Test-Gerüst) und einem bestandenen
+  `/gate-check` (Stand 2026-11-09: FAIL, siehe `production/gate-checks/gate-2026-11-09-prototyp.md`)
 - [ ] Die riskantesten Systeme (Gäste, Ragdoll im Netz) früh ausprobieren
 
 > **Prüfungen durch Director-Agenten:** TD-SYSTEM-BOUNDARY, PR-SCOPE und CD-SYSTEMS sind im Lean-Modus

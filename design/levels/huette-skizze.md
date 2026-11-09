@@ -1,9 +1,10 @@
 # Skizze: Hütte und Umgebung (Vertical Slice)
 
 > **Status**: Skizze, vom Entwickler am 2026-11-08 für gut befunden
-> **Zweck**: Grundlage für das spätere Dokument „Hütten-Layout“ (vor dem Bau der Seilbahn, Schritt 6 im
-> Plan `production/milestones/vertical-slice.md`)
-> **Gebaut**: nein. Gebaut wird erst nach dem zweiten Freundestest. Die Szene bleibt bis dahin unverändert.
+> **Zweck**: Grundlage für das spätere Dokument „Hütten-Layout“ (vor dem Bau der Seilbahn, Plan-Schritt
+> „Lager und Materialseilbahn“ in `production/milestones/vertical-slice.md`)
+> **Gebaut**: nein. Gebaut wird erst, wenn der Gate-Check den Bau des Vertical Slice freigibt (Stand
+> 2026-11-09: FAIL). Die Szene bleibt bis dahin unverändert.
 
 ![Skizze von oben](huette-skizze.svg)
 

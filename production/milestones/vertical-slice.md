@@ -1,9 +1,11 @@
 # Vertical Slice: Plan
 
-- **Stand:** 2026-11-08
-- **Status:** geplant, **nicht begonnen**. Gebaut wird erst, wenn der Prototyp-Prüfpunkt bestanden
-  ist: Freundestest 2 mit 0.1.4, danach `/playtest-report` und `/gate-check`
-  (siehe `production/gate-checks/gate-2026-11-08-prototyp.md`).
+- **Stand:** 2026-11-09 (Reihenfolge nach dem Gate-Check korrigiert)
+- **Status:** geplant, **nicht begonnen**. Die Spaßfrage des Prototyps ist mit Bedenken bestanden
+  (Freundestest 2, `production/qa/playtests/playtest-2026-11-09-freund.md`). Der Gate-Check vom
+  2026-11-09 ist FAIL, weil bei Stufe `standard` Architektur, Foundation-ADRs, Review, Test-Gerüst und
+  CI fehlen (`production/gate-checks/gate-2026-11-09-prototyp.md`). Gebaut wird ab Schritt 2, wenn
+  Schritt 1 erledigt und der Gate-Check bestanden ist.
 - **Grundlage:** `docs/KONZEPT.md` („Kern-Spielschleife“, „Mechaniken im Detail“, „Umfang“,
   „Fahrplan“) und `design/game-brief.md`. Bei Widersprüchen gilt KONZEPT.md.
 
@@ -23,8 +25,10 @@ Bewertung? Das klärt ein Freundestest mit einer ganzen Saison.
 | Inhalt | Mittel: 3 Gästetypen, 3 Gerichte, 5 Ereignisse |
 | Systeme | Nachteinsatz mit Trage, Holz hacken, Materialseilbahn, Hüttenkasse und Upgrades |
 | Steam und Sprache | Steam-Lobby mit Einladen, Proximity-Sprachchat mit Funkgerät |
-| Steam-Lobby wann? | früh (Schritt 2), mit Valves kostenloser Test-App „Spacewar“ (App-ID 480). Die eigene App-ID (100 USD) kommt erst mit der Steam-Seite (Nachtrag am selben Abend) |
+| Steam-Lobby wann? | mit Valves kostenloser Test-App „Spacewar“ (App-ID 480). Die eigene App-ID (100 USD) kommt erst mit der Steam-Seite (Nachtrag am selben Abend). Ursprünglich früh (Schritt 2), am 2026-11-09 hinter den frühen Freundestest verschoben: Das Hosting über IP funktioniert, und die Lobby klärt die Spaßfrage nicht |
 | Ragdoll und Solo-Hüttenhund | beide im Vertical Slice, Musik erst in der Alpha (Nachtrag bei `/map-systems`, siehe `design/gdd/systems-index.md`) |
+| Chaos vor dem frühen Freundestest (2026-11-09) | Geschirr zerbricht bei hartem Aufprall, der Gast reagiert auf Lärm und Treffer (beides aus den freigegebenen GDDs Gegenstandsarten und Gäste). Antwort auf „Physik-Chaos ist die schwächste Säule“ aus Freundestest 2 |
+| Nachteinsatz und Funkgerät (2026-11-09) | Der Nachteinsatz funktioniert zuerst ohne Funkgerät. Das Funkgerät kommt mit dem Sprachchat dazu, der Sprachchat bleibt Streichkandidat Nr. 1 |
 
 ## Inhalt im Einzelnen
 
@@ -61,13 +65,36 @@ Was mit „Vorschlag“ markiert ist, ist noch nicht entschieden.
 
 ## Reihenfolge
 
-Jeder Schritt ist für sich im Editor testbar. Der Kern einer Saison kommt zuerst, weil er auch die
-offene Frage aus dem Prototyp beantwortet: Macht Tragen mit Ziel und Zeitdruck mehr Spaß als „ganz
-okay“?
+Jeder Schritt ist für sich im Editor testbar. Freundestest 2 sagte: Es kann richtig Spaß machen, wenn
+es etwas zu tun gibt, mehr Physik und Texturen. Deshalb kommen ein Ziel und spürbares Chaos zuerst, und
+der frühe Freundestest nach Schritt 5 entscheidet, ob es so weitergeht. Jeder Schritt baut nur auf
+Systemen aus früheren Schritten auf (Abhängigkeiten laut `design/gdd/systems-index.md`).
 
-1. **Vorbereitung:** `/settings modes.rigor=standard` (CLAUDE.md). Wichtige Architektur-Entscheidungen
-   als ADRs festhalten, vor allem Saison-Ablauf und Datenobjekte. Stories mit `/create-stories`.
-2. **Steam-Lobby und Einladen, mit der Test-App 480:** Beitreten über Steam-Freunde statt über
+1. **Vorbereitung:** Vor dem ersten Bauschritt, so verlangt es der Gate-Check vom 2026-11-09.
+   - `/create-architecture`: den Ist-Stand des Prototyps festhalten, Budgets für Draw Calls und
+     Speicher ergänzen.
+   - `/architecture-decision` für 3–4 Foundation-ADRs: Netz-Autorität und Physik-Synchronisation,
+     Datenobjekte und Gegenstandsarten mit Netz-ID, Saison-Uhr und Phasen-Synchronisation, Steam-Transport
+     mit IP-Ausweg. Danach `/architecture-review`.
+   - `/test-setup`: asmdefs, Test-Paket (nach Rückfrage), EditMode und PlayMode, ein Beispieltest, CI.
+   - `/gate-check` erneut, danach `/create-control-manifest` und Stories mit `/create-stories`.
+   - Den Freund fragen, was er mit „mehr Physik“ meint.
+   - Nebenher: die Art Bible (`/art-bible`), fertig spätestens vor dem Kauf des Asset-Packs.
+2. **Gegenstandsarten:** Die heutigen Kisten, Holzscheite und die Truhe werden Datenobjekte (Arten) mit
+   Gewicht, Material und Eigenschaften. Alle folgenden Schritte lesen diese Daten.
+3. **Saison-Uhr und Phasen:** Der Host steuert die Uhr, alle sehen dieselbe Phase. Licht und Stimmung
+   wechseln mit der Phase, den Sturm selbst bringt Schritt 8. Das HUD zeigt Uhr und Phase.
+4. **Interaktion:** Ein gemeinsames „Benutzen“ mit der Taste E, zuerst an Herd und Ofen.
+5. **Erster Gast mit erstem Gericht:** Ein Wanderer kommt an, hat Hunger und wartet in der Stube.
+   - Vorher ein ADR für die Gäste-Wegfindung im Netz (AI-Navigation-Paket nur nach Rückfrage).
+   - Tee in zwei Schritten am Herd. Die Zutaten kommen aus einem **Mindest-Lager**, dessen Bestand in
+     diesem Schritt nicht ausgeht. Das echte Lager folgt in Schritt 9.
+   - **Chaos von Anfang an:** Tassen zerbrechen bei hartem Aufprall, der Gast reagiert auf Lärm und auf
+     Treffer.
+   - Danach der **frühe Freundestest als Go/No-Go:** Macht es mit einem Ziel und Chaos richtig Spaß?
+     Host, Ping, Dauer und lustige Momente notieren, dann `/playtest-report` und den Aufwand neu
+     schätzen. Bei No-Go wird erst der Kern verbessert, bevor weitere Systeme dazukommen.
+6. **Steam-Lobby und Einladen, mit der Test-App 480:** Beitreten über Steam-Freunde statt über
    IP-Adresse und Portfreigabe. Kostenlos (Facepunch.Steamworks und Valves Test-App „Spacewar“).
    - Beide Spieler brauchen ein laufendes Steam. In der Freundesliste steht dann „Spacewar“ statt
      „Schutzhütte“.
@@ -76,25 +103,28 @@ okay“?
    - Beitreten über IP bleibt als Ausweg, zum Beispiel für Tests mit zwei Fenstern auf einem PC
      (`127.0.0.1`). Steam selbst erlaubt nur ein Konto pro PC, deshalb lässt sich die Lobby zu zweit
      nur mit dem Freund testen.
-3. **Saison-Uhr und Phasen:** Der Host steuert die Uhr, alle sehen dieselbe Phase. Licht und Wetter
-   wechseln mit der Phase.
-4. **Erster Gast mit erstem Gericht:** Ein Wanderer kommt an, hat Hunger und wartet in der Stube. Tee
-   in zwei Schritten. Danach ein **früher Freundestest**: Macht es mit einem Ziel mehr Spaß?
-5. **Holz hacken** für den Ofen.
-6. **Lager und Materialseilbahn.**
-7. **Weitere Gäste und Gerichte:** Familie mit Betten, Bergsteiger mit Erster Hilfe, Speckbrot und
-   Kaiserschmarrn. Gäste reagieren auf Kälte.
-8. **Wetter-Eskalation und die 5 Ereignisse.**
-9. **Nachteinsatz:** Vermisster Gast, Stirnlampe, Trage zu zweit.
-10. **Solo-Hüttenhund:** Hilft solo beim Suchen und Tragen, damit eine Saison auch allein zu schaffen
+7. **Holz hacken** für den Ofen.
+8. **Wetter-Eskalation:** Der Sturm wird über die Phasen stärker: Wind, Sicht, Kälte. Er kommt vor der
+   Seilbahn, weil ihr Wind von hier stammt. Die Ereignisse folgen in Schritt 11.
+9. **Lager und Materialseilbahn:** Das Lager wird echt. Der Bestand geht zur Neige, Nachschub kommt über
+   die Seilbahn, und der Wind lässt die Kiste schaukeln.
+10. **Weitere Gäste und Gerichte:** Familie mit Betten, Bergsteiger mit Erster Hilfe, Speckbrot und
+    Kaiserschmarrn. Gäste reagieren auf Kälte.
+11. **Die 5 Ereignisse** mit Strom und Licht.
+12. **Nachteinsatz:** Vermisster Gast, Stirnlampe, Trage zu zweit. Zuerst ohne Funkgerät, das kommt in
+    Schritt 16 dazu.
+13. **Solo-Hüttenhund:** Hilft solo beim Suchen und Tragen, damit eine Saison auch allein zu schaffen
     ist.
-11. **Bewertung, Hüttenkasse, Upgrades, nächste Saison.**
-12. **Proximity-Sprachchat und Funkgerät.**
-13. **Erste echte Grafik:** Asset-Pack einsetzen, Figuren mit leichtem Wackeln und Ragdoll beim
+14. **Bewertung, Hüttenkasse, Upgrades, nächste Saison.**
+15. **Menüs und HUD:** Hauptmenü, Lobby, Bewertungs- und Upgrade-Bildschirm und Einstellungen ersetzen
+    die Test-Knöpfe. Das HUD, das bis hierher Schritt für Schritt gewachsen ist (Uhr, Gäste, Ofen,
+    Hüttenkasse), wird zusammengeführt. Vorher `/ux-design` für HUD und Menüs.
+16. **Proximity-Sprachchat und Funkgerät,** auch im Nachteinsatz.
+17. **Erste echte Grafik:** Asset-Pack einsetzen, Figuren mit leichtem Wackeln und Ragdoll beim
     Hinfallen.
-14. **Steam-Seite und eigene App-ID:** Steamworks-Konto anlegen (100 USD), das Spiel von App-ID 480
-    auf die eigene umstellen, Bilder, Trailer und Text, live schalten. Danach Freundestest mit einer
-    ganzen Saison, `/playtest-report` und `/gate-check`.
+18. **Steam-Seite und eigene App-ID:** Das Spiel von App-ID 480 auf die eigene umstellen, Bilder,
+    Trailer und Text, live schalten. Das Steamworks-Konto wird schon früher angelegt (siehe offene
+    Fragen). Danach Freundestest mit einer ganzen Saison, `/playtest-report` und `/gate-check`.
 
 Die Systeme dahinter mit Abhängigkeiten und Design-Reihenfolge stehen in `design/gdd/systems-index.md`.
 
@@ -114,8 +144,9 @@ Upgrades, dann das dritte Gericht und der dritte Gast.
 - **Asset-Pack** für die Grafik: welches, was es kostet, welche Lizenz gilt.
 - **Sprachchat:** Vivox oder Dissonance (Kosten, Aufwand, Funkgerät-Effekt).
 - **Steamworks-Konto** und App-Gebühr (Steam Direct, 100 USD pro Spiel, nicht erstattbar, wird ab
-  1.000 USD Umsatz zurückgezahlt): Das legt der Entwickler selbst an, vor Schritt 14. Bis dahin
-  genügt die kostenlose Test-App 480.
+  1.000 USD Umsatz zurückgezahlt): Das legt der Entwickler selbst an. Valve prüft Konto, Steuerdaten
+  und später die Store-Seite, das braucht Vorlauf. Deshalb spätestens beim Start von Schritt 17
+  anlegen, nicht erst in Schritt 18. Bis dahin genügt die kostenlose Test-App 480.
 - **Solo-Hüttenhund:** Truhe und Trage gehen nur zu zweit. Wie schafft man sie solo, zum Beispiel
   mit einem Schlitten, den der Hund zieht? Das klärt das GDD des Hundes.
 - **Ragdoll im Netz:** Nur Zustand und Wurzelposition übertragen oder mehr? Das klärt das GDD und ein

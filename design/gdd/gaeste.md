@@ -1218,5 +1218,5 @@ Netz“ steht noch aus.
 | 6 | Die Navigations-Referenz in `docs/engine-reference/unity/` ist für 6.6 nicht geprüft. | `unity-specialist` | vor dem ADR |
 | 7 | Die Interaktion schätzt im Beispiel 8 Betten pro Saison, hier sind es höchstens 4 (zwei Familien). | Versorgung-GDD | bei dessen Design |
 | 8 | Ist der Andrang zu viert zu entspannt? Spürt man die Nacht mit `phase_rate_scale` 0,2? | Playtest | Freundestest mit Gästen |
-| 9 | Genaue Zahl der Sitzplätze und Betten (angenommen: 10 und 4) | Dokument „Hütten-Layout“ | vor Schritt 6 im Plan |
+| 9 | Genaue Zahl der Sitzplätze und Betten (angenommen: 10 und 4) | Dokument „Hütten-Layout“ | vor dem Plan-Schritt „Lager und Materialseilbahn“ |
 | 10 | Fühlt sich Maulen fair an? Es setzt S auf 0, egal wie gut es vorher lief (danach höchstens 25 plus Wärmebonus). Reicht dem Bergsteiger nachts der Tee mit 84 s (nur das 1,4- bis 1,9-Fache von Kochen und Weg)? | Playtest, danach Bewertung-GDD | Freundestest mit Gästen |
