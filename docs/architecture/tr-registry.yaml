@@ -37,33 +37,238 @@
 #   its fields sit two columns past the dash. Quote a value that holds ": ". A
 #   line in any other shape is reported as unsupported layout, with its number.
 
-version: 1
-last_updated: ""
+version: 2
+last_updated: "2026-11-09"
 
-requirements: []
-
-# --- EXAMPLE ENTRIES (remove when first real entries are added) ---
-#
-# - id: TR-combat-001
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Player takes damage from enemies based on attack power minus defence"
-#   created: 2026-03-10
-#   revised: ""
-#   status: active
-#
-# - id: TR-combat-002
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Combo window timing is 0.4 seconds between hits"
-#   created: 2026-03-10
-#   revised: "2026-04-01"
-#   status: active
-#
-# - id: TR-combat-003
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Old damage formula using raw stats"
-#   created: 2026-03-10
-#   revised: ""
-#   status: "superseded-by: TR-combat-001"
+requirements:
+- id: TR-gegenstandsarten-001
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Katalog aller Arten als Datenobjekte: Masse, Trageart, Eigenschaften (brennbar, Vorratspaket, Gericht, zerbrechlich, Werkzeug, Ausrüstung, hackbar)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gegenstandsarten-002
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Über das Netz wird eine Art nur über ihre feste Kennung verschickt, nie als Objekt"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gegenstandsarten-003
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Bruchregel: Zerbrechliches zerbricht ab einer Aufprall-Geschwindigkeit, der Host entscheidet (Formel 2)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gegenstandsarten-004
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Gerichte kühlen mit game_time ab (is_warm, warm_fraction); der Host speichert nur den Kochzeitpunkt (Formel 3)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gegenstandsarten-005
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Würfe bis 15 m/s dürfen dünne Wände nicht durchfliegen (Open Question 3, durchgehende Kollisionsprüfung)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gegenstandsarten-006
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Waren (ware_*) sind ein schlanker Datentyp ohne Körper, nur Bestand im Lager und Inhalt eines Pakets"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gegenstandsarten-007
+  system: gegenstandsarten
+  gdd: design/gdd/gegenstandsarten.md
+  requirement: "Die Katalogprüfung ist eine reine Funktion; doppelte Kennung, fehlendes Prefab, Masse <= 0, unbekannte Ware oder ein Hack-Kreis sperren Build und Host-Start (Edge Cases Katalog, Kriterien 2, 5, 33)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-interaktion-001
+  system: interaktion
+  gdd: design/gdd/interaktion.md
+  requirement: "Ein gemeinsamer Strahl liefert das Ziel für Tragen und Benutzen. Stationen melden nur Handlungen und Bedingungen"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-interaktion-002
+  system: interaktion
+  gdd: design/gdd/interaktion.md
+  requirement: "Jede Handlung geht als Wunsch per RPC an den Host, der Host prüft, führt aus und meldet an alle"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-interaktion-003
+  system: interaktion
+  gdd: design/gdd/interaktion.md
+  requirement: "Fortschritt am Bezugsobjekt (Halten, Pausieren, Teamzuschlag zu zweit), dt ist vergangene game_time"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-interaktion-004
+  system: interaktion
+  gdd: design/gdd/interaktion.md
+  requirement: "Jeder Tastendruck fühlt sich auch mit Ping sofort an (Hinweis und Fortschritt am Client vorhergesagt)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-interaktion-005
+  system: interaktion
+  gdd: design/gdd/interaktion.md
+  requirement: "Ausrüstung (Stirnlampe, Funkgerät) sitzt am Körper statt in der Hand"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-interaktion-006
+  system: interaktion
+  gdd: design/gdd/interaktion.md
+  requirement: "Handlungen sind Datenobjekte (Name, Bedingung für die Hand, Dauer, Höchstzahl der Nutzer, Tempo-Zuschlag) mit Editor-Prüfung action_data_valid (Regel 3, Formel 4)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-001
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Die Uhr gehört dem Host, alle sehen dieselbe Phase zur selben Zeit (Serverzeit, Phase und Phasenstart als NetworkVariables)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-002
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Gemeinsame Spielzeit game_time. Sie steht in der Solo-Pause, dann halten auch Physik und Animation an"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-003
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Meldungen Saison beginnt, Phase X beginnt, Nacht beginnt, Nacht vorbei (Grund mission, timeout, abort), Spielzeit läuft. Jedes System setzt sich selbst zurück"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-004
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Gemeinsamer Druckwert season_pressure für Gäste, Wetter und Ereignisse"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-005
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Startaufstellung: Gegenstände entfernen, Arten und Waren an festen Plätzen spawnen"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-006
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Beitritt nur zwischen den Saisons (gemeinsame Freigabe)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-007
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Abbruch durch den Host: keine Bewertung, die Hüttenkasse fällt auf den Stand beim Saisonstart zurück"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-saison-008
+  system: saison
+  gdd: design/gdd/saison-ablauf.md
+  requirement: "Sitzungsende (Host verlässt das Spiel oder wählt Beenden): alle Clients landen innerhalb von 2 s mit Meldung im Hauptmenü; ein neuer Host-Start beginnt mit Saison 1 und Kasse auf Startwert, ohne Reste der alten Sitzung (Regel 8, Kriterium 45)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-steam-lobby-001
+  system: steam-lobby
+  gdd: design/gdd/steam-lobby.md
+  requirement: "Transport wählbar: Steam oder IP (Unity Transport), der IP-Weg bleibt als Ausweg"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-steam-lobby-002
+  system: steam-lobby
+  gdd: design/gdd/steam-lobby.md
+  requirement: "Steam-Anbindung mit App-ID aus einer Einstellung (480 bis zur Steam-Seite, dann die eigene)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-steam-lobby-003
+  system: steam-lobby
+  gdd: design/gdd/steam-lobby.md
+  requirement: "Eine gemeinsame Freigabe für beide Wege: Version, höchstens 4 Spieler, Sperre während der Saison"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-steam-lobby-004
+  system: steam-lobby
+  gdd: design/gdd/steam-lobby.md
+  requirement: "Zeitgrenze 20 s für den Beitritt, Steam-Namen über den Figuren"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-001
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Gäste sind vom Host gesteuert. Clients bekommen Position, Zustand, Bedürfnis, Geduld und Stimmung"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-002
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Wegfindung beim Host (NavMesh, Paket AI Navigation nur nach OK)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-003
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Ankunft aus Phase, season_pressure und Spielerzahl n beim Saisonstart"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-004
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Reaktion auf Kälte (Ofenwärme), Lärm (Aufprall in der Nähe) und Chaos (Treffer). Braucht Aufprall-Meldungen aus der Physik"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-005
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Schnittstelle Bedürfnis erfüllt für Stationen und Gerichte; die Gäste kennen keine Station"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-006
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Gästetypen und Bedürfnisse als Datenobjekte, mit Datenprüfung (guest_data_valid)"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-007
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Gäste-Logik eingefroren außerhalb von Nachmittag, Abend und Nacht"
+  created: 2026-11-09
+  revised: ""
+  status: active
+- id: TR-gaeste-008
+  system: gaeste
+  gdd: design/gdd/gaeste.md
+  requirement: "Leistungsbudget: Gäste-System beim Host im Mittel <= 1,0 ms pro Frame (Spitze <= 2,0 ms beim Neuplanen), 0 B GC pro Frame; beim Client <= 0,2 ms ohne Wegfindung (Kriterium 49)"
+  created: 2026-11-09
+  revised: ""
+  status: active
