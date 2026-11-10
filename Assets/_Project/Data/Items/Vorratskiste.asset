@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92badb91f71cfe842870a031f4045007, type: 3}
+  m_Name: Vorratskiste
+  m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.ItemKind
+  _id: vorratskiste
+  _displayName: Vorratskiste
+  _massKg: 10
+  _carryMode: 0
+  _category: 2
+  _impactSound: 0
+  _prefab: {fileID: 2641027020233376290, guid: 68d64396c523ad34faae35ded21de2cf, type: 3}
+  _fuel:
+    _enabled: 0
+    _burnSeconds: 0
+  _chop:
+    _enabled: 0
+    _result: {fileID: 0}
+    _count: 0
+  _supplyPack:
+    _enabled: 1
+    _portions: 6
+    _fixedWare: {fileID: 0}
+  _dish:
+    _enabled: 0
+    _need: {fileID: 0}
+    _coolTimeSeconds: 0
+  _fragile:
+    _enabled: 0
+    _breakSpeed: 0
+  _tool:
+    _enabled: 0
+    _action: 0
+  _equipment:
+    _enabled: 0
+    _slot: 0

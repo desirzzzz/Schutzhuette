@@ -1,12 +1,12 @@
 # Story 005: Startkatalog mit 13 Arten und 7 Waren
 
 > **Epic**: Gegenstandsarten
-> **Status**: Ready
+> **Status**: In Progress (Teil 1 erledigt am 2026-11-10: 4 Arten, 7 Waren, Katalog, Tasse; Teil 2 mit den übrigen 9 Arten offen)
 > **Layer**: Foundation
 > **Type**: Config/Data
 > **Estimate**: M
 > **Manifest Version**: 2026-11-10
-> **Last Updated**: —
+> **Last Updated**: 2026-11-10
 
 ## Context
 
@@ -95,7 +95,7 @@ checks scope against it.*
 **Required evidence**:
 - Config/Data: smoke check pass (`production/qa/smoke-*.md`); zusätzlich der Schnappschuss-Test `Assets/Tests/EditMode/Items/StartCatalogTests.cs` aus Kriterium 1
 
-**Status**: [ ] Not yet created
+**Status**: [ ] Teil 1 erstellt (2026-11-10): 4 von 13 Arten (`vorratskiste`, `holzscheit`, `truhe`, `tee`), alle 7 Waren, Katalog, `Tea.prefab`. `StartCatalogTests` 7 von 7 bestanden (gesamt 55 von 55). Gegenprobe: Mit falschem Erwartungswert schlägt `ShippedKind_MatchesStartCatalogRow(tee)` fehl. Zweiter Lauf des Skripts ändert keine Datei. Offen für Teil 2: die übrigen 9 Arten und damit „genau 13 Arten“.
 
 ---
 

@@ -14,7 +14,7 @@
 | 002 | [Prüfregeln für Masse und Hacken](story-002-pruefregeln-masse-und-hacken.md) | Logic | Ready | ADR-0002 |
 | 003 | [Abkühl-Regeln für Gerichte](story-003-abkuehl-regeln.md) | Logic | Ready | ADR-0002 |
 | 004 | [Bruchregel und Aufprall-Formeln](story-004-bruchregel-und-aufprall-formeln.md) | Logic | Complete | ADR-0001 |
-| 005 | [Startkatalog mit 13 Arten und 7 Waren](story-005-startkatalog.md) | Config/Data | Ready | ADR-0002 |
+| 005 | [Startkatalog mit 13 Arten und 7 Waren](story-005-startkatalog.md) | Config/Data | In Progress (Teil 1 erledigt) | ADR-0002 |
 | 006 | [Laufzeit-Katalog, Komponente Item und Masse aus dem Katalog](story-006-laufzeit-katalog-und-masse.md) | Integration | Ready | ADR-0002 |
 | 007 | [Erscheinen und Entfernen über ItemSpawning, Ware am Vorratspaket](story-007-erscheinen-und-entfernen.md) | Integration | Ready | ADR-0002 |
 | 008 | [Tragen und Ofen lesen den Katalog](story-008-tragen-und-ofen-lesen-den-katalog.md) | Integration | Ready | ADR-0002 |
@@ -27,7 +27,7 @@ Zerbrechen braucht, damit das erste sichtbare Ergebnis früh kommt:
 
 1. 001 (erledigt)
 2. 004: Bruchregel (erledigt)
-3. 005, erster Teil: Steckbriefe und Prefabs für `vorratskiste`, `holzscheit`, `truhe` und `tee`. Das Kriterium
+3. 005, erster Teil (erledigt): Steckbriefe und Prefabs für `vorratskiste`, `holzscheit`, `truhe` und `tee`. Das Kriterium
    „genau 13 Arten und 7 Waren“ bleibt offen, bis der zweite Teil gebaut ist.
 4. 006 und 007: Das Spiel liest den Katalog und lässt Gegenstände darüber erscheinen
 5. 010: Tassen zerbrechen
