@@ -1,0 +1,24 @@
+{
+    "name": "Schutzhuette.Editor",
+    "rootNamespace": "Schutzhuette.EditorTools",
+    "references": [
+        "Schutzhuette.Runtime",
+        "Unity.Netcode.Runtime",
+        "Unity.Networking.Transport",
+        "Unity.Multiplayer.Tools.NetworkSimulator.Runtime",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Core.Editor",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

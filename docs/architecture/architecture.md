@@ -141,6 +141,17 @@ bekommen, sonst landen die Editor-Skripte in `Schutzhuette.Runtime`, und der Bui
 Paket-Referenzen (Netcode, Input System, Multiplayer Tools) legt `/test-setup` fest. Dieser Umbau wird im
 Editor geprüft (Solo und mit zwei Spielern in Multiplayer Play Mode).
 
+Festgelegt von `/test-setup` am 2026-11-10 (Anleitung zum Testen: `tests/README.md`):
+
+| Assembly | Verweise |
+| --- | --- |
+| `Schutzhuette.Runtime` | `Unity.Netcode.Runtime`, `Unity.Networking.Transport`, `Unity.InputSystem` |
+| `Schutzhuette.Editor` | `Schutzhuette.Runtime`, `Unity.Netcode.Runtime`, `Unity.Networking.Transport`, `Unity.Multiplayer.Tools.NetworkSimulator.Runtime`, `Unity.RenderPipelines.Core.Runtime`, `Unity.RenderPipelines.Core.Editor`, `Unity.RenderPipelines.Universal.Runtime` |
+| `Schutzhuette.Tests.EditMode` / `.PlayMode` | `UnityEngine.TestRunner`, `UnityEditor.TestRunner`, `Schutzhuette.Runtime`, `Unity.Netcode.Runtime` (Komponenten wie der Ofen sind `NetworkBehaviour`s), NUnit; nur mit `UNITY_INCLUDE_TESTS` |
+
+Braucht der Spielcode ein weiteres Paket, kommt dessen Assembly hier und in der `.asmdef` dazu. Ohne den
+Verweis meldet der Compiler `CS0246` (Typ nicht gefunden) oder `CS0012` (Assembly nicht referenziert).
+
 ## Module Ownership
 
 Bei `workflow: standard` nicht ausgeführt. Wem welche Daten gehören, steht in den Abhängigkeits-Tabellen
