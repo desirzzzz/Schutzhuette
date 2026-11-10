@@ -1,12 +1,12 @@
 # Story 001: Katalog-Datentypen und Grundprüfung
 
 > **Epic**: Gegenstandsarten
-> **Status**: Ready
+> **Status**: Complete (2026-11-10: 23 Tests grün, Entwickler hat die Exe getestet, „wie vorher“)
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-11-10
-> **Last Updated**: —
+> **Last Updated**: 2026-11-10
 
 ## Context
 
@@ -38,10 +38,10 @@ Spiel sichtbar; die folgenden Stories bauen darauf auf.
 
 *From GDD `design/gdd/gegenstandsarten.md`, scoped to this story:*
 
-- [ ] **Kriterium 2 [EditMode]:** GIVEN je eine Test-Art mit einem Fehler (Masse 0, Masse −1, leere Kennung, leerer Name, kein Prefab, Paket mit 0 Portionen, Paket mit unbekannter fester Ware) WHEN die Prüfung läuft THEN gibt es pro Test-Art genau 1 Fehler, der ihre Kennung oder ihren Asset-Namen nennt.
-- [ ] **Kriterium 5 [EditMode]:** GIVEN zwei Einträge (Arten oder Waren) mit derselben Kennung WHEN die Prüfung läuft THEN gibt es genau 1 Fehler, der beide Assets nennt, AND das Prüfergebnis meldet „Start gesperrt“ (das Ergebnis, das der Host-Start liest, ist eine prüfbare Funktion).
-- [ ] **Edge Case Waren [EditMode]:** Eine Ware mit leerer Kennung oder leerem Anzeigenamen ergibt einen Fehler; Waren haben kein Prefab-Feld.
-- [ ] **Kennung (ADR-0002, Verification 4) [EditMode]:** Eine Kennung mit 29 Zeichen ist gültig, eine mit 30 Zeichen, mit Großbuchstaben oder mit falschem Präfix (`ware_` an einer Art, fehlendes `ware_` an einer Ware) ergibt einen Fehler.
+- [x] **Kriterium 2 [EditMode]:** GIVEN je eine Test-Art mit einem Fehler (Masse 0, Masse −1, leere Kennung, leerer Name, kein Prefab, Paket mit 0 Portionen, Paket mit unbekannter fester Ware) WHEN die Prüfung läuft THEN gibt es pro Test-Art genau 1 Fehler, der ihre Kennung oder ihren Asset-Namen nennt.
+- [x] **Kriterium 5 [EditMode]:** GIVEN zwei Einträge (Arten oder Waren) mit derselben Kennung WHEN die Prüfung läuft THEN gibt es genau 1 Fehler, der beide Assets nennt, AND das Prüfergebnis meldet „Start gesperrt“ (das Ergebnis, das der Host-Start liest, ist eine prüfbare Funktion).
+- [x] **Edge Case Waren [EditMode]:** Eine Ware mit leerer Kennung oder leerem Anzeigenamen ergibt einen Fehler; Waren haben kein Prefab-Feld.
+- [x] **Kennung (ADR-0002, Verification 4) [EditMode]:** Eine Kennung mit 29 Zeichen ist gültig, eine mit 30 Zeichen, mit Großbuchstaben oder mit falschem Präfix (`ware_` an einer Art, fehlendes `ware_` an einer Ware) ergibt einen Fehler.
 
 ---
 
@@ -87,6 +87,8 @@ checks scope against it.*
 - `Assets/_Project/Scripts/Items/CatalogReport.cs`
 - `Assets/_Project/Scripts/Items/CatalogValidator.cs`
 - `Assets/Tests/EditMode/Items/CatalogValidatorTests.cs`
+- `Assets/Tests/EditMode/Items/CatalogTestFactory.cs` (Helfer für Test-Kataloge, auch für Story 002 bis 004)
+- `Assets/_Project/Scripts/AssemblyInfo.cs` (Zugriff der Tests und Editor-Skripte auf die Befüll-Methoden)
 
 ---
 
@@ -104,7 +106,7 @@ checks scope against it.*
 **Required evidence**:
 - Logic: `Assets/Tests/EditMode/Items/CatalogValidatorTests.cs` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Erstellt, 23 Tests bestanden im Batchmode (2026-11-10, `test-results/editmode.xml`: 28 von 28 mit den 5 Ofen-Tests). Gegenprobe: Mit absichtlich falscher Massen-Regel schlägt `KindWithZeroMass_OneErrorNamingId` fehl.
 
 ---
 

@@ -10,7 +10,7 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [Katalog-Datentypen und Grundprüfung](story-001-katalog-datentypen-und-grundpruefung.md) | Logic | Ready | ADR-0002 |
+| 001 | [Katalog-Datentypen und Grundprüfung](story-001-katalog-datentypen-und-grundpruefung.md) | Logic | Complete | ADR-0002 |
 | 002 | [Prüfregeln für Masse und Hacken](story-002-pruefregeln-masse-und-hacken.md) | Logic | Ready | ADR-0002 |
 | 003 | [Abkühl-Regeln für Gerichte](story-003-abkuehl-regeln.md) | Logic | Ready | ADR-0002 |
 | 004 | [Bruchregel und Aufprall-Formeln](story-004-bruchregel-und-aufprall-formeln.md) | Logic | Ready | ADR-0001 |
