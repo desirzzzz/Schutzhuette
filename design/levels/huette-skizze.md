@@ -3,8 +3,12 @@
 > **Status**: Skizze, vom Entwickler am 2026-11-08 für gut befunden
 > **Zweck**: Grundlage für das spätere Dokument „Hütten-Layout“ (vor dem Bau der Seilbahn, Plan-Schritt
 > „Lager und Materialseilbahn“ in `production/milestones/vertical-slice.md`)
-> **Gebaut**: nein. Gebaut wird erst, wenn der Gate-Check den Bau des Vertical Slice freigibt (Stand
-> 2026-11-09: FAIL). Die Szene bleibt bis dahin unverändert.
+> **Gebaut**: ja, als Graubox ohne Funktion (2026-11-10, auf Wunsch des Entwicklers vor dem Gate-Check).
+> Editor-Skript `HutExtensionBuilder` (Menü „Schutzhütte/Karte erweitern (Skizze)“), Maße in
+> `docs/GRAUBOX.md`, Abschnitt „Erweiterung nach der Skizze“. Die Funktionen kommen mit den Plan-Schritten.
+> **Berg**: Seit 2026-11-10 steht die Hütte auf einem Gelände (`HutTerrainBuilder`, `docs/GRAUBOX.md`,
+> Abschnitt „Berg“). Abweichung von der Skizze: Die Talstation liegt tiefer und weiter vorn am Hang
+> (z −20 … −16, Boden −6,5); das Seil läuft über eine Stütze an der Platzkante und ist rund 35 m lang.
 
 ![Skizze von oben](huette-skizze.svg)
 
@@ -25,14 +29,14 @@ ungefähr gesetzt; die echten Maße legt das Dokument „Hütten-Layout“ fest.
 | Schlafraum | ja | −1 … 6 | 22 … 25,5 | 4 Betten, Tür aus der Stube |
 | Generator-Schuppen | ja | 7,5 … 13 | 17 … 21 | Draußen neben der Stube |
 | Seilbahn-Bergstation | ja | −14,5 … −8 | 15 … 19 | Kurbel, direkt neben dem Lager |
-| Seilbahn-Talstation | ja | −14,5 … −8 | −8 … −4 | Hier wird beladen; Seil etwa 20 m |
+| Seilbahn-Talstation | ja | −14,5 … −8 | −8 … −4 (gebaut: −20 … −16, tiefer am Hang) | Hier wird beladen; Seil etwa 20 m (gebaut: rund 35 m über eine Stütze) |
 | Terrasse | nein | −7 … 7 | 10 … 12 | |
 | Hang | nein | −7 … 3 | 2 … 10 | Steigt von 0 auf 1,5 m |
 | Startplätze | nein | −3, −1, 1, 3 | 0 | |
-| Holzplatz | nein | 5 … 11 | etwa 3 … 5 | Lage ungefähr wie in der Szene |
-| Hackstock | ja | 5 … 11 | etwa 0 … 2,5 | Direkt vor dem Holzplatz |
-| Truhe | nein | etwa 12 … 16 | etwa 3 … 5 | Lage ungefähr wie in der Szene |
-| Suchgebiet Nachteinsatz | ja | 4 … 16 | −11 … −1 | Abseits vom Weg zur Talstation |
+| Holzplatz | nein | 4,7 … 6,3 | 2,9 … 4,3 | Lage aus der Szene (Spawnpunkte `WoodPile`) |
+| Hackstock | ja | 7,2 … 7,8 | 2 … 2,6 | Rechts neben dem Holz; vor dem Holz steht die Truhe |
+| Truhe | nein | 4,1 … 5,9 | 1,2 … 1,8 | Lage aus der Szene (Spawnpunkt `HeavySpawnPoints`) |
+| Suchgebiet Nachteinsatz | ja | 4 … 16 | −11 … −1 | Abseits vom Weg zur Talstation; gebaut am Hang (0 … −3,6 m) |
 
 ## Warum so
 

@@ -86,7 +86,7 @@ Alle Werte sind Weltkoordinaten. Rotation ist (0, 0, 0), wo nichts anderes steht
 
 | Teil | Position (x, y, z) | Rotation | Scale (x, y, z) |
 | --- | --- | --- | --- |
-| Ground (gibt es schon, nur Scale ändern) | 0, 0, 0 | | 6, 1, 6 |
+| Ground (seit 2026-11-10 ersetzt durch das Gelände „Berg“, siehe unten) | 0, 0, 0 | | 6, 1, 6 |
 | Sockel | 0, 0.75, 16.5 | | 14, 1.5, 13 |
 | Hang | -2, 0.5, 6.05 | -10.6, 0, 0 | 10, 0.5, 8.15 |
 
@@ -144,6 +144,64 @@ Die Teile, die unten im Boden oder hinten im Sockel stecken, sieht man nicht.
 | Tisch 3 (Mitte) | 1.0, 1.9, 16.5 | 1.2, 0.8, 1.2 |
 | Regal im Lager | -5.3, 2.5, 17.0 | 0.6, 2.0, 2.4 |
 | Küchenzeile | -3.4, 1.95, 21.3 | 3.0, 0.9, 0.7 |
+
+## Erweiterung nach der Skizze (2026-11-10)
+
+Grundlage ist `design/levels/huette-skizze.md`. Gebaut vom Editor-Skript `HutExtensionBuilder`
+(Menü „Schutzhütte/Karte erweitern (Skizze)“), nach Graubox und „Farbe und Licht setzen“. Es darf
+mehrmals laufen: Die Gruppe `Huette/Erweiterung` wird jedes Mal neu aufgebaut. Die neuen Orte haben
+noch keine Funktion; die kommt mit den Schritten im Plan für den Vertical Slice.
+
+**Geänderte Teile des Rohbaus:**
+
+| Vorher | Nachher |
+| --- | --- |
+| Wand hinten (eine Wand, x −6 … 6) | Wand hinten links (x −6 … 3,9), Tür zum Schlafraum (x 3,9 … 5,3, 1,4 m), Wand hinten rechts, Sturz Schlafraum |
+| Wand links (eine Wand, z 12 … 22) | Wand links vorne (z 12 … 16,3), Tür vom Lager zur Bergstation (z 16,3 … 17,7, 1,4 m), Wand links hinten, Sturz Bergstation |
+| Regal Lager bei (−5,3 / 2,5 / 17) vor der Westwand | Regal Lager bei (−1,4 / 2,5 / 17) an der Ostwand des Lagers |
+
+**Neue Orte** (Weltkoordinaten in Metern, Boden = Höhe der Oberkante):
+
+| Ort | x | z | Boden | Inhalt |
+| --- | --- | --- | --- | --- |
+| Schlafraum | −1 … 6 | 22 … 25,5 | 1,5 | 4 Betten an der Nordwand (0,9 × 2 m), Lampe; eigener Sockel bis z 26,5 |
+| Bergstation | −14,5 … −7 | 15 … 19 | 1,5 | Plattform mit Dach auf 4 Pfosten, Geländer 1 m (vorne Lücke x −12 … −10 fürs Seil), Kurbel, Seilrad, Ablage, Lampe |
+| Seil | x −11 | 15,3 … −17,8 | | Tragseil in zwei Stücken über eine Stütze, zusammen rund 35 m, ohne Collider |
+| Stütze | −11 | −1,5 | 0 | Mast 3,5 m an der Kante des Hüttenplatzes mit Sattel; hält das Seil gut 3 m über dem Boden |
+| Talstation | −14,5 … −8 | −20 … −16 | −6,5 | Laderampe (eine Stufe) auf einem ebenen Absatz im Hang (−6,75), Gerüst mit Seilrad, Ablage |
+| Generator-Schuppen | 7,5 … 13 | 17 … 21 | 0 | Wände 2,7 m, Tür nach vorn (x 9,55 … 10,95), Generator, Lampe |
+| Hackstock | 7,2 … 7,8 | 2 … 2,6 | 0 | Klotz, 0,5 m hoch |
+| Suchgebiet | 4 … 16 | −11 … −1 | 0 … −3,6 (Hang) | 7 Felsen, 5 Tannen, auf das Gelände gesetzt |
+
+Ohne Gelände (Szene ohne „Berg“) setzt das Skript Talstation und Suchgebiet wie in der Skizze auf
+Höhe 0 und die Talstation bei z −8 … −4.
+
+## Berg (Gelände, 2026-11-10)
+
+Gebaut vom Editor-Skript `HutTerrainBuilder` (Menü „Schutzhütte/Berg formen“). Es ersetzt die
+Bodenplatte `Ground` durch ein Unity Terrain `Berg` und baut danach die Erweiterung neu, damit
+Talstation, Stütze, Seil und Suchgebiet auf dem Gelände stehen. Darf mehrmals laufen.
+
+Das Gelände liegt fest in der Szene. Jeder Rechner lädt dieselbe Szene, deshalb geht davon nichts
+übers Netz. Rutschende Kisten berechnet wie bisher der Host.
+
+| Bereich | Lage | Form |
+| --- | --- | --- |
+| Gelände gesamt | x −120 … 120, z −110 … 130 | Höhen −30 … 110 m, Raster rund 0,47 m |
+| Hüttenplatz | x −22 … 20, z −3 … 28 | exakt eben auf Höhe 0 (Sockel, Bergstation, Schuppen) |
+| Hang ins Tal | vor z −3 | 0,45 m je Meter (rund 24 Grad), bis zum Talboden auf −22 |
+| Absatz Talstation | x −16 … −6,5, z −21,5 … −14,5 | eben auf −6,75; Böschung rundherum höchstens 37 Grad |
+| Gegenhang vorne | vor z −75 | steil, Kartenrand |
+| Hinter der Hütte | ab z 28 | 8 m sanft (rund 20 Grad), dann über 50 Grad |
+| Seiten | links von x −22, rechts von x 20 | 18 m mit rund 31 Grad, dann zu steil |
+
+- **Kartenrand:** Spieler kommen Hänge bis 45 Grad hoch (Slope Limit des CharacterControllers).
+  Steiler ist Rand. Im Spielbereich (x −26 … 24, z −24 … 32) ist die steilste Stelle rund 37 Grad;
+  das Skript schreibt den Wert bei jedem Lauf ins Log („[Berg] Steilste Stelle …“).
+- **Aussehen:** Schnee, ab rund 35 Grad Fels (Ebenen `Schnee` und `Fels` in `Art/Terrain/`).
+  Nebel etwas lichter als vorher (Dichte 0,012).
+- **Schnee rutscht:** Physik-Material `Schnee Physik` (Haftreibung 0,3, Gleitreibung 0,25, „Minimum“).
+  Kisten rutschen ab rund 17 Grad los, also auf dem Hang ins Tal, nicht auf dem Hüttenplatz.
 
 ## Prüfen, ob es passt
 

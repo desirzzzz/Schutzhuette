@@ -40,6 +40,12 @@ namespace Schutzhuette.EditorTools
         private const string VolumeName = "Stimmung";
         private const string LogPrefix = "[Look] ";
 
+        /// <summary>
+        /// Dichte des bläulichen Nebels draußen. Seit dem Berg (HutTerrainBuilder) lichter als vorher
+        /// (0,02), damit die Grate in 50 bis 100 m Entfernung noch zu sehen sind.
+        /// </summary>
+        internal const float FogDensity = 0.012f;
+
         /// <summary>Menüeintrag im Editor. Fragt vorher nach ungespeicherten Szenen.</summary>
         [MenuItem("Schutzhütte/Farbe und Licht setzen")]
         public static void BuildFromMenu()
@@ -123,7 +129,8 @@ namespace Schutzhuette.EditorTools
             }
             else
             {
-                Debug.LogWarning(LogPrefix + "Kein Objekt \"Ground\" gefunden, Boden unverändert.");
+                // Seit "Berg formen" ersetzt das Gelände die Bodenplatte.
+                Debug.Log(LogPrefix + "Kein Objekt \"Ground\" (Gelände statt Bodenplatte), Boden unverändert.");
             }
 
             string lightError = SetupOutdoorLight(scene);
@@ -145,8 +152,8 @@ namespace Schutzhuette.EditorTools
 
         // ----- Materialien -----
 
-        // Legt ein URP-Lit-Material an oder stellt ein vorhandenes neu ein.
-        private static Material SaveMaterial(Shader lit, string name, Color baseColor, float smoothness, Color? emission = null)
+        /// <summary>Legt ein URP-Lit-Material an oder stellt ein vorhandenes neu ein. Auch für HutExtensionBuilder.</summary>
+        internal static Material SaveMaterial(Shader lit, string name, Color baseColor, float smoothness, Color? emission = null)
         {
             string path = $"{MaterialFolder}/{name}.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -177,7 +184,8 @@ namespace Schutzhuette.EditorTools
             return material;
         }
 
-        private static Material LoadMaterial(string name)
+        /// <summary>Lädt ein Material aus Art/Materials, null wenn es fehlt.</summary>
+        internal static Material LoadMaterial(string name)
         {
             return AssetDatabase.LoadAssetAtPath<Material>($"{MaterialFolder}/{name}.mat");
         }
@@ -318,9 +326,11 @@ namespace Schutzhuette.EditorTools
             return cube;
         }
 
-        // Lampe = leuchtender Schirm (nur Darstellung) plus warmes Punktlicht darunter.
-        // Ohne Schatten: Punktlicht-Schatten kosten viel und sind im Prototyp nicht nötig.
-        private static void EnsureLamp(Transform parent, string name, Vector3 position, float intensity, float range)
+        /// <summary>
+        /// Lampe = leuchtender Schirm (nur Darstellung) plus warmes Punktlicht darunter.
+        /// Ohne Schatten: Punktlicht-Schatten kosten viel und sind im Prototyp nicht nötig.
+        /// </summary>
+        internal static void EnsureLamp(Transform parent, string name, Vector3 position, float intensity, float range)
         {
             Transform lamp = parent.Find(name);
             if (lamp == null)
@@ -401,7 +411,7 @@ namespace Schutzhuette.EditorTools
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
             RenderSettings.fogColor = new Color(0.45f, 0.52f, 0.65f);
-            RenderSettings.fogDensity = 0.02f;
+            RenderSettings.fogDensity = FogDensity;
             return null;
         }
 
@@ -529,6 +539,23 @@ namespace Schutzhuette.EditorTools
             RenderView(previewCamera, target, image, outputFolder, "2_Stube", new Vector3(5f, 3.2f, 12.7f), new Vector3(2.2f, 2.4f, 20.9f));
             RenderView(previewCamera, target, image, outputFolder, "3_Vorraum", new Vector3(-2f, 3.2f, 12.6f), new Vector3(-3.5f, 2.6f, 16f));
             RenderView(previewCamera, target, image, outputFolder, "4_Kueche", new Vector3(-2.2f, 3.2f, 18.9f), new Vector3(-3.6f, 2.2f, 21.3f));
+
+            // Erweiterung nach der Skizze (HutExtensionBuilder).
+            RenderView(previewCamera, target, image, outputFolder, "5_Schlafraum", new Vector3(5f, 3.2f, 22.4f), new Vector3(0.5f, 2f, 24.6f));
+            RenderView(previewCamera, target, image, outputFolder, "6_Bergstation", new Vector3(-4.5f, 6.5f, 8f), new Vector3(-11f, 2.5f, 16.5f));
+            RenderView(previewCamera, target, image, outputFolder, "7_Seilbahn", new Vector3(-13.5f, -4.5f, -21.5f), new Vector3(-11f, 2f, 12f));
+            RenderView(previewCamera, target, image, outputFolder, "8_Schuppen", new Vector3(8f, 2f, 12.5f), new Vector3(10.25f, 1f, 19.5f));
+            RenderView(previewCamera, target, image, outputFolder, "9_Suchgebiet", new Vector3(2f, 4.5f, 4f), new Vector3(10f, -2.5f, -7f));
+
+            // Berg (HutTerrainBuilder): von der Kante des Hüttenplatzes ins Tal und vom Hang hinauf zur Hütte.
+            RenderView(previewCamera, target, image, outputFolder, "10_Tal", new Vector3(-4f, 1.9f, -2.2f), new Vector3(-11f, -6.5f, -19f));
+            RenderView(previewCamera, target, image, outputFolder, "11_Berg", new Vector3(6f, -3.2f, -14f), new Vector3(0f, 6f, 30f));
+
+            // Übersicht von schräg oben, ohne Nebel, damit alles zu sehen ist.
+            bool fog = RenderSettings.fog;
+            RenderSettings.fog = false;
+            RenderView(previewCamera, target, image, outputFolder, "0_Uebersicht", new Vector3(45f, 50f, -60f), new Vector3(-3f, -2f, 5f));
+            RenderSettings.fog = fog;
 
             RenderTexture.active = null;
             Object.DestroyImmediate(cameraObject);
