@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Schutzhuette.Items;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -15,6 +16,9 @@ namespace Schutzhuette.Carrying
     /// der Host erzeugt die Objekte (NetworkObject.Spawn). Die Clients bekommen sie
     /// automatisch mitgeteilt. Liegt auf demselben GameObject wie der NetworkManager,
     /// mehrere dieser Komponenten nebeneinander sind erlaubt.
+    /// Gegenstände (Prefabs mit <see cref="Item"/>) erscheinen und verschwinden über
+    /// <see cref="ItemSpawning"/>, das vorher die Art prüft. Der Ofen ist kein Gegenstand
+    /// und erscheint ohne Katalog.
     /// </remarks>
     [RequireComponent(typeof(NetworkManager))]
     public class CrateSpawner : MonoBehaviour
@@ -27,6 +31,9 @@ namespace Schutzhuette.Carrying
 
         [Tooltip("Sekunden, bis an einem leeren Punkt ein neues Exemplar erscheint. 0 = nie.")]
         [SerializeField, Min(0f)] private float _respawnDelay;
+
+        [Tooltip("Nur für Vorratspakete ohne feste Ware (Kiste, Truhe): Diese Ware ist drin.")]
+        [SerializeField] private WareKind _ware;
 
         private NetworkManager _networkManager;
 
@@ -86,8 +93,23 @@ namespace Schutzhuette.Carrying
                 return;
             }
 
-            NetworkObject spawned = Instantiate(_cratePrefab, point.position, point.rotation);
-            spawned.Spawn(destroyWithScene: true);
+            NetworkObject spawned;
+            if (_cratePrefab.TryGetComponent(out Item item) && item.Kind != null)
+            {
+                // Gegenstand: Die Ausgabestelle prüft die Art. Erscheint nichts, steht der Grund im Log.
+                spawned = ItemSpawning.Spawn(item.Kind, point.position, point.rotation, _ware);
+                if (spawned == null)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                // Kein Gegenstand (zum Beispiel der Ofen).
+                spawned = Instantiate(_cratePrefab, point.position, point.rotation);
+                spawned.Spawn(destroyWithScene: true);
+            }
+
             _spawnedPerPoint[index] = spawned;
             _spawnedObjects.Add(spawned);
         }
@@ -126,7 +148,17 @@ namespace Schutzhuette.Carrying
         {
             foreach (NetworkObject spawned in _spawnedObjects)
             {
-                if (spawned != null)
+                if (spawned == null)
+                {
+                    continue;
+                }
+
+                if (spawned.TryGetComponent(out Item _))
+                {
+                    // Gegenstände verschwinden immer über die Ausgabestelle.
+                    ItemSpawning.Remove(spawned);
+                }
+                else
                 {
                     Destroy(spawned.gameObject);
                 }

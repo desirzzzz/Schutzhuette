@@ -45,6 +45,13 @@ namespace Schutzhuette.EditorTools
 
         private const string ScenePath = "Assets/_Project/Scenes/Prototype.unity";
         private const string PorcelainMaterialName = "Porzellan";
+
+        // Tassen auf dem Tisch: Name des Tisches aus docs/GRAUBOX.md, Abstände entlang der langen Seite in m.
+        private const string TeaTableName = "Tisch 1";
+        private const float TeaHalfHeight = 0.06f;
+        private const float TeaDropMargin = 0.02f;
+        private const float TeaRespawnSeconds = 20f;
+        private const float TeaSpacing = 0.6f;
         private const string LogPrefix = "[Katalog] ";
 
         /// <summary>Menüeintrag im Editor.</summary>
@@ -133,7 +140,12 @@ namespace Schutzhuette.EditorTools
                 }
 
                 string prefabPath = AssetDatabase.GetAssetPath(kind.Prefab);
-                if (kind.Prefab.TryGetComponent(out Item existing) && existing.Kind == kind)
+
+                // Ein Paket ohne feste Ware trägt seine Ware am Gegenstand und braucht dafür SupplyPackState.
+                bool needsPackState = kind.SupplyPack.Enabled && kind.SupplyPack.FixedWare == null;
+                bool hasItem = kind.Prefab.TryGetComponent(out Item existing) && existing.Kind == kind;
+                bool hasPackState = kind.Prefab.TryGetComponent(out SupplyPackState _);
+                if (hasItem && (!needsPackState || hasPackState))
                 {
                     continue;
                 }
@@ -147,13 +159,19 @@ namespace Schutzhuette.EditorTools
                     }
 
                     item.EditorSetKind(kind);
+
+                    if (needsPackState && !root.TryGetComponent(out SupplyPackState _))
+                    {
+                        root.AddComponent<SupplyPackState>();
+                    }
+
                     PrefabUtility.SaveAsPrefabAsset(root, prefabPath, out bool saved);
                     if (!saved)
                     {
                         return $"{prefabPath} konnte nicht gespeichert werden.";
                     }
 
-                    Debug.Log(LogPrefix + $"Etikett gesetzt: {prefabPath} → {kind.Id}");
+                    Debug.Log(LogPrefix + $"Etikett und Bausteine gesetzt: {prefabPath} → {kind.Id}");
                 }
                 finally
                 {
@@ -184,25 +202,156 @@ namespace Schutzhuette.EditorTools
                 return $"In {ScenePath} gibt es keinen NetworkManager.";
             }
 
-            if (networkManager.TryGetComponent(out CatalogService service) && service.Catalog == catalog)
+            bool changed = false;
+
+            if (!networkManager.TryGetComponent(out CatalogService service) || service.Catalog != catalog)
+            {
+                if (service == null)
+                {
+                    service = networkManager.AddComponent<CatalogService>();
+                }
+
+                service.EditorSetCatalog(catalog);
+                EditorUtility.SetDirty(service);
+                changed = true;
+                Debug.Log(LogPrefix + "CatalogService am NetworkManager eingetragen.");
+            }
+
+            // Platzhalter, bis die Startaufstellung (ADR-0003) festlegt, was in welchem Paket ist.
+            changed |= SetSpawnerWare(networkManager, CratePrefabPath, $"{WaresFolder}/WareSpeck.asset");
+            changed |= SetSpawnerWare(networkManager, ChestPrefabPath, $"{WaresFolder}/WareMehl.asset");
+
+            string error = AddTeaSpawner(networkManager, scene, ref changed);
+            if (error != null)
+            {
+                return error;
+            }
+
+            if (!changed)
             {
                 return null;
             }
 
-            if (service == null)
-            {
-                service = networkManager.AddComponent<CatalogService>();
-            }
-
-            service.EditorSetCatalog(catalog);
-            EditorUtility.SetDirty(service);
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene))
             {
                 return $"Szene konnte nicht gespeichert werden: {ScenePath}";
             }
 
-            Debug.Log(LogPrefix + $"CatalogService am NetworkManager eingetragen: {ScenePath}");
+            Debug.Log(LogPrefix + $"Szene gespeichert: {ScenePath}");
+            return null;
+        }
+
+        // Trägt beim Aussteller dieses Prefabs die Ware ein, wenn dort noch keine steht.
+        private static bool SetSpawnerWare(GameObject networkManager, string prefabPath, string warePath)
+        {
+            NetworkObject prefab = LoadNetworkPrefab(prefabPath);
+            var ware = AssetDatabase.LoadAssetAtPath<WareKind>(warePath);
+            if (prefab == null || ware == null)
+            {
+                return false;
+            }
+
+            bool changed = false;
+            foreach (CrateSpawner spawner in networkManager.GetComponents<CrateSpawner>())
+            {
+                var serialized = new SerializedObject(spawner);
+                SerializedProperty wareProperty = serialized.FindProperty("_ware");
+                if (serialized.FindProperty("_cratePrefab").objectReferenceValue != prefab
+                    || wareProperty.objectReferenceValue != null)
+                {
+                    continue;
+                }
+
+                wareProperty.objectReferenceValue = ware;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                changed = true;
+                Debug.Log(LogPrefix + $"Aussteller für {prefab.name}: Ware {ware.Id} eingetragen.");
+            }
+
+            return changed;
+        }
+
+        // Drei Tassen auf Tisch 1 in der Stube, die nachwachsen. Platzhalter bis zur Startaufstellung.
+        private static string AddTeaSpawner(GameObject networkManager, Scene scene, ref bool changed)
+        {
+            NetworkObject teaPrefab = LoadNetworkPrefab(TeaPrefabPath);
+            if (teaPrefab == null)
+            {
+                return $"Tassen-Prefab fehlt: {TeaPrefabPath}";
+            }
+
+            foreach (CrateSpawner existing in networkManager.GetComponents<CrateSpawner>())
+            {
+                if (new SerializedObject(existing).FindProperty("_cratePrefab").objectReferenceValue == teaPrefab)
+                {
+                    return null;
+                }
+            }
+
+            Renderer table = FindRenderer(scene, TeaTableName);
+            if (table == null)
+            {
+                return $"In {ScenePath} gibt es kein Objekt „{TeaTableName}“ mit Renderer für die Tassen.";
+            }
+
+            // Auf der Tischplatte, in einer Reihe entlang der langen Seite. Die Tasse ist 12 cm hoch.
+            Bounds bounds = table.bounds;
+            float y = bounds.max.y + TeaHalfHeight + TeaDropMargin;
+            bool longSideIsZ = bounds.size.z >= bounds.size.x;
+
+            // Drei Plätze: einer in der Mitte, je einer links und rechts davon.
+            float[] offsets = { -TeaSpacing, 0f, TeaSpacing };
+
+            var parent = new GameObject("TeaSpawnPoints").transform;
+            var points = new Transform[offsets.Length];
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                var point = new GameObject($"Tea{i + 1}").transform;
+                point.SetParent(parent, false);
+                point.position = longSideIsZ
+                    ? new Vector3(bounds.center.x, y, bounds.center.z + offsets[i])
+                    : new Vector3(bounds.center.x + offsets[i], y, bounds.center.z);
+                points[i] = point;
+            }
+
+            var spawner = networkManager.AddComponent<CrateSpawner>();
+            var serializedSpawner = new SerializedObject(spawner);
+            serializedSpawner.FindProperty("_cratePrefab").objectReferenceValue = teaPrefab;
+            serializedSpawner.FindProperty("_respawnDelay").floatValue = TeaRespawnSeconds;
+            SerializedProperty pointsProperty = serializedSpawner.FindProperty("_spawnPoints");
+            pointsProperty.arraySize = points.Length;
+            for (int i = 0; i < points.Length; i++)
+            {
+                pointsProperty.GetArrayElementAtIndex(i).objectReferenceValue = points[i];
+            }
+
+            serializedSpawner.ApplyModifiedPropertiesWithoutUndo();
+            changed = true;
+            Debug.Log(LogPrefix + $"Aussteller für {points.Length} Tassen auf „{TeaTableName}“ angelegt "
+                + $"(Höhe {y:0.00} m).");
+            return null;
+        }
+
+        private static NetworkObject LoadNetworkPrefab(string prefabPath)
+        {
+            var prefabObject = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            return prefabObject != null ? prefabObject.GetComponent<NetworkObject>() : null;
+        }
+
+        private static Renderer FindRenderer(Scene scene, string objectName)
+        {
+            foreach (GameObject rootObject in scene.GetRootGameObjects())
+            {
+                foreach (Transform child in rootObject.GetComponentsInChildren<Transform>(true))
+                {
+                    if (child.name == objectName && child.TryGetComponent(out Renderer found))
+                    {
+                        return found;
+                    }
+                }
+            }
+
             return null;
         }
 

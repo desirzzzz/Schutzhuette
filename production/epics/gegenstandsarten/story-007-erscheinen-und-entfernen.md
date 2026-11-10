@@ -1,12 +1,12 @@
 # Story 007: Erscheinen und Entfernen über ItemSpawning, Ware am Vorratspaket
 
 > **Epic**: Gegenstandsarten
-> **Status**: Ready
+> **Status**: Complete (2026-11-10: Tests grün, Entwickler hat die Exe getestet und den Commit freigegeben). Offen für den Freundestest: die Client-Seite von Kriterium 32 und Verification 1
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-11-10
-> **Last Updated**: —
+> **Last Updated**: 2026-11-10
 
 ## Context
 
@@ -38,10 +38,10 @@ an der eine Kennung als Text übers Netz geht.
 
 *From GDD `design/gdd/gegenstandsarten.md`, scoped to this story:*
 
-- [ ] **Kriterium 32 [PlayMode]:** GIVEN der Host lässt eine Vorratskiste mit `ware_speck` erscheinen WHEN ein Client sie sieht THEN lesen Host und Client am Gegenstand dieselbe Ware `ware_speck`.
-- [ ] **Edge Case Paket ohne Ware [PlayMode]:** Wenn ein Paket ohne feste Ware ohne Angabe erscheinen soll: Fehler beim Host, das Paket erscheint nicht.
-- [ ] **Edge Case ungültige Art [PlayMode]:** Eine ungültige Art (Masse ≤ 0, kein Prefab, unbekannte Ware) erscheint nicht in der Welt; im Log steht ein Fehler.
-- [ ] **Startwert (ADR-0002, Verification 1) [Log]:** Beim Erscheinen einer Vorratskiste mit Ware gibt es beim Host keine Warnung zur NetworkVariable, und der Client liest die Ware schon in seinem `OnNetworkSpawn`.
+- [ ] **Kriterium 32 [PlayMode]:** GIVEN der Host lässt eine Vorratskiste mit `ware_speck` erscheinen WHEN ein Client sie sieht THEN lesen Host und Client am Gegenstand dieselbe Ware `ware_speck`. *(Stand 2026-11-10: Host-Seite durch `HostSpawnTests` belegt. Client-Seite offen, Prüfung im Freundestest über die Log-Zeilen `[Items] … Ware … (Host)` und `(Client)`.)*
+- [x] **Edge Case Paket ohne Ware [PlayMode]:** Wenn ein Paket ohne feste Ware ohne Angabe erscheinen soll: Fehler beim Host, das Paket erscheint nicht.
+- [x] **Edge Case ungültige Art [PlayMode]:** Eine ungültige Art (Masse ≤ 0, kein Prefab, unbekannte Ware) erscheint nicht in der Welt; im Log steht ein Fehler.
+- [ ] **Startwert (ADR-0002, Verification 1) [Log]:** Beim Erscheinen einer Vorratskiste mit Ware gibt es beim Host keine Warnung zur NetworkVariable, und der Client liest die Ware schon in seinem `OnNetworkSpawn`. *(Stand 2026-11-10: Beim Host keine Warnung, durch `HostSpawnTests` belegt. Dass der Client die Ware schon in seinem `OnNetworkSpawn` liest, ist offen bis zum Freundestest.)*
 
 ---
 
@@ -95,7 +95,7 @@ checks scope against it.*
 **Required evidence**:
 - Integration: `Assets/Tests/PlayMode/Items/ItemSpawningTests.cs` OR playtest doc (Log-Zeilen von Host und Client aus dem Freundestest für Kriterium 32)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Erstellt (2026-11-10). EditMode 79 von 79 (neu: `ItemSpawningTests` 11, ein Test in `CatalogValidatorTests`), PlayMode 5 von 5 (neu: `Assets/Tests/PlayMode/Items/HostSpawnTests.cs` startet in der echten Szene einen Host). Der Host-Test belegt Kriterium 32 für die Host-Seite und Verification 1 für den Host (keine Warnung von NGO). Gegenprobe: Ohne die Zeile, die die Ware in den Netzwert überträgt, schlägt der Host-Test fehl. Offen für den Freundestest: Der Client liest dieselbe Ware (Log-Zeilen `[Items] … Ware … (Client)`). Abweichung von der ADR-Signatur: `ItemSpawning.Spawn` hat noch keinen Parameter für den Kochzeitpunkt; er kommt mit `DishState`.
 
 ---
 

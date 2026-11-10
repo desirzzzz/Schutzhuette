@@ -121,6 +121,7 @@ namespace Schutzhuette.Items
 
                 CheckPrefab(kind, label, networkPrefabs, prefabOwners, report);
                 CheckSupplyPack(kind.SupplyPack, label, knownWares, report);
+                CheckSupplyPackPrefab(kind, label, report);
                 CheckFragile(kind.Fragile, label, settings, report);
             }
 
@@ -297,6 +298,24 @@ namespace Schutzhuette.Items
             {
                 report.AddError($"{label}: Die feste Ware {Describe(WareLabel, fixedWare.Id, fixedWare.name)} "
                     + "steht nicht im Katalog.");
+            }
+        }
+
+        // Ein Paket ohne feste Ware trägt seine Ware am einzelnen Gegenstand (ADR-0002, Entscheidung 5).
+        // Dafür braucht sein Prefab die Komponente SupplyPackState, sonst kann es nicht erscheinen.
+        private static void CheckSupplyPackPrefab(ItemKind kind, string label, CatalogReport report)
+        {
+            SupplyPackBlock pack = kind.SupplyPack;
+            NetworkObject prefab = kind.Prefab;
+            if (!pack.Enabled || pack.FixedWare != null || prefab == null)
+            {
+                return;
+            }
+
+            if (!prefab.TryGetComponent(out SupplyPackState _))
+            {
+                report.AddError($"{label}: Dem Prefab „{prefab.name}“ fehlt die Komponente SupplyPackState. "
+                    + "Ein Vorratspaket ohne feste Ware braucht sie für seine Ware.");
             }
         }
 

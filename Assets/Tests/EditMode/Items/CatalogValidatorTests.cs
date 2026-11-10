@@ -155,6 +155,22 @@ namespace Schutzhuette.Tests
         public void SupplyPackWithoutFixedWare_NoError()
         {
             // Arrange: Ohne feste Ware legt fest, wer das Paket erzeugt, was drin ist.
+            // Das Prefab trägt dafür den Baustein für die Ware.
+            ItemKind pack = _factory.NewKind(KindId, KindAsset, category: ItemCategory.SupplyPack);
+            pack.EditorSetSupplyPack(new SupplyPackBlock(true, SomePortions, null));
+            pack.Prefab.gameObject.AddComponent<SupplyPackState>();
+
+            // Act
+            CatalogReport report = ValidateKinds(pack);
+
+            // Assert
+            Assert.IsEmpty(report.Errors, report.ToString());
+        }
+
+        [Test]
+        public void SupplyPackWithoutFixedWareAndWithoutPackState_OneErrorNamingId()
+        {
+            // Arrange: Dem Prefab fehlt der Baustein, der die Ware am Gegenstand trägt.
             ItemKind pack = _factory.NewKind(KindId, KindAsset, category: ItemCategory.SupplyPack);
             pack.EditorSetSupplyPack(new SupplyPackBlock(true, SomePortions, null));
 
@@ -162,7 +178,7 @@ namespace Schutzhuette.Tests
             CatalogReport report = ValidateKinds(pack);
 
             // Assert
-            Assert.IsEmpty(report.Errors, report.ToString());
+            AssertSingleErrorNaming(report, KindId);
         }
 
         // ---------- Kriterium 5: doppelte Kennung ----------

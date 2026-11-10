@@ -4249,6 +4249,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 585874451}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &587699644
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 587699645}
+  m_Layer: 0
+  m_Name: Tea3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &587699645
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587699644}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4, y: 2.3799999, z: 15.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1669722846}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &587913709
 GameObject:
   m_ObjectHideFlags: 0
@@ -6133,6 +6164,7 @@ GameObject:
   - component: {fileID: 840623075}
   - component: {fileID: 840623074}
   - component: {fileID: 840623076}
+  - component: {fileID: 840623077}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -6280,6 +6312,7 @@ MonoBehaviour:
   - {fileID: 624549346}
   - {fileID: 1505464392}
   _respawnDelay: 0
+  _ware: {fileID: 11400000, guid: d71b4f7bf8203e743a011f13dd2ed86b, type: 2}
 --- !u!114 &840623072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6329,6 +6362,7 @@ MonoBehaviour:
   _spawnPoints:
   - {fileID: 1191690953}
   _respawnDelay: 0
+  _ware: {fileID: 11400000, guid: 0efb88738211fdf468a60a55b236caa9, type: 2}
 --- !u!114 &840623074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6350,6 +6384,7 @@ MonoBehaviour:
   - {fileID: 1025784428}
   - {fileID: 1517849603}
   _respawnDelay: 20
+  _ware: {fileID: 0}
 --- !u!114 &840623075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6366,6 +6401,7 @@ MonoBehaviour:
   _spawnPoints:
   - {fileID: 171972971}
   _respawnDelay: 0
+  _ware: {fileID: 0}
 --- !u!114 &840623076
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6379,6 +6415,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.CatalogService
   _catalog: {fileID: 11400000, guid: 630a53a169a3a2a46bbdecac0bab2ef0, type: 2}
+--- !u!114 &840623077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840623065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5897f4e4a2fe84f49ac87f15e633c0ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Carrying.CrateSpawner
+  _cratePrefab: {fileID: 2658166364783262532, guid: b1d2068cf61445c43a2ca1a70b8a9604, type: 3}
+  _spawnPoints:
+  - {fileID: 1247244276}
+  - {fileID: 1629038753}
+  - {fileID: 587699645}
+  _respawnDelay: 20
+  _ware: {fileID: 0}
 --- !u!1 &844680941
 GameObject:
   m_ObjectHideFlags: 0
@@ -9130,6 +9185,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1217708921}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1247244275
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1247244276}
+  m_Layer: 0
+  m_Name: Tea1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1247244276
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1247244275}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4, y: 2.3799999, z: 13.9}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1669722846}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1251049935
 GameObject:
   m_ObjectHideFlags: 0
@@ -12151,6 +12237,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1615591861}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1629038752
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1629038753}
+  m_Layer: 0
+  m_Name: Tea2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1629038753
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629038752}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4, y: 2.3799999, z: 14.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1669722846}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1632402031
 GameObject:
   m_ObjectHideFlags: 0
@@ -12579,6 +12696,40 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1664020398}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1669722845
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1669722846}
+  m_Layer: 0
+  m_Name: TeaSpawnPoints
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1669722846
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669722845}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1247244276}
+  - {fileID: 1629038753}
+  - {fileID: 587699645}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1673600794
 GameObject:
   m_ObjectHideFlags: 0
@@ -15747,3 +15898,4 @@ SceneRoots:
   - {fileID: 368995705}
   - {fileID: 246012246}
   - {fileID: 1753987063}
+  - {fileID: 1669722846}
