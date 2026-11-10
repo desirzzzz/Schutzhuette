@@ -4,7 +4,36 @@
 > **GDD**: design/gdd/gegenstandsarten.md
 > **Architecture Module**: Gegenstandsarten (Katalog und Kennung), `Assets/_Project/Scripts/Items/`, Namespace `Schutzhuette.Items`
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories gegenstandsarten`
+> **Stories**: 11 stories (2026-11-10), siehe Tabelle unten
+
+## Stories
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | [Katalog-Datentypen und Grundprüfung](story-001-katalog-datentypen-und-grundpruefung.md) | Logic | Ready | ADR-0002 |
+| 002 | [Prüfregeln für Masse und Hacken](story-002-pruefregeln-masse-und-hacken.md) | Logic | Ready | ADR-0002 |
+| 003 | [Abkühl-Regeln für Gerichte](story-003-abkuehl-regeln.md) | Logic | Ready | ADR-0002 |
+| 004 | [Bruchregel und Aufprall-Formeln](story-004-bruchregel-und-aufprall-formeln.md) | Logic | Ready | ADR-0001 |
+| 005 | [Startkatalog mit 13 Arten und 7 Waren](story-005-startkatalog.md) | Config/Data | Ready | ADR-0002 |
+| 006 | [Laufzeit-Katalog, Komponente Item und Masse aus dem Katalog](story-006-laufzeit-katalog-und-masse.md) | Integration | Ready | ADR-0002 |
+| 007 | [Erscheinen und Entfernen über ItemSpawning, Ware am Vorratspaket](story-007-erscheinen-und-entfernen.md) | Integration | Ready | ADR-0002 |
+| 008 | [Tragen und Ofen lesen den Katalog](story-008-tragen-und-ofen-lesen-den-katalog.md) | Integration | Ready | ADR-0002 |
+| 009 | [Build und Host-Start sperren bei Katalogfehlern](story-009-build-und-host-start-sperren.md) | Integration | Ready | ADR-0002 |
+| 010 | [Aufprall-Messpunkt, Zustand „Fällt“ und Zerbrechen](story-010-aufprall-messpunkt-und-zerbrechen.md) | Integration | Ready | ADR-0001 |
+| 011 | [Scherben und Aufprall-Klang über ImpactEffects](story-011-scherben-und-aufprall-klang.md) | Integration | Ready | ADR-0001 |
+
+Reihenfolge: 001 zuerst, dann 002 bis 004 in beliebiger Folge, dann 005 bis 009, zum Schluss 010 und 011.
+
+**Abnahmekriterien des GDD, die noch keine Story haben** (28 von 34 sind abgedeckt). Sie bekommen eine Story,
+sobald ihr System existiert (`/create-stories gegenstandsarten` erneut):
+
+| Kriterium | Inhalt | Wartet auf |
+|-----------|--------|-----------|
+| 17 | Tasse fällt beim Hinfallen des Trägers und bleibt aus Haltehöhe heil | Hinfallen und Ragdoll (Plan-Schritt 17) |
+| 21, 30 | Tee kühlt im laufenden Spiel ab, bei Host und Client höchstens 0,5 s auseinander | Saison-Uhr (Epic Saison-Ablauf, Plan-Schritt 3) und Gerichte |
+| 23 | Klotz hacken ergibt 4 Holzscheite mit je 3,0 kg | Holz hacken (Plan-Schritt 7) |
+| 31 | Servieren schlägt fehl, wenn die Tasse vorher zerbrochen ist | Gäste (Plan-Schritt 5) |
+| 34 | Ausrüstung geht in den Zustand „Am Körper“ und zerbricht dort nie | Interaktion und ADR-0004 (Plan-Schritt 4) |
 
 ## Overview
 

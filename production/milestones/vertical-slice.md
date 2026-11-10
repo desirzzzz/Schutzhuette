@@ -1,12 +1,12 @@
 # Vertical Slice: Plan
 
-- **Stand:** 2026-11-10 (Schritt 4 und 6 nach dem Gate-Check ergänzt)
-- **Status:** Schritt 1 läuft, gebaut wird noch nicht. Die Spaßfrage des Prototyps ist mit Bedenken
-  bestanden (Freundestest 2, `production/qa/playtests/playtest-2026-11-09-freund.md`). Der Gate-Check
-  vom 2026-11-10 ist CONCERNS: keine Blocker, 12 Bedenken
-  (`production/gate-checks/gate-2026-11-10-pre-production.md`). Aus Schritt 1 fehlen noch das Control
-  Manifest, die Stories für Schritt 2 und die Frage an den Freund. Gebaut wird ab Schritt 2, wenn das
-  erledigt ist.
+- **Stand:** 2026-11-10 (Schritt 4 und 6 nach dem Gate-Check ergänzt, Stories für Schritt 2 geschrieben)
+- **Status:** Schritt 1 ist bis auf die Frage an den Freund erledigt, **Schritt 2 kann beginnen**. Die
+  Spaßfrage des Prototyps ist mit Bedenken bestanden (Freundestest 2,
+  `production/qa/playtests/playtest-2026-11-09-freund.md`). Der Gate-Check vom 2026-11-10 ist CONCERNS:
+  keine Blocker, 12 Bedenken (`production/gate-checks/gate-2026-11-10-pre-production.md`). Control
+  Manifest (`docs/architecture/control-manifest.md`) und die 11 Stories für Schritt 2
+  (`production/epics/gegenstandsarten/`) liegen vor. Gebaut wird Story für Story, beginnend mit Story 001.
 - **Grundlage:** `docs/KONZEPT.md` („Kern-Spielschleife“, „Mechaniken im Detail“, „Umfang“,
   „Fahrplan“) und `design/game-brief.md`. Bei Widersprüchen gilt KONZEPT.md.
 
