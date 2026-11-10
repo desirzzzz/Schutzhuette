@@ -5,7 +5,7 @@
 > **Last Updated**: 2026-11-10
 > **Accessibility Tier Target**: Standard
 > **Platform(s)**: PC (Steam, Windows); Maus und Tastatur, Gamepad teilweise
-> **Linked Documents**: `design/gdd/systems-index.md`, `design/ux/interaction-patterns.md` (noch nicht angelegt)
+> **Linked Documents**: `design/gdd/systems-index.md`, `design/ux/interaction-patterns.md`
 > **Template**: Accessibility Requirements
 
 > **Wozu dieses Dokument:** Hinweise zur Barrierefreiheit für einzelne Bildschirme stehen in den
