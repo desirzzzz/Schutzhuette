@@ -1,11 +1,12 @@
 # Vertical Slice: Plan
 
-- **Stand:** 2026-11-09 (Reihenfolge nach dem Gate-Check korrigiert)
-- **Status:** geplant, **nicht begonnen**. Die Spaßfrage des Prototyps ist mit Bedenken bestanden
-  (Freundestest 2, `production/qa/playtests/playtest-2026-11-09-freund.md`). Der Gate-Check vom
-  2026-11-09 ist FAIL, weil bei Stufe `standard` Architektur, Foundation-ADRs, Review, Test-Gerüst und
-  CI fehlen (`production/gate-checks/gate-2026-11-09-prototyp.md`). Gebaut wird ab Schritt 2, wenn
-  Schritt 1 erledigt und der Gate-Check bestanden ist.
+- **Stand:** 2026-11-10 (Schritt 4 und 6 nach dem Gate-Check ergänzt)
+- **Status:** Schritt 1 läuft, gebaut wird noch nicht. Die Spaßfrage des Prototyps ist mit Bedenken
+  bestanden (Freundestest 2, `production/qa/playtests/playtest-2026-11-09-freund.md`). Der Gate-Check
+  vom 2026-11-10 ist CONCERNS: keine Blocker, 12 Bedenken
+  (`production/gate-checks/gate-2026-11-10-pre-production.md`). Aus Schritt 1 fehlen noch das Control
+  Manifest, die Stories für Schritt 2 und die Frage an den Freund. Gebaut wird ab Schritt 2, wenn das
+  erledigt ist.
 - **Grundlage:** `docs/KONZEPT.md` („Kern-Spielschleife“, „Mechaniken im Detail“, „Umfang“,
   „Fahrplan“) und `design/game-brief.md`. Bei Widersprüchen gilt KONZEPT.md.
 
@@ -84,7 +85,11 @@ Systemen aus früheren Schritten auf (Abhängigkeiten laut `design/gdd/systems-i
    Gewicht, Material und Eigenschaften. Alle folgenden Schritte lesen diese Daten.
 3. **Saison-Uhr und Phasen:** Der Host steuert die Uhr, alle sehen dieselbe Phase. Licht und Stimmung
    wechseln mit der Phase, den Sturm selbst bringt Schritt 8. Das HUD zeigt Uhr und Phase.
-4. **Interaktion:** Ein gemeinsames „Benutzen“ mit der Taste E, zuerst an Herd und Ofen.
+4. **Interaktion:** Ein gemeinsames „Benutzen“ mit der linken Maustaste, zuerst an Herd und Ofen. E hebt
+   nur noch auf und legt ab, geworfen wird neu mit der rechten Maustaste (`design/gdd/interaktion.md`).
+   - Vorher ADR-0004 „Interaktion übers Netz“ (`docs/architecture/architecture.md`).
+   - Die Tastentabelle in `docs/FREUNDESTEST.md` wird in diesem Schritt angepasst (heute wirft der
+     Linksklick).
 5. **Erster Gast mit erstem Gericht:** Ein Wanderer kommt an, hat Hunger und wartet in der Stube.
    - Vorher ein ADR für die Gäste-Wegfindung im Netz (AI-Navigation-Paket nur nach Rückfrage).
    - Tee in zwei Schritten am Herd. Die Zutaten kommen aus einem **Mindest-Lager**, dessen Bestand in
@@ -96,6 +101,7 @@ Systemen aus früheren Schritten auf (Abhängigkeiten laut `design/gdd/systems-i
      schätzen. Bei No-Go wird erst der Kern verbessert, bevor weitere Systeme dazukommen.
 6. **Steam-Lobby und Einladen, mit der Test-App 480:** Beitreten über Steam-Freunde statt über
    IP-Adresse und Portfreigabe. Kostenlos (Facepunch.Steamworks und Valves Test-App „Spacewar“).
+   - Vorher ADR-0006 „Steam-Transport für NGO mit IP-Ausweg“ (`docs/architecture/architecture.md`).
    - Beide Spieler brauchen ein laufendes Steam. In der Freundesliste steht dann „Spacewar“ statt
      „Schutzhütte“.
    - Die Test-App teilen sich viele Entwickler. Lobbys deshalb nur über Einladen beitreten oder mit
