@@ -22,7 +22,17 @@
 | 010 | [Aufprall-Messpunkt, Zustand „Fällt“ und Zerbrechen](story-010-aufprall-messpunkt-und-zerbrechen.md) | Integration | Ready | ADR-0001 |
 | 011 | [Scherben und Aufprall-Klang über ImpactEffects](story-011-scherben-und-aufprall-klang.md) | Integration | Ready | ADR-0001 |
 
-Reihenfolge: 001 zuerst, dann 002 bis 004 in beliebiger Folge, dann 005 bis 009, zum Schluss 010 und 011.
+**Reihenfolge (Entscheidung des Entwicklers, 2026-11-10: „Schnell zu den Tassen“).** Zuerst alles, was das
+Zerbrechen braucht, damit das erste sichtbare Ergebnis früh kommt:
+
+1. 001 (erledigt)
+2. 004: Bruchregel
+3. 005, erster Teil: Steckbriefe und Prefabs für `vorratskiste`, `holzscheit`, `truhe` und `tee`. Das Kriterium
+   „genau 13 Arten und 7 Waren“ bleibt offen, bis der zweite Teil gebaut ist.
+4. 006 und 007: Das Spiel liest den Katalog und lässt Gegenstände darüber erscheinen
+5. 010: Tassen zerbrechen
+
+Danach in dieser Folge: 011 (Scherben-Klang), 002, 003, 005 zweiter Teil, 008, 009.
 
 **Abnahmekriterien des GDD, die noch keine Story haben** (28 von 34 sind abgedeckt). Sie bekommen eine Story,
 sobald ihr System existiert (`/create-stories gegenstandsarten` erneut):
