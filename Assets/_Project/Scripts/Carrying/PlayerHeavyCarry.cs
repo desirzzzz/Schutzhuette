@@ -1,3 +1,4 @@
+using Schutzhuette.Items;
 using Schutzhuette.Player;
 using Unity.Netcode;
 using UnityEngine;
@@ -308,8 +309,9 @@ namespace Schutzhuette.Carrying
                 return null;
             }
 
+            // Ohne Art ist es kein Gegenstand: kein Hinweis, kein Anpacken (GDD Gegenstandsarten, Edge Case).
             var heavy = hit.collider.GetComponentInParent<HeavyCarryable>();
-            return heavy != null && heavy.HolderCount < 2 ? heavy : null;
+            return heavy != null && heavy.HolderCount < 2 && Item.HasKind(heavy) ? heavy : null;
         }
 
         private void SetIgnoreCollision(Collider target)
@@ -338,7 +340,8 @@ namespace Schutzhuette.Carrying
         private void GrabHeavyRpc(NetworkObjectReference heavyReference, int end)
         {
             if (!heavyReference.TryGet(out NetworkObject heavyObject)
-                || !heavyObject.TryGetComponent(out HeavyCarryable heavy))
+                || !heavyObject.TryGetComponent(out HeavyCarryable heavy)
+                || !Item.HasKind(heavy))
             {
                 return;
             }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace Schutzhuette.Items
 {
@@ -34,6 +35,9 @@ namespace Schutzhuette.Items
 
         /// <summary>Damit beginnt die Kennung jedes Bedürfnisses.</summary>
         public const string NeedPrefix = "beduerfnis_";
+
+        // Ab dieser Abweichung in kg gilt eine Prefab-Masse als anders als im Katalog.
+        private const float MassTolerance = 0.0001f;
 
         private const string KindLabel = "Art";
         private const string WareLabel = "Ware";
@@ -178,7 +182,7 @@ namespace Schutzhuette.Items
 
             idOwners.Add(id, owner);
 
-            if (!MatchesIdPattern(id))
+            if (!IsValidId(id))
             {
                 report.AddError($"{label}: Die Kennung passt nicht zum Muster. Erlaubt sind nur a–z, 0–9 und _, "
                     + $"höchstens {MaxIdLength} Zeichen (sie hat {id.Length}).");
@@ -203,10 +207,14 @@ namespace Schutzhuette.Items
             }
         }
 
-        // Muster ^[a-z0-9_]{1,29}$ (ADR-0002, Entscheidung 4).
-        private static bool MatchesIdPattern(string id)
+        /// <summary>
+        /// Ob eine Kennung dem Muster ^[a-z0-9_]{1,29}$ folgt (ADR-0002, Entscheidung 4). Nur solche
+        /// Kennungen passen in den Netz-Datentyp FixedString32Bytes. Präfixe prüft <see cref="Validate"/>.
+        /// </summary>
+        /// <param name="id">Die Kennung. null oder leer ist ungültig.</param>
+        public static bool IsValidId(string id)
         {
-            if (id.Length < 1 || id.Length > MaxIdLength)
+            if (string.IsNullOrEmpty(id) || id.Length > MaxIdLength)
             {
                 return false;
             }
@@ -247,6 +255,27 @@ namespace Schutzhuette.Items
             {
                 report.AddError($"{label}: Das Prefab „{prefab.name}“ steht nicht in der Netzwerk-Prefab-Liste. "
                     + "Ohne Eintrag kann es im Netz nicht erscheinen.");
+            }
+
+            // Das Prefab verrät die Art (ADR-0002, Entscheidung 3): Sein Etikett muss auf genau diese Art
+            // zeigen, sonst bekäme der Gegenstand im Spiel einen falschen oder gar keinen Steckbrief.
+            if (!prefab.TryGetComponent(out Item item))
+            {
+                report.AddError($"{label}: Dem Prefab „{prefab.name}“ fehlt die Komponente Item.");
+            }
+            else if (item.Kind != kind)
+            {
+                string other = item.Kind != null ? Describe(KindLabel, item.Kind.Id, item.Kind.name) : "keine Art";
+                report.AddError($"{label}: Die Komponente Item am Prefab „{prefab.name}“ zeigt auf {other} "
+                    + "statt auf diese Art.");
+            }
+
+            // Der Katalog gilt, die Masse wird beim Erscheinen überschrieben (GDD Edge Case, Kriterium 7).
+            if (prefab.TryGetComponent(out Rigidbody body) && Math.Abs(body.mass - kind.MassKg) > MassTolerance)
+            {
+                report.AddHint($"{label}: Die Rigidbody-Masse im Prefab „{prefab.name}“ ({Format(body.mass)} kg) "
+                    + $"weicht vom Katalog ab ({Format(kind.MassKg)} kg). Der Katalog gilt, die Masse wird beim "
+                    + "Erscheinen überschrieben.");
             }
         }
 

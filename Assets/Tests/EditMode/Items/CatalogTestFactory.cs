@@ -44,6 +44,9 @@ namespace Schutzhuette.Tests
             _created.Add(gameObject);
 
             NetworkObject networkObject = gameObject.AddComponent<NetworkObject>();
+
+            // Das Etikett; welche Art darauf steht, trägt NewKind ein.
+            gameObject.AddComponent<Item>();
             if (listed)
             {
                 PrefabList.Add(new NetworkPrefab { Prefab = gameObject });
@@ -70,6 +73,14 @@ namespace Schutzhuette.Tests
             }
 
             kind.EditorSetBasics(id, displayName, massKg, carryMode, category, ImpactSoundGroup.Wood, usedPrefab);
+
+            // Das Etikett des Prefabs zeigt auf die erste Art, die es benutzt. Teilen sich zwei Arten
+            // ein Prefab, zeigt es für die zweite auf die falsche Art, wie im echten Projekt.
+            if (usedPrefab != null && usedPrefab.TryGetComponent(out Item item) && item.Kind == null)
+            {
+                item.EditorSetKind(kind);
+            }
+
             return kind;
         }
 

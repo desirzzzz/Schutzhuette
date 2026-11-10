@@ -1,3 +1,4 @@
+using Schutzhuette.Items;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -110,6 +111,9 @@ namespace Schutzhuette.Carrying
             _networkRigidbody = GetComponent<NetworkRigidbody>();
             _collider = GetComponent<Collider>();
             _renderers = GetComponentsInChildren<Renderer>();
+
+            // Jeder tragbare Gegenstand braucht ein Etikett mit seiner Art.
+            Item.ReportIfMissing(this);
         }
 
         /// <summary>

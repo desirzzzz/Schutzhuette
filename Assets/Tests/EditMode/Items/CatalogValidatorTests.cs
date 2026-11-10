@@ -20,6 +20,9 @@ namespace Schutzhuette.Tests
         private const string NeedId = "beduerfnis_test";
         private const string NeedAsset = "TestBeduerfnis";
 
+        // Wortlaut der Meldung für ein Prefab, das sich mehrere Arten teilen.
+        private const string SharedPrefabText = "mehreren Arten";
+
         // Grenzwerte: Genau diese Zahlen sind der Prüfpunkt.
         private const float ZeroMassKg = 0f;
         private const float NegativeMassKg = -1f;
@@ -314,10 +317,84 @@ namespace Schutzhuette.Tests
             // Act
             CatalogReport report = ValidateKinds(first, second);
 
+            // Assert: ein Fehler für das geteilte Prefab, der beide Arten nennt. Dazu kommt der Fehler,
+            // dass das Etikett des Prefabs für die zweite Art auf die falsche Art zeigt.
+            Assert.AreEqual(2, report.Errors.Count, report.ToString());
+            string sharedError = FindError(report, SharedPrefabText);
+            Assert.IsNotNull(sharedError, report.ToString());
+            StringAssert.Contains(KindId, sharedError);
+            StringAssert.Contains(secondId, sharedError);
+        }
+
+        [Test]
+        public void PrefabWithoutItemComponent_OneErrorNamingId()
+        {
+            // Arrange: Das Etikett fehlt ganz.
+            NetworkObject prefab = _factory.NewPrefab();
+            UnityEngine.Object.DestroyImmediate(prefab.GetComponent<Item>());
+            ItemKind kind = _factory.NewKind(KindId, KindAsset, prefab: prefab);
+
+            // Act
+            CatalogReport report = ValidateKinds(kind);
+
             // Assert
-            Assert.AreEqual(1, report.Errors.Count, report.ToString());
-            StringAssert.Contains(KindId, report.Errors[0]);
-            StringAssert.Contains(secondId, report.Errors[0]);
+            AssertSingleErrorNaming(report, KindId);
+        }
+
+        [Test]
+        public void PrefabItemPointsToOtherKind_OneErrorNamingId()
+        {
+            // Arrange: Das Etikett des Prefabs zeigt auf eine Art, die nicht im Katalog steht.
+            const string otherId = "andere_art";
+            NetworkObject prefab = _factory.NewPrefab();
+            ItemKind other = _factory.NewKind(otherId, SecondKindAsset, withPrefab: false);
+            prefab.GetComponent<Item>().EditorSetKind(other);
+            ItemKind kind = _factory.NewKind(KindId, KindAsset, prefab: prefab);
+
+            // Act
+            CatalogReport report = ValidateKinds(kind);
+
+            // Assert
+            AssertSingleErrorNaming(report, KindId);
+        }
+
+        // ---------- Kriterium 7: Masse im Prefab weicht vom Katalog ab ----------
+
+        [Test]
+        public void PrefabMassDiffersFromCatalog_OneHintNamingIdAndNoError()
+        {
+            // Arrange: Das Prefab wiegt 1 kg, der Katalog sagt 3 kg.
+            const float prefabMassKg = 1f;
+            const float catalogMassKg = 3f;
+            NetworkObject prefab = _factory.NewPrefab();
+            prefab.gameObject.AddComponent<UnityEngine.Rigidbody>().mass = prefabMassKg;
+            ItemKind kind = _factory.NewKind(KindId, KindAsset, massKg: catalogMassKg, prefab: prefab);
+
+            // Act
+            CatalogReport report = ValidateKinds(kind);
+
+            // Assert
+            Assert.IsEmpty(report.Errors, report.ToString());
+            Assert.AreEqual(1, report.Hints.Count, report.ToString());
+            StringAssert.Contains(KindId, report.Hints[0]);
+            Assert.IsFalse(report.StartBlocked);
+        }
+
+        [Test]
+        public void PrefabMassEqualsCatalog_NoHint()
+        {
+            // Arrange
+            const float massKg = 3f;
+            NetworkObject prefab = _factory.NewPrefab();
+            prefab.gameObject.AddComponent<UnityEngine.Rigidbody>().mass = massKg;
+            ItemKind kind = _factory.NewKind(KindId, KindAsset, massKg: massKg, prefab: prefab);
+
+            // Act
+            CatalogReport report = ValidateKinds(kind);
+
+            // Assert
+            Assert.IsEmpty(report.Hints, report.ToString());
+            Assert.IsEmpty(report.Errors, report.ToString());
         }
 
         // ---------- Fehlende Eingaben ----------
@@ -349,6 +426,19 @@ namespace Schutzhuette.Tests
         {
             ItemCatalog catalog = _factory.NewCatalog(kinds);
             return CatalogValidator.Validate(catalog, _factory.PrefabList);
+        }
+
+        private static string FindError(CatalogReport report, string text)
+        {
+            foreach (string error in report.Errors)
+            {
+                if (error.Contains(text))
+                {
+                    return error;
+                }
+            }
+
+            return null;
         }
 
         private static void AssertSingleErrorNaming(CatalogReport report, string expectedName)

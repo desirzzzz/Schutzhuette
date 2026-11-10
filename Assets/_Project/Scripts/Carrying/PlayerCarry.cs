@@ -1,3 +1,4 @@
+using Schutzhuette.Items;
 using Schutzhuette.Player;
 using Unity.Netcode;
 using UnityEngine;
@@ -392,7 +393,8 @@ namespace Schutzhuette.Carrying
                 ? _releasedItem
                 : hit.collider.GetComponentInParent<Carryable>();
 
-            if (item == null)
+            // Ohne Art ist es kein Gegenstand: kein Hinweis, kein Aufheben (GDD Gegenstandsarten, Edge Case).
+            if (item == null || !Item.HasKind(item))
             {
                 return null;
             }
@@ -559,7 +561,8 @@ namespace Schutzhuette.Carrying
 
             if (!itemReference.TryGet(out NetworkObject itemObject)
                 || !itemObject.TryGetComponent(out Carryable item)
-                || item.IsCarried)
+                || item.IsCarried
+                || !Item.HasKind(item))
             {
                 return;
             }

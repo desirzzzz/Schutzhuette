@@ -1,12 +1,12 @@
 # Story 006: Laufzeit-Katalog, Komponente Item und Masse aus dem Katalog
 
 > **Epic**: Gegenstandsarten
-> **Status**: Ready
+> **Status**: Complete (2026-11-10: Tests grün, Entwickler hat die Exe getestet und den Commit freigegeben). Offen: der Handtest zu Kriterium 8 im Spiel
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-11-10
-> **Last Updated**: —
+> **Last Updated**: 2026-11-10
 
 ## Context
 
@@ -39,9 +39,9 @@ Rigidbody kommt ab jetzt aus dem Katalog, auf jedem Rechner.
 
 *From GDD `design/gdd/gegenstandsarten.md`, scoped to this story:*
 
-- [ ] **Kriterium 7 [EditMode + PlayMode]:** GIVEN das holzscheit-Prefab hat Rigidbody-Masse 1 WHEN die Prüfung läuft THEN gibt es 1 Hinweis und keinen Fehler; WHEN der Host es erscheinen lässt THEN ist `Rigidbody.mass` = 3,0.
-- [ ] **Kriterium 8 [Manuell]:** Solo: GIVEN ein Objekt in der Szene ohne Art WHEN Play startet THEN steht genau 1 Fehler mit dem Objektnamen in der Konsole, und ein Aufheben-Versuch lässt es liegen.
-- [ ] **Kriterium 27 [EditMode]:** GIVEN der Laufzeit-Katalog WHEN nach `gibt_es_nicht` gesucht wird THEN gibt es keinen Treffer, genau 1 Fehler, keine Exception, und der Erscheinen-Pfad beim Client zeigt nichts an.
+- [x] **Kriterium 7 [EditMode + PlayMode]:** GIVEN das holzscheit-Prefab hat Rigidbody-Masse 1 WHEN die Prüfung läuft THEN gibt es 1 Hinweis und keinen Fehler; WHEN der Host es erscheinen lässt THEN ist `Rigidbody.mass` = 3,0.
+- [ ] **Kriterium 8 [Manuell]:** Solo: GIVEN ein Objekt in der Szene ohne Art WHEN Play startet THEN steht genau 1 Fehler mit dem Objektnamen in der Konsole, und ein Aufheben-Versuch lässt es liegen. *(Stand 2026-11-10: Die Fehlermeldung mit Objektnamen ist durch PlayMode-Tests belegt, die Sperre steht in `PlayerCarry` und `PlayerHeavyCarry`. Den Aufheben-Versuch im Spiel hat noch niemand von Hand geprüft.)*
+- [x] **Kriterium 27 [EditMode]:** GIVEN der Laufzeit-Katalog WHEN nach `gibt_es_nicht` gesucht wird THEN gibt es keinen Treffer, genau 1 Fehler, keine Exception, und der Erscheinen-Pfad beim Client zeigt nichts an.
 
 ---
 
@@ -98,7 +98,7 @@ checks scope against it.*
 **Required evidence**:
 - Integration: `Assets/Tests/PlayMode/Items/ItemMassTests.cs` und `Assets/Tests/EditMode/Items/CatalogServiceTests.cs`; Kriterium 8 nach Testanleitung im Editor (Entwickler bestätigt)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Erstellt (2026-11-10). EditMode 67 von 67 (neu: `CatalogLookupTests` 8, vier Tests in `CatalogValidatorTests` zu Etikett und Masse), PlayMode 4 von 4 (`Assets/Tests/PlayMode/Items/ItemTests.cs`, die ersten PlayMode-Tests des Projekts). Gegenprobe: Ohne die Zeile, die die Masse übernimmt, schlägt `ItemWithKind_RigidbodyTakesMassFromCatalog` fehl. Kriterium 8 im Spiel (Aufheben-Versuch) prüft der Entwickler nach Testanleitung.
 
 ---
 

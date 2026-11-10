@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 5037891365898932533}
   - component: {fileID: 4812375535518034755}
   - component: {fileID: 7552202985462751931}
+  - component: {fileID: 3125024181422179102}
   m_Layer: 0
   m_Name: Firewood
   m_TagString: Untagged
@@ -276,3 +277,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.ImpactSound
   ShowTopMostFoldoutHeaderGroup: 1
   _settings: {fileID: 11400000, guid: 63c3d4f315d63e648ad8518f95139d90, type: 2}
+--- !u!114 &3125024181422179102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1989595317476219397}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f65d20c27be450478d1e3749052d759, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.Item
+  _kind: {fileID: 11400000, guid: dbb6a3d134b8b8b45b629bb2c718c32e, type: 2}

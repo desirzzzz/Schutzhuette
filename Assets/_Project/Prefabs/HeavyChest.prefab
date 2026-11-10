@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 2327189927657449921}
   - component: {fileID: 7144396083196664942}
   - component: {fileID: 7027754100802840794}
+  - component: {fileID: 7148423824213603630}
   m_Layer: 0
   m_Name: HeavyChest
   m_TagString: Untagged
@@ -269,3 +270,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Schutzhuette.Audio.ImpactSound
   ShowTopMostFoldoutHeaderGroup: 1
   _settings: {fileID: 11400000, guid: 63c3d4f315d63e648ad8518f95139d90, type: 2}
+--- !u!114 &7148423824213603630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3937016545671902130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f65d20c27be450478d1e3749052d759, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.Item
+  _kind: {fileID: 11400000, guid: ad5006da3b41ea646bfc807e0bda1ff1, type: 2}

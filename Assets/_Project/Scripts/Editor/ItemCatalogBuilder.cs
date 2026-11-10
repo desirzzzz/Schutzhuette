@@ -6,7 +6,9 @@ using Schutzhuette.Items;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace Schutzhuette.EditorTools
@@ -41,6 +43,7 @@ namespace Schutzhuette.EditorTools
         private const string ChestPrefabPath = "Assets/_Project/Prefabs/HeavyChest.prefab";
         private const string TeaPrefabPath = "Assets/_Project/Prefabs/Tea.prefab";
 
+        private const string ScenePath = "Assets/_Project/Scenes/Prototype.unity";
         private const string PorcelainMaterialName = "Porzellan";
         private const string LogPrefix = "[Katalog] ";
 
@@ -48,6 +51,12 @@ namespace Schutzhuette.EditorTools
         [MenuItem("Schutzhütte/Katalog anlegen")]
         public static void BuildFromMenu()
         {
+            // Das Skript öffnet die Prototyp-Szene; vorher nach ungespeicherten Änderungen fragen.
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                return;
+            }
+
             string error = Build() ?? Verify();
             EditorUtility.DisplayDialog("Katalog", error ?? "Fertig. Der Katalog hat keine Fehler.", "OK");
         }
@@ -97,15 +106,103 @@ namespace Schutzhuette.EditorTools
 
             var wares = new List<WareKind>();
             var kinds = new List<ItemKind>();
+            ItemCatalog catalog = null;
             error ??= BuildWares(wares);
             error ??= BuildKinds(kinds);
-            error ??= BuildCatalog(kinds, wares);
+            error ??= BuildCatalog(kinds, wares, out catalog);
+            error ??= WireItems(kinds);
             if (error != null)
             {
                 return error;
             }
 
+            // Erst die Assets sichern, dann die Szene öffnen.
             AssetDatabase.SaveAssets();
+            return AddCatalogServiceToScene(catalog);
+        }
+
+        // Hängt an jedes Gegenstands-Prefab das Etikett (Item), das auf seine Art zeigt.
+        // Stimmt es schon, bleibt das Prefab unberührt.
+        private static string WireItems(List<ItemKind> kinds)
+        {
+            foreach (ItemKind kind in kinds)
+            {
+                if (kind.Prefab == null)
+                {
+                    return $"Art „{kind.Id}“ hat kein Prefab.";
+                }
+
+                string prefabPath = AssetDatabase.GetAssetPath(kind.Prefab);
+                if (kind.Prefab.TryGetComponent(out Item existing) && existing.Kind == kind)
+                {
+                    continue;
+                }
+
+                GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
+                try
+                {
+                    if (!root.TryGetComponent(out Item item))
+                    {
+                        item = root.AddComponent<Item>();
+                    }
+
+                    item.EditorSetKind(kind);
+                    PrefabUtility.SaveAsPrefabAsset(root, prefabPath, out bool saved);
+                    if (!saved)
+                    {
+                        return $"{prefabPath} konnte nicht gespeichert werden.";
+                    }
+
+                    Debug.Log(LogPrefix + $"Etikett gesetzt: {prefabPath} → {kind.Id}");
+                }
+                finally
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+            }
+
+            return null;
+        }
+
+        // Der Laufzeit-Dienst für den Katalog sitzt am Objekt des NetworkManagers (ADR-0002, Entscheidung 6).
+        private static string AddCatalogServiceToScene(ItemCatalog catalog)
+        {
+            Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+            GameObject networkManager = null;
+            foreach (GameObject rootObject in scene.GetRootGameObjects())
+            {
+                if (rootObject.GetComponent<NetworkManager>() != null)
+                {
+                    networkManager = rootObject;
+                    break;
+                }
+            }
+
+            if (networkManager == null)
+            {
+                return $"In {ScenePath} gibt es keinen NetworkManager.";
+            }
+
+            if (networkManager.TryGetComponent(out CatalogService service) && service.Catalog == catalog)
+            {
+                return null;
+            }
+
+            if (service == null)
+            {
+                service = networkManager.AddComponent<CatalogService>();
+            }
+
+            service.EditorSetCatalog(catalog);
+            EditorUtility.SetDirty(service);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene))
+            {
+                return $"Szene konnte nicht gespeichert werden: {ScenePath}";
+            }
+
+            Debug.Log(LogPrefix + $"CatalogService am NetworkManager eingetragen: {ScenePath}");
             return null;
         }
 
@@ -195,9 +292,9 @@ namespace Schutzhuette.EditorTools
         }
 
         // Legt den Katalog an oder hängt fehlende Einträge an. Vorhandene Einträge und ihre Reihenfolge bleiben.
-        private static string BuildCatalog(List<ItemKind> kinds, List<WareKind> wares)
+        private static string BuildCatalog(List<ItemKind> kinds, List<WareKind> wares, out ItemCatalog catalog)
         {
-            var catalog = AssetDatabase.LoadAssetAtPath<ItemCatalog>(CatalogPath);
+            catalog = AssetDatabase.LoadAssetAtPath<ItemCatalog>(CatalogPath);
             bool isNew = catalog == null;
             if (isNew)
             {
@@ -304,14 +401,18 @@ namespace Schutzhuette.EditorTools
         // Netzwerk-ID des Tassen-Prefabs, Eintrag in der Netzwerk-Prefab-Liste, Katalogprüfung.
         private static string Verify()
         {
-            uint hash = PrototypeSceneBuilder.EnsureNetworkPrefabHash(TeaPrefabPath);
-            if (hash == 0)
+            // Alle Gegenstands-Prefabs: Das Skript hat sie gespeichert, die Netzwerk-ID muss gültig bleiben.
+            foreach (string prefabPath in new[] { CratePrefabPath, FirewoodPrefabPath, ChestPrefabPath, TeaPrefabPath })
             {
-                return $"GlobalObjectIdHash von {TeaPrefabPath} ist 0. VerifyFromCommandLine in einem "
-                    + "eigenen Unity-Start nach BuildFromCommandLine ausführen.";
-            }
+                uint hash = PrototypeSceneBuilder.EnsureNetworkPrefabHash(prefabPath);
+                if (hash == 0)
+                {
+                    return $"GlobalObjectIdHash von {prefabPath} ist 0. VerifyFromCommandLine in einem "
+                        + "eigenen Unity-Start nach BuildFromCommandLine ausführen.";
+                }
 
-            Debug.Log(LogPrefix + $"GlobalObjectIdHash von {TeaPrefabPath}: {hash}");
+                Debug.Log(LogPrefix + $"GlobalObjectIdHash von {prefabPath}: {hash}");
+            }
 
             var networkPrefabs = AssetDatabase.LoadAssetAtPath<NetworkPrefabsList>(NetworkPrefabsPath);
             if (networkPrefabs == null)
