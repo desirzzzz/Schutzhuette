@@ -43,9 +43,10 @@ specialists:
 naming:
   classes: PascalCase
   variables: camelCase
-  constants: SCREAMING_SNAKE   # UNVERIFIED — not sourceable from
-                               # docs/engine-reference/unity/; confirm before relying on it
-  signals: "PascalCase On<Event>"
+  # constants and signals: set by the developer on 2026-11-10 to match the existing code
+  # (ShrinkFactor, LogPrefix) and the event names in ADR-0001 to ADR-0003 (PhaseChanged).
+  constants: PascalCase
+  signals: "PascalCase <Event>, handler methods On<Event>"
   files: PascalCase
   scenes: PascalCase
 

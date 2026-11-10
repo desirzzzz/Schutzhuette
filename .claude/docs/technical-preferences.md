@@ -31,10 +31,10 @@
 
 - **Classes**: PascalCase (`PlayerController`)
 - **Variables**: camelCase for locals and parameters; private fields `_camelCase` (`_moveSpeed`); public fields and properties PascalCase (`MoveSpeed`)
-- **Signals/Events**: PascalCase `On<Event>` (`OnItemPickedUp`)
+- **Signals/Events**: PascalCase without `On` (`PhaseChanged`); methods that handle an event are named `On<Event>` (`OnPhaseChanged`). Set by the developer on 2026-11-10 to match ADR-0001 to ADR-0003.
 - **Files**: PascalCase, matching the class name (`PlayerController.cs`)
 - **Scenes/Prefabs**: PascalCase
-- **Constants**: UPPER_SNAKE_CASE — UNVERIFIED, not sourceable from `docs/engine-reference/unity/`; confirm before relying on it (same caveat as `naming.constants` in `project.yaml`)
+- **Constants**: PascalCase (`ShrinkFactor`). Set by the developer on 2026-11-10 to match the existing code (same value as `naming.constants` in `project.yaml`).
 
 ## Performance Budgets
 
