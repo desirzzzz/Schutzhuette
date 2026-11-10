@@ -19,7 +19,7 @@
 | 007 | [Erscheinen und Entfernen über ItemSpawning, Ware am Vorratspaket](story-007-erscheinen-und-entfernen.md) | Integration | Complete (Client-Seite offen bis zum Freundestest) | ADR-0002 |
 | 008 | [Tragen und Ofen lesen den Katalog](story-008-tragen-und-ofen-lesen-den-katalog.md) | Integration | Ready | ADR-0002 |
 | 009 | [Build und Host-Start sperren bei Katalogfehlern](story-009-build-und-host-start-sperren.md) | Integration | Ready | ADR-0002 |
-| 010 | [Aufprall-Messpunkt, Zustand „Fällt“ und Zerbrechen](story-010-aufprall-messpunkt-und-zerbrechen.md) | Integration | Ready | ADR-0001 |
+| 010 | [Aufprall-Messpunkt, Zustand „Fällt“ und Zerbrechen](story-010-aufprall-messpunkt-und-zerbrechen.md) | Integration | Complete (Client-Seite offen bis zum Freundestest) | ADR-0001 |
 | 011 | [Scherben und Aufprall-Klang über ImpactEffects](story-011-scherben-und-aufprall-klang.md) | Integration | Ready | ADR-0001 |
 
 **Reihenfolge (Entscheidung des Entwicklers, 2026-11-10: „Schnell zu den Tassen“).** Zuerst alles, was das
@@ -30,7 +30,7 @@ Zerbrechen braucht, damit das erste sichtbare Ergebnis früh kommt:
 3. 005, erster Teil (erledigt): Steckbriefe und Prefabs für `vorratskiste`, `holzscheit`, `truhe` und `tee`. Das Kriterium
    „genau 13 Arten und 7 Waren“ bleibt offen, bis der zweite Teil gebaut ist.
 4. 006 und 007 (beide erledigt): Das Spiel liest den Katalog und lässt Gegenstände darüber erscheinen
-5. 010: Tassen zerbrechen
+5. 010: Tassen zerbrechen (erledigt). Der schnelle Weg ist damit durch.
 
 Danach in dieser Folge: 011 (Scherben-Klang), 002, 003, 005 zweiter Teil, 008, 009.
 

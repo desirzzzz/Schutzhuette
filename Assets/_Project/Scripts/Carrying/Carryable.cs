@@ -27,6 +27,9 @@ namespace Schutzhuette.Carrying
         private Collider _collider;
         private Renderer[] _renderers;
 
+        // Der Aufprall-Messer des Gegenstands. Er erfährt hier, wann getragen und wann losgelassen wird.
+        private ImpactReporter _impactReporter;
+
         /// <summary>Wird der Gegenstand gerade getragen? Stimmt auf Host und Clients.</summary>
         public bool IsCarried => transform.parent != null;
 
@@ -53,6 +56,7 @@ namespace Schutzhuette.Carrying
             _networkRigidbody = GetComponent<NetworkRigidbody>();
             _collider = GetComponent<Collider>();
             _renderers = GetComponentsInChildren<Renderer>();
+            _impactReporter = GetComponent<ImpactReporter>();
 
             // Jeder tragbare Gegenstand braucht ein Etikett mit seiner Art.
             Item.ReportIfMissing(this);
@@ -83,6 +87,10 @@ namespace Schutzhuette.Carrying
                 ghost.AddComponent<BoxCollider>();
                 var body = ghost.AddComponent<Rigidbody>();
                 body.mass = _rigidbody.mass;
+
+                // Wie das Original beim Host: durchgehende Kollisionsprüfung, damit die Kopie nicht dort
+                // durch die Wand fliegt, wo das Original abprallt (ADR-0001, Entscheidung 3).
+                body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
                 // Die fliegende Kopie macht ihre Aufprall-Geräusche selbst (Vorhersage).
                 if (TryGetComponent(out ImpactSound impactSound))
@@ -122,6 +130,12 @@ namespace Schutzhuette.Carrying
                 _rigidbody.angularVelocity = Vector3.zero;
             }
 
+            // Vor dem Kinematisch-Machen: Der Messer stellt die Kollisionsprüfung zurück auf "Discrete".
+            if (_impactReporter != null)
+            {
+                _impactReporter.MarkCarried();
+            }
+
             _networkRigidbody.SetIsKinematic(true);
 
             if (!NetworkObject.TrySetParent(carrier, false))
@@ -155,6 +169,17 @@ namespace Schutzhuette.Carrying
             _rigidbody.linearVelocity = velocity;
             _rigidbody.angularVelocity = Vector3.zero;
             _rigidbody.WakeUp();
+
+            // Ab jetzt fällt der Gegenstand: Nur in diesem Zustand kann er zerbrechen.
+            MarkFalling();
+        }
+
+        private void MarkFalling()
+        {
+            if (_impactReporter != null)
+            {
+                _impactReporter.MarkFalling();
+            }
         }
 
         /// <inheritdoc />
@@ -171,6 +196,7 @@ namespace Schutzhuette.Carrying
             {
                 _networkRigidbody.SetIsKinematic(false);
                 _rigidbody.WakeUp();
+                MarkFalling();
             }
         }
     }

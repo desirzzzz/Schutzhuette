@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 4838641882317983678}
   - component: {fileID: 2187450065516591486}
   - component: {fileID: 3089283727377461501}
+  - component: {fileID: 9128869553788139166}
   m_Layer: 0
   m_Name: Crate
   m_TagString: Untagged
@@ -289,4 +290,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 232cd9fd4b696f14493a484c3adcf1d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.SupplyPackState
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &9128869553788139166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3903322549749023954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c76ad52461793f943806edd6022255a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.ImpactReporter
   ShowTopMostFoldoutHeaderGroup: 1

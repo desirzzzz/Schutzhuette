@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Schutzhuette.Items;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Schutzhuette.Tests
@@ -20,14 +18,10 @@ namespace Schutzhuette.Tests
     /// <remarks>
     /// Jeder Fehler im Log lässt den Test scheitern (Regel des Test-Frameworks). Die Client-Seite von
     /// Kriterium 32 prüft der Freundestest über die Log-Zeilen von <see cref="SupplyPackState"/>.
-    /// Der Host lauscht auf einem eigenen Port, damit ein laufendes Spiel den Test nicht stört.
     /// </remarks>
     public class HostSpawnTests
     {
-        private const string SceneName = "Prototype";
-        private const string LocalAddress = "127.0.0.1";
-        private const ushort TestPort = 7791;
-        private const int FramesToSettle = 30;
+        private const ushort Port = HostSceneFixture.FirstPort;
         private const float MassTolerance = 0.0001f;
 
         // Diese Warnung schreibt NGO, wenn ein Netzwert vor Spawn() geschrieben wird (ADR-0002, Verification 1).
@@ -44,38 +38,12 @@ namespace Schutzhuette.Tests
         private const int ExpectedChestCount = 1;
 
         private readonly List<string> _warnings = new List<string>();
-        private int _emptySceneCount;
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
             Application.logMessageReceived -= CaptureWarnings;
-
-            NetworkManager networkManager = NetworkManager.Singleton;
-            if (networkManager != null)
-            {
-                if (networkManager.IsListening)
-                {
-                    networkManager.Shutdown();
-                }
-
-                yield return null;
-                yield return null;
-
-                // Der NetworkManager überlebt Szenenwechsel, deshalb ausdrücklich zerstören.
-                Object.Destroy(networkManager.gameObject);
-                yield return null;
-            }
-
-            // Die echte Szene wieder verlassen, damit sie keinen anderen Test beeinflusst.
-            Scene loaded = SceneManager.GetSceneByName(SceneName);
-            if (loaded.IsValid() && loaded.isLoaded)
-            {
-                _emptySceneCount++;
-                Scene empty = SceneManager.CreateScene("TestLeer" + _emptySceneCount);
-                SceneManager.SetActiveScene(empty);
-                yield return SceneManager.UnloadSceneAsync(loaded);
-            }
+            yield return HostSceneFixture.StopHost();
         }
 
         [UnityTest]
@@ -84,26 +52,13 @@ namespace Schutzhuette.Tests
             // Arrange
             _warnings.Clear();
             Application.logMessageReceived += CaptureWarnings;
-            yield return SceneManager.LoadSceneAsync(SceneName, LoadSceneMode.Single);
-
-            NetworkManager networkManager = NetworkManager.Singleton;
-            Assert.IsNotNull(networkManager, $"In der Szene {SceneName} fehlt der NetworkManager.");
-            Assert.IsNotNull(CatalogService.Current, "Es läuft kein CatalogService.");
-
-            var transport = networkManager.GetComponent<UnityTransport>();
-            Assert.IsNotNull(transport, "Am NetworkManager fehlt UnityTransport.");
-            transport.SetConnectionData(LocalAddress, TestPort, LocalAddress);
 
             // Act
-            Assert.IsTrue(networkManager.StartHost(), "Der Host konnte nicht starten.");
-            for (int i = 0; i < FramesToSettle; i++)
-            {
-                yield return null;
-            }
+            yield return HostSceneFixture.StartHost(Port);
 
             // Assert: jeder Gegenstand einzeln
             var countByKind = new Dictionary<string, int>();
-            foreach (NetworkObject spawned in networkManager.SpawnManager.SpawnedObjectsList)
+            foreach (NetworkObject spawned in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList)
             {
                 if (!spawned.TryGetComponent(out Item item))
                 {
@@ -117,6 +72,8 @@ namespace Schutzhuette.Tests
 
                 Assert.IsTrue(spawned.TryGetComponent(out Rigidbody body), $"„{spawned.name}“ hat keinen Rigidbody.");
                 Assert.AreEqual(item.Kind.MassKg, body.mass, MassTolerance, $"Masse von „{spawned.name}“");
+                Assert.IsTrue(spawned.TryGetComponent(out ImpactReporter _),
+                    $"„{spawned.name}“ hat keinen Aufprall-Messer.");
 
                 if (kindId == CrateKindId || kindId == ChestKindId)
                 {

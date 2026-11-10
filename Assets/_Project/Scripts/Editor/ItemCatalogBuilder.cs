@@ -145,7 +145,10 @@ namespace Schutzhuette.EditorTools
                 bool needsPackState = kind.SupplyPack.Enabled && kind.SupplyPack.FixedWare == null;
                 bool hasItem = kind.Prefab.TryGetComponent(out Item existing) && existing.Kind == kind;
                 bool hasPackState = kind.Prefab.TryGetComponent(out SupplyPackState _);
-                if (hasItem && (!needsPackState || hasPackState))
+
+                // Jeder Gegenstand trägt den Aufprall-Messer (ADR-0001, Entscheidung 4).
+                bool hasReporter = kind.Prefab.TryGetComponent(out ImpactReporter _);
+                if (hasItem && hasReporter && (!needsPackState || hasPackState))
                 {
                     continue;
                 }
@@ -163,6 +166,11 @@ namespace Schutzhuette.EditorTools
                     if (needsPackState && !root.TryGetComponent(out SupplyPackState _))
                     {
                         root.AddComponent<SupplyPackState>();
+                    }
+
+                    if (!root.TryGetComponent(out ImpactReporter _))
+                    {
+                        root.AddComponent<ImpactReporter>();
                     }
 
                     PrefabUtility.SaveAsPrefabAsset(root, prefabPath, out bool saved);

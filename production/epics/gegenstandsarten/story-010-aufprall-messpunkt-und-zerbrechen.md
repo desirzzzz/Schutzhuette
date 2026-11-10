@@ -1,12 +1,12 @@
 # Story 010: Aufprall-Messpunkt, Zustand „Fällt“ und Zerbrechen
 
 > **Epic**: Gegenstandsarten
-> **Status**: Ready
+> **Status**: Complete (2026-11-10: Tests grün, Entwickler hat die Exe getestet und den Commit freigegeben). Offen für den Freundestest: Warnungen beim Client und die Vorhersage-Kopie
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: L
 > **Manifest Version**: 2026-11-10
-> **Last Updated**: —
+> **Last Updated**: 2026-11-10
 
 ## Context
 
@@ -39,9 +39,9 @@ Gegenstände fliegen nicht mehr durch dünne Wände. Das ist der erste spürbare
 
 *From GDD `design/gdd/gegenstandsarten.md`, scoped to this story:*
 
-- [ ] **Kriterium 14 [EditMode]:** GIVEN eine fallende Tasse WHEN im selben Physikschritt zwei Kontakte mit 8 und 9 m/s kommen THEN wird Entfernen genau 1-mal ausgelöst und genau 1 Scherben-Geräusch angefordert, ohne Exception.
-- [ ] **Kriterium 15 [PlayMode]:** Nur Host: GIVEN eine Tasse Tee liegt eingefroren auf dem Boden WHEN eine Vorratskiste mit 8 m/s waagrecht dagegenprallt THEN ist die Tasse nach höchstens 10 Physikschritten entfernt; WHEN die Kiste stattdessen aus Haltehöhe (5,01 m/s) senkrecht darauf fällt THEN existiert die Tasse nach 50 Schritten noch.
-- [ ] **Würfe bis 15 m/s (TR-gegenstandsarten-005; ADR-0001, Verification 1) [PlayMode oder Manuell]:** Eine Tasse mit 15 m/s fliegt nicht durch eine 0,2 m dicke Innenwand, und beim Umschalten der Kollisionsprüfung erscheint keine Konsolen-Warnung bei Host und Client, auch nicht beim Bruch.
+- [x] **Kriterium 14 [EditMode]:** GIVEN eine fallende Tasse WHEN im selben Physikschritt zwei Kontakte mit 8 und 9 m/s kommen THEN wird Entfernen genau 1-mal ausgelöst und genau 1 Scherben-Geräusch angefordert, ohne Exception.
+- [x] **Kriterium 15 [PlayMode]:** Nur Host: GIVEN eine Tasse Tee liegt eingefroren auf dem Boden WHEN eine Vorratskiste mit 8 m/s waagrecht dagegenprallt THEN ist die Tasse nach höchstens 10 Physikschritten entfernt; WHEN die Kiste stattdessen aus Haltehöhe (5,01 m/s) senkrecht darauf fällt THEN existiert die Tasse nach 50 Schritten noch.
+- [ ] **Würfe bis 15 m/s (TR-gegenstandsarten-005; ADR-0001, Verification 1) [PlayMode oder Manuell]:** Eine Tasse mit 15 m/s fliegt nicht durch eine 0,2 m dicke Innenwand, und beim Umschalten der Kollisionsprüfung erscheint keine Konsolen-Warnung bei Host und Client, auch nicht beim Bruch. *(Stand 2026-11-10: Beim Host durch `BreakOnImpactTests` belegt, ohne Warnung und ohne Durchflug, dazu der Test mit 20 m/s für die durchgehende Prüfung selbst. Die Warnungen beim Client sind offen bis zum Freundestest.)*
 
 ---
 
@@ -106,7 +106,7 @@ checks scope against it.*
 **Required evidence**:
 - Integration: `Assets/Tests/PlayMode/Items/BreakOnImpactTests.cs` und `Assets/Tests/EditMode/Items/BreakOnceTests.cs`; der Wand-Test als PlayMode-Test oder als Notiz nach Testanleitung (Entwickler bestätigt, mit dem Ergebnis des Vergleichs `ContinuousDynamic` gegen `ContinuousSpeculative`)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Erstellt (2026-11-10). EditMode 89 von 89 (neu: `ImpactJudgeTests` 7 für Kriterium 14, `ImpactEventsTests` 3), PlayMode 10 von 10 (neu: `BreakOnImpactTests` 5 mit Host in der echten Szene auf einer Test-Plattform). Ergebnis zu ADR-0001, Verification 1: `ContinuousDynamic` nur im Zustand „Fällt“ läuft beim Host ohne Warnung zur Kollisionsprüfung und ohne Durchflug; der Vergleich mit dauerhaft `ContinuousSpeculative` wurde deshalb nicht gefahren, die Abgleichstelle bleibt. Gegenproben: (A) ohne die Regel „getroffener liegender Gegenstand fällt“ scheitert der Test mit der Kiste bei 8 m/s; (B) mit abgeschalteter durchgehender Prüfung bestehen die Wand-Tests bei 15 m/s trotzdem (0,3 m pro Schritt gegen 0,32 m Tiefe von Wand und Tasse), deshalb kam `CupAtTwentyMetersPerSecond_DoesNotSkipThinWall` dazu, der ohne die Prüfung scheitert und mit ihr besteht. Offen: Warnungen beim Client und die Vorhersage-Kopie (Freundestest), Wurfgefühl (Handtest des Entwicklers).
 
 ---
 

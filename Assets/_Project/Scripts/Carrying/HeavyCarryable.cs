@@ -341,6 +341,13 @@ namespace Schutzhuette.Carrying
                     _rigidbody.angularVelocity = Vector3.zero;
                 }
 
+                // Vor dem Kinematisch-Machen: Der Aufprall-Messer stellt die Kollisionsprüfung zurück auf
+                // "Discrete", falls die Truhe gerade angestoßen wurde und noch als fallend gilt.
+                if (TryGetComponent(out ImpactReporter impactReporter))
+                {
+                    impactReporter.MarkCarried();
+                }
+
                 _networkRigidbody.SetIsKinematic(true);
             }
             else

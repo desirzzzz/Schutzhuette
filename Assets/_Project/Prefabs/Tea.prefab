@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 7459799401699864645}
   - component: {fileID: 522451489006808352}
   - component: {fileID: 672914384167525512}
+  - component: {fileID: 1570143975646590944}
   m_Layer: 0
   m_Name: Tea
   m_TagString: Untagged
@@ -276,3 +277,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.Item
   _kind: {fileID: 11400000, guid: 33a3496968efd994b8cd54287b0d8b3e, type: 2}
+--- !u!114 &1570143975646590944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8600394754638364453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c76ad52461793f943806edd6022255a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Schutzhuette.Runtime::Schutzhuette.Items.ImpactReporter
+  ShowTopMostFoldoutHeaderGroup: 1
