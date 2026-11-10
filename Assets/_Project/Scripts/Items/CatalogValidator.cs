@@ -80,7 +80,7 @@ namespace Schutzhuette.Items
                 }
             }
 
-            ValidateKinds(catalog.Kinds, networkPrefabs, knownWares, idOwners, report);
+            ValidateKinds(catalog.Kinds, catalog.Settings, networkPrefabs, knownWares, idOwners, report);
             ValidateWares(catalog.Wares, idOwners, report);
             ValidateNeeds(catalog.Needs, idOwners, report);
             ReportDuplicateIds(idOwners, report);
@@ -88,8 +88,9 @@ namespace Schutzhuette.Items
             return report;
         }
 
-        private static void ValidateKinds(IReadOnlyList<ItemKind> kinds, NetworkPrefabsList networkPrefabs,
-            HashSet<WareKind> knownWares, OwnerMap<string> idOwners, CatalogReport report)
+        private static void ValidateKinds(IReadOnlyList<ItemKind> kinds, CatalogSettings settings,
+            NetworkPrefabsList networkPrefabs, HashSet<WareKind> knownWares, OwnerMap<string> idOwners,
+            CatalogReport report)
         {
             // Welche Arten welches Prefab benutzen: Jede Art braucht ihr eigenes.
             var prefabOwners = new OwnerMap<NetworkObject>(null);
@@ -116,6 +117,7 @@ namespace Schutzhuette.Items
 
                 CheckPrefab(kind, label, networkPrefabs, prefabOwners, report);
                 CheckSupplyPack(kind.SupplyPack, label, knownWares, report);
+                CheckFragile(kind.Fragile, label, settings, report);
             }
 
             foreach (NetworkObject prefab in prefabOwners.Keys)
@@ -266,6 +268,37 @@ namespace Schutzhuette.Items
             {
                 report.AddError($"{label}: Die feste Ware {Describe(WareLabel, fixedWare.Id, fixedWare.name)} "
                     + "steht nicht im Katalog.");
+            }
+        }
+
+        // Prüffenster für die Bruchgeschwindigkeit (GDD Formel 2, Kriterium 13). Nur Hinweise, nie Fehler.
+        private static void CheckFragile(FragileBlock fragile, string label, CatalogSettings settings,
+            CatalogReport report)
+        {
+            if (!fragile.Enabled)
+            {
+                return;
+            }
+
+            float holdHeight = settings.CheckHoldHeightMeters;
+            float throwSpeed = settings.CheckThrowSpeed;
+            BreakSpeedCheck check = BreakRule.CheckBreakSpeed(fragile.BreakSpeed, holdHeight, throwSpeed,
+                BreakRule.ProjectGravity);
+
+            switch (check)
+            {
+                case BreakSpeedCheck.BreaksWhenPutDown:
+                    report.AddHint($"{label}: Mit der Bruchgeschwindigkeit {Format(fragile.BreakSpeed)} m/s gilt: "
+                        + "Ablegen zerbricht. Sie sollte mindestens "
+                        + $"{Format(BreakRule.MinBreakSpeed(holdHeight, BreakRule.ProjectGravity))} m/s sein "
+                        + $"(Haltehöhe {Format(holdHeight)} m).");
+                    break;
+                case BreakSpeedCheck.StraightThrowsDoNotBreak:
+                    report.AddHint($"{label}: Mit der Bruchgeschwindigkeit {Format(fragile.BreakSpeed)} m/s gilt: "
+                        + "gerade Würfe zerbrechen nicht. Sie sollte höchstens "
+                        + $"{Format(BreakRule.MaxBreakSpeed(throwSpeed))} m/s sein "
+                        + $"(Wurftempo {Format(throwSpeed)} m/s).");
+                    break;
             }
         }
 

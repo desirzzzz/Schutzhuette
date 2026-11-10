@@ -1,12 +1,12 @@
 # Story 004: Bruchregel und Aufprall-Formeln
 
 > **Epic**: Gegenstandsarten
-> **Status**: Ready
+> **Status**: Complete (2026-11-10: 20 Tests grün, Entwickler hat die Exe getestet und den Commit freigegeben)
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: S
 > **Manifest Version**: 2026-11-10
-> **Last Updated**: —
+> **Last Updated**: 2026-11-10
 
 ## Context
 
@@ -38,10 +38,10 @@ nicht zerbrechen.
 
 *From GDD `design/gdd/gegenstandsarten.md`, scoped to this story:*
 
-- [ ] **Kriterium 10 [EditMode]:** GIVEN ein flacher Wurf auf den Boden mit v_relative (6,0; −5,01; 0), Normale (0; 1; 0), break_speed 7,0, Tasse „fällt“ WHEN berechnet THEN ist `impact_speed` = 5,01 und die Tasse bleibt heil (der Gesamtbetrag 7,82 zählt nicht).
-- [ ] **Kriterium 11 [EditMode]:** GIVEN zerbrechlich, break_speed 7,0, „fällt“ WHEN impact_speed 4,2 / 6,1 / 7,0 / 7,01 / 8,0 / 12,5 THEN heil / heil / heil / bricht / bricht / bricht. Der schräge Wurf (5,14; 0; 6,13) gegen die Normale (0; 0; 1) ergibt 6,13 und bleibt heil. Speckbrot und eine Tasse im Zustand „getragen“ bleiben auch bei 12,5 heil.
-- [ ] **Kriterium 12 [EditMode]:** GIVEN (Haltehöhe; Fläche) = (1,28; 0) / (1,28; 0,9) / (1,8; 0) / (1,28; 2,0) WHEN `release_fall_speed` berechnet wird THEN 5,01 / 2,73 / 5,94 / 0, ohne NaN.
-- [ ] **Kriterium 13 [EditMode]:** GIVEN Prüfwerte Haltehöhe 1,28 m und Wurftempo 8,0 m/s (Fenster 5,51 bis 7,20) WHEN break_speed 7,0 / 5,52 / 7,20 / 5,45 / 7,25 geprüft wird THEN nichts / nichts / nichts / Hinweis „Ablegen zerbricht“ / Hinweis „gerade Würfe zerbrechen nicht“; nie ein Fehler.
+- [x] **Kriterium 10 [EditMode]:** GIVEN ein flacher Wurf auf den Boden mit v_relative (6,0; −5,01; 0), Normale (0; 1; 0), break_speed 7,0, Tasse „fällt“ WHEN berechnet THEN ist `impact_speed` = 5,01 und die Tasse bleibt heil (der Gesamtbetrag 7,82 zählt nicht).
+- [x] **Kriterium 11 [EditMode]:** GIVEN zerbrechlich, break_speed 7,0, „fällt“ WHEN impact_speed 4,2 / 6,1 / 7,0 / 7,01 / 8,0 / 12,5 THEN heil / heil / heil / bricht / bricht / bricht. Der schräge Wurf (5,14; 0; 6,13) gegen die Normale (0; 0; 1) ergibt 6,13 und bleibt heil. Speckbrot und eine Tasse im Zustand „getragen“ bleiben auch bei 12,5 heil.
+- [x] **Kriterium 12 [EditMode]:** GIVEN (Haltehöhe; Fläche) = (1,28; 0) / (1,28; 0,9) / (1,8; 0) / (1,28; 2,0) WHEN `release_fall_speed` berechnet wird THEN 5,01 / 2,73 / 5,94 / 0, ohne NaN.
+- [x] **Kriterium 13 [EditMode]:** GIVEN Prüfwerte Haltehöhe 1,28 m und Wurftempo 8,0 m/s (Fenster 5,51 bis 7,20) WHEN break_speed 7,0 / 5,52 / 7,20 / 5,45 / 7,25 geprüft wird THEN nichts / nichts / nichts / Hinweis „Ablegen zerbricht“ / Hinweis „gerade Würfe zerbrechen nicht“; nie ein Fehler.
 
 ---
 
@@ -91,7 +91,7 @@ checks scope against it.*
 **Required evidence**:
 - Logic: `Assets/Tests/EditMode/Items/BreakRuleTests.cs` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Erstellt, 20 Tests bestanden im Batchmode (2026-11-10, `test-results/editmode.xml`: 48 von 48). Gegenprobe: Mit `>=` statt `>` in `BreaksOnImpact` schlägt `FragileAndFalling_BreaksOnlyAboveBreakSpeed(7.0f,False)` fehl.
 
 ---
 
